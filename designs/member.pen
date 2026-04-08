@@ -1,0 +1,1069 @@
+{
+  "version": "2.9",
+  "children": [
+    {
+      "type": "frame",
+      "id": "hJ9wt",
+      "x": -64,
+      "y": -173,
+      "name": "page-root",
+      "width": 375,
+      "fill": "#FFFBEF",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "4AYUk",
+          "name": "scroll-container",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 12,
+          "padding": [
+            12,
+            16,
+            200,
+            16
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "jm1O0",
+              "name": "member-top-intro",
+              "width": "fill_container",
+              "fill": "#FFFFFF",
+              "cornerRadius": 20,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#0000000C",
+                "offset": {
+                  "x": 0,
+                  "y": 2
+                },
+                "blur": 8
+              },
+              "layout": "vertical",
+              "gap": 16,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "tr1vs",
+                  "name": "member-top-intro-row",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "2FVB0",
+                      "name": "introText",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "w10Yu",
+                          "name": "member-top-line1",
+                          "fill": "#333333",
+                          "content": "你的减脂计划需8周达成",
+                          "fontFamily": "Inter",
+                          "fontSize": 15,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "nDC9a",
+                          "name": "member-top-line2",
+                          "fill": "#333333",
+                          "content": "推荐选永久会员",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "vkLDf",
+                      "name": "image-placeholder",
+                      "width": 100,
+                      "height": 100,
+                      "fill": "#FFF3E0",
+                      "cornerRadius": 16,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#E8DCC8"
+                      },
+                      "layout": "vertical",
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "fvH0Q",
+                          "fill": "#A1887F",
+                          "content": "image-placeholder",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "DqT7Z",
+              "name": "data-tag-group",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 12,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "BLNMW",
+                  "name": "data-tag-row",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "ym3wg",
+                      "name": "data-tag-item",
+                      "fill": "#FFF3D5",
+                      "cornerRadius": 40,
+                      "padding": [
+                        10,
+                        20
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "5YCHB",
+                          "name": "data-tag-text",
+                          "fill": "#5D4037",
+                          "content": "4周人均减重5.8斤",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "PpCBS",
+                      "name": "data-tag-item",
+                      "fill": "#FFF3D5",
+                      "cornerRadius": 40,
+                      "padding": [
+                        10,
+                        20
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "YjzM9",
+                          "name": "data-tag-text",
+                          "fill": "#5D4037",
+                          "content": "78%的人瘦8-15斤",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "aa1NP",
+                  "name": "data-tag-row",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "pO7yi",
+                      "name": "data-tag-item",
+                      "fill": "#FFF3D5",
+                      "cornerRadius": 40,
+                      "padding": [
+                        10,
+                        20
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "3FyPu",
+                          "name": "data-tag-text",
+                          "fill": "#5D4037",
+                          "content": "91%的人获得理想身材",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "VrK9t",
+              "name": "member-plan-block",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "yIghz",
+                  "name": "member-plan-selector",
+                  "width": "fill_container",
+                  "height": 135,
+                  "gap": 12,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "0rPe5",
+                      "name": "left-plan-card",
+                      "width": "fill_container",
+                      "height": "fill_container",
+                      "fill": "#FFFFFF",
+                      "cornerRadius": 24,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 3,
+                        "fill": "#FF9800"
+                      },
+                      "layout": "vertical",
+                      "gap": 4,
+                      "padding": [
+                        8,
+                        12,
+                        12,
+                        12
+                      ],
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "klUQO",
+                          "name": "badge-group",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "vHN3Y",
+                              "name": "plan-card-tag-wrap",
+                              "rotation": -4,
+                              "fill": "#E53935",
+                              "cornerRadius": 4,
+                              "padding": [
+                                3,
+                                8
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "25GMf",
+                                  "name": "plan-tag",
+                                  "fill": "#FFFFFF",
+                                  "content": "92%人选择",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "sVxNu",
+                          "name": "title-group",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "EQAmv",
+                              "name": "plan-title",
+                              "fill": "#1A1A1A",
+                              "content": "永久会员",
+                              "fontFamily": "Inter",
+                              "fontSize": 16,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "Qhssh",
+                              "name": "plan-desc",
+                              "fill": "#888888",
+                              "content": "一次买断，终生有效",
+                              "lineHeight": 1.2,
+                              "fontFamily": "Inter",
+                              "fontSize": 10,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "mELRw",
+                          "name": "price-group",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 2,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ipLxV",
+                              "name": "plan-price",
+                              "fill": "#E53935",
+                              "content": "¥168",
+                              "fontFamily": "Inter",
+                              "fontSize": 20,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "EWcH2",
+                              "name": "plan-origin",
+                              "fill": "#AAAAAA",
+                              "content": "原价：¥360",
+                              "fontFamily": "Inter",
+                              "fontSize": 10,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "9ERy6",
+                      "name": "right-plan-group",
+                      "width": "fill_container",
+                      "height": "fill_container",
+                      "layout": "vertical",
+                      "gap": 16,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "6vGdC",
+                          "name": "plan-card",
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 24,
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "#E0E0E0"
+                          },
+                          "layout": "vertical",
+                          "padding": 12,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "Xct4K",
+                              "name": "plan-card-top-row",
+                              "width": "fill_container",
+                              "justifyContent": "space_between",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "J7wr1",
+                                  "name": "title-group",
+                                  "layout": "vertical",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "yDcS5",
+                                      "name": "plan-title",
+                                      "fill": "#1A1A1A",
+                                      "content": "季度会员",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 15,
+                                      "fontWeight": "700"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "cEzZu",
+                                  "name": "price-group",
+                                  "layout": "vertical",
+                                  "gap": 2,
+                                  "alignItems": "end",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "m2Dth",
+                                      "name": "plan-price",
+                                      "fill": "#E53935",
+                                      "content": "¥48",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 17,
+                                      "fontWeight": "700"
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "M1Hw0",
+                                      "name": "plan-origin",
+                                      "fill": "#AAAAAA",
+                                      "content": "原价：¥75",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 10,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "E94Rs",
+                          "name": "plan-card",
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 24,
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "#E0E0E0"
+                          },
+                          "layout": "vertical",
+                          "padding": 12,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "K9lVX",
+                              "name": "plan-card-top-row",
+                              "width": "fill_container",
+                              "justifyContent": "space_between",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "KfEqt",
+                                  "name": "title-group",
+                                  "layout": "vertical",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "mTJJe",
+                                      "name": "plan-title",
+                                      "fill": "#1A1A1A",
+                                      "content": "年费会员",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 15,
+                                      "fontWeight": "700"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "2eL4F",
+                                  "name": "price-group",
+                                  "layout": "vertical",
+                                  "gap": 2,
+                                  "alignItems": "end",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "0exLf",
+                                      "name": "plan-price",
+                                      "fill": "#E53935",
+                                      "content": "¥148",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 17,
+                                      "fontWeight": "700"
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "t0Lax",
+                                      "name": "plan-origin",
+                                      "fill": "#AAAAAA",
+                                      "content": "原价：¥198",
+                                      "fontFamily": "Inter",
+                                      "fontSize": 10,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "VBO9G",
+                  "name": "member-tip-text",
+                  "fill": "#999999",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "不会自动续费，请放心购买~",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "FTEMI",
+              "name": "member-notice-bar",
+              "width": "fill_container",
+              "fill": "#F0F0F0",
+              "cornerRadius": 24,
+              "gap": 8,
+              "padding": [
+                12,
+                14
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon_font",
+                  "id": "jZRBS",
+                  "name": "member-notice-icon",
+                  "width": 18,
+                  "height": 18,
+                  "iconFontName": "volume-2",
+                  "iconFontFamily": "lucide",
+                  "fill": "#666666"
+                },
+                {
+                  "type": "text",
+                  "id": "laWTV",
+                  "name": "member-notice-text",
+                  "fill": "#666666",
+                  "textGrowth": "fixed-width",
+                  "width": 260,
+                  "content": "旋***成为了年费会员",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ukEOn",
+              "name": "member-benefits-section",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "KWEYR",
+                  "name": "member-benefits-header",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "VVSg4",
+                      "fill": "#F3A73F",
+                      "content": "──",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "lMgtn",
+                      "fill": "#333333",
+                      "content": "会员特权",
+                      "fontFamily": "Inter",
+                      "fontSize": 16,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "0E4xU",
+                      "fill": "#F3A73F",
+                      "content": "──",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "k4BOR",
+                  "name": "b1r",
+                  "width": "fill_container",
+                  "fill": "#FFF9E6",
+                  "cornerRadius": 16,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#F5E6C8"
+                  },
+                  "gap": 14,
+                  "padding": 18,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "2rXIO",
+                      "name": "bIcon",
+                      "width": 80,
+                      "height": 80,
+                      "fill": "#FFF3E0",
+                      "cornerRadius": 16,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#E8DCC8"
+                      },
+                      "layout": "vertical",
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "iXMGt",
+                          "fill": "#A1887F",
+                          "content": "image-placeholder",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "GzLF9",
+                      "name": "btCol",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "VWaxD",
+                          "name": "benefit-title",
+                          "fill": "#F3A73F",
+                          "content": "拍照识别热量",
+                          "fontFamily": "Inter",
+                          "fontSize": 16,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "8KYWl",
+                          "name": "benefit-desc",
+                          "fill": "#8E8E8E",
+                          "textGrowth": "fixed-width",
+                          "width": 210,
+                          "content": "每日免费20次，精准识别热量，免除手动录入的麻烦。",
+                          "lineHeight": 1.4,
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Uj9cV",
+                  "name": "b2r",
+                  "width": "fill_container",
+                  "fill": "#FFF9E6",
+                  "cornerRadius": 16,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#F5E6C8"
+                  },
+                  "gap": 14,
+                  "padding": 18,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "gkVD5",
+                      "name": "bIcon",
+                      "width": 80,
+                      "height": 80,
+                      "fill": "#FFF3E0",
+                      "cornerRadius": 16,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#E8DCC8"
+                      },
+                      "layout": "vertical",
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "hcu58",
+                          "fill": "#A1887F",
+                          "content": "image-placeholder",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "9Lu9v",
+                      "name": "btCol",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "7B9p5",
+                          "name": "benefit-title",
+                          "fill": "#F3A73F",
+                          "content": "专属饮食计划",
+                          "fontFamily": "Inter",
+                          "fontSize": 16,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "dgTpc",
+                          "name": "benefit-desc",
+                          "fill": "#8E8E8E",
+                          "textGrowth": "fixed-width",
+                          "width": 210,
+                          "content": "基于减重目标，量身定制计划，定时提醒。",
+                          "lineHeight": 1.4,
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "wxTBp",
+                  "name": "b3r",
+                  "width": "fill_container",
+                  "fill": "#FFF9E6",
+                  "cornerRadius": 16,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#F5E6C8"
+                  },
+                  "gap": 14,
+                  "padding": 18,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "PYF1g",
+                      "name": "bIcon",
+                      "width": 80,
+                      "height": 80,
+                      "fill": "#FFF3E0",
+                      "cornerRadius": 16,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#E8DCC8"
+                      },
+                      "layout": "vertical",
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "VUU8r",
+                          "fill": "#A1887F",
+                          "content": "image-placeholder",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "slLqa",
+                      "name": "btCol",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "uud2G",
+                          "name": "benefit-title",
+                          "fill": "#F3A73F",
+                          "content": "食谱推荐",
+                          "fontFamily": "Inter",
+                          "fontSize": 16,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "vwzxc",
+                          "name": "benefit-desc",
+                          "fill": "#8E8E8E",
+                          "textGrowth": "fixed-width",
+                          "width": 210,
+                          "content": "根据你的热量预算和已摄入饮食，动态推荐食谱",
+                          "lineHeight": 1.4,
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "W0VbP",
+                  "name": "b4r",
+                  "width": "fill_container",
+                  "fill": "#FFF9E6",
+                  "cornerRadius": 16,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#F5E6C8"
+                  },
+                  "gap": 14,
+                  "padding": 18,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "MOnSl",
+                      "name": "bIcon",
+                      "width": 80,
+                      "height": 80,
+                      "fill": "#FFF3E0",
+                      "cornerRadius": 16,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#E8DCC8"
+                      },
+                      "layout": "vertical",
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "cQg1x",
+                          "fill": "#A1887F",
+                          "content": "image-placeholder",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "VC4IA",
+                      "name": "btCol",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "wRNfB",
+                          "name": "benefit-title",
+                          "fill": "#F3A73F",
+                          "content": "饮食建议分析",
+                          "fontFamily": "Inter",
+                          "fontSize": 16,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "D3Xo1",
+                          "name": "benefit-desc",
+                          "fill": "#8E8E8E",
+                          "textGrowth": "fixed-width",
+                          "width": 210,
+                          "content": "分析饮食营养分布，科学建议推荐食物和饮食方式。",
+                          "lineHeight": 1.4,
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "kJFAf",
+              "name": "support-contact-text",
+              "fill": "#AAAAAA",
+              "textGrowth": "fixed-width",
+              "width": 320,
+              "content": "如遇到问题，请通过kf@small-circle.cn联系客服",
+              "textAlign": "center",
+              "fontFamily": "Inter",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "sM1c6",
+          "name": "fixed-bottom-bar",
+          "width": "fill_container",
+          "fill": "#FFFBEF",
+          "layout": "vertical",
+          "gap": 12,
+          "padding": [
+            12,
+            16,
+            20,
+            16
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "tfDc5",
+              "name": "open-vip-button",
+              "width": "fill_container",
+              "height": 52,
+              "fill": "#B5C984",
+              "cornerRadius": 26,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "PCNBs",
+                  "name": "open-vip-button-label",
+                  "fill": "#1A1A1A",
+                  "content": "立即开通",
+                  "fontFamily": "Inter",
+                  "fontSize": 17,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "vVeLw",
+              "name": "agreement-checkbox",
+              "width": "fill_container",
+              "gap": 8,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "4n0SP",
+                  "name": "agreement-checkbox-icon",
+                  "fill": "#FFFFFF",
+                  "width": 16,
+                  "height": 16,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 2,
+                    "fill": "#B5C984"
+                  }
+                },
+                {
+                  "type": "text",
+                  "id": "gnoUQ",
+                  "name": "agreement-text",
+                  "fill": "#888888",
+                  "content": "我已阅读并同意《会员服务协议》",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "ZevZ1",
+          "layoutPosition": "absolute",
+          "x": 0,
+          "y": 0,
+          "name": "payment-loading-mask",
+          "enabled": false,
+          "width": 375,
+          "height": 812,
+          "fill": "#00000088",
+          "layout": "vertical",
+          "gap": 16,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "EIfnO",
+              "name": "payment-loading-box",
+              "width": 200,
+              "height": 120,
+              "fill": "#333333",
+              "cornerRadius": 12,
+              "layout": "vertical",
+              "gap": 12,
+              "padding": 20,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "3cSKW",
+                  "name": "loading-icon",
+                  "fill": "#FFFFFF",
+                  "width": 36,
+                  "height": 36
+                },
+                {
+                  "type": "text",
+                  "id": "zRf6l",
+                  "name": "loading-text",
+                  "fill": "#FFFFFF",
+                  "content": "支付中",
+                  "fontFamily": "Inter",
+                  "fontSize": 15,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+/target/
+/uploads/
+!.mvn/wrapper/maven-wrapper.jar
+application-local.yml
+*.iml
+.idea/

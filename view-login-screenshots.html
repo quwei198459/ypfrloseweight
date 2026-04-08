@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>查看登录页截图</title>
+    <style>
+        body { margin: 0; padding: 20px; background: #f0f0f0; font-family: Arial; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { text-align: center; }
+        .images { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; }
+        .image-box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .image-box h3 { margin-top: 0; }
+        .image-box img { width: 100%; height: auto; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>登录页截图</h1>
+        <div class="images">
+            <div class="image-box">
+                <h3>01.png - 登录页主界面</h3>
+                <img src="./screenshots/login/01.png" alt="登录页主界面">
+            </div>
+            <div class="image-box">
+                <h3>02_status.png - 登录状态</h3>
+                <img src="./screenshots/login/02_status.png" alt="登录状态">
+            </div>
+            <div class="image-box">
+                <h3>03_popup.png - 弹窗</h3>
+                <img src="./screenshots/login/03_popup.png" alt="弹窗">
+            </div>
+        </div>
+    </div>
+</body>
+</html>

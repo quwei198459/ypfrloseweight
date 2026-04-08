@@ -1,0 +1,193 @@
+{
+	"pages": [
+		{
+			"path": "pages/login/index",
+			"style": {
+				"navigationBarTitleText": "登录",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/home/index",
+			"style": {
+				"navigationBarTitleText": "首页",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/home-budget-help/index",
+			"style": {
+				"navigationBarTitleText": "每日还可吃",
+				"navigationBarBackgroundColor": "#BFD9A3",
+				"navigationBarTextStyle": "black",
+				"backgroundColor": "#EEF4E8"
+			}
+		},
+		{
+			"path": "pages/photograph/index",
+			"style": {
+				"navigationBarTitleText": "餐前拍一拍",
+				"navigationBarBackgroundColor": "#F7F8F7",
+				"navigationBarTextStyle": "black",
+				"backgroundColor": "#F7F8F7"
+			}
+		},
+		{
+			"path": "pages/user/index",
+			"style": {
+				"navigationBarTitleText": "我的",
+				"navigationStyle": "custom",
+				"backgroundColor": "#F6F6F6"
+			}
+		},
+		{
+			"path": "pages/search/index",
+			"style": {
+				"navigationBarTitleText": "热量查询",
+				"navigationBarBackgroundColor": "#BFD9A3",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/record-success/index",
+			"style": {
+				"navigationBarTitleText": "记录成功",
+				"navigationBarBackgroundColor": "#BFD9A3",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/user/account-edit",
+			"style": {
+				"navigationBarTitleText": "个人信息",
+				"navigationBarBackgroundColor": "#F8F8F8",
+				"navigationBarTextStyle": "black",
+				"backgroundColor": "#F8F8F8"
+			}
+		},
+		{
+			"path": "pages/user/week-stats",
+			"style": {
+				"navigationBarTitleText": "近7日数据统计",
+				"navigationBarBackgroundColor": "#F6F6F6",
+				"navigationBarTextStyle": "black",
+				"backgroundColor": "#F6F6F6"
+			}
+		},
+		{
+			"path": "pages/user/weight-trend",
+			"style": {
+				"navigationBarTitleText": "减脂趋势",
+				"navigationBarBackgroundColor": "#F6F6F6",
+				"navigationBarTextStyle": "black",
+				"backgroundColor": "#EFEFEF"
+			}
+		},
+		{
+			"path": "pages/user/weight",
+			"style": {
+				"navigationBarTitleText": "体重记录",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "首页"
+			}
+		},
+		{
+			"path": "pages/food-search/index",
+			"style": {
+				"navigationBarTitleText": "3月10日饮食",
+				"navigationBarBackgroundColor": "#BFD9A3"
+			}
+		},
+		{
+			"path": "pages/gi-guide/index",
+			"style": {
+				"navigationBarTitleText": "GI值说明",
+				"navigationBarBackgroundColor": "#EAF2D6",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/sport-search/index",
+			"style": {
+				"navigationBarTitleText": "运动项目",
+				"navigationBarBackgroundColor": "#BFD9A3"
+			}
+		},
+		{
+			"path": "pages/daily-record/index",
+			"style": {
+				"navigationBarTitleText": "每日饮食记录",
+				"navigationBarBackgroundColor": "#BFD9A3",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/plan-result/index",
+			"style": {
+				"navigationBarTitleText": "你的专属计划已生成",
+				"navigationBarBackgroundColor": "#79c791",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/member/index",
+			"style": {
+				"navigationBarTitleText": "开通VIP"
+			}
+		}
+	],
+	"tabBar": {
+		"color": "#8a8a8a",
+		"selectedColor": "#5FA854",
+		"backgroundColor": "#ffffff",
+		"borderStyle": "white",
+		"list": [
+			{
+				"pagePath": "pages/home/index",
+				"text": "首页",
+				"iconPath": "/static/tab/tab-home.png",
+				"selectedIconPath": "/static/tab/tab-home-active.png"
+			},
+			{
+				"pagePath": "pages/photograph/index",
+				"text": "拍照",
+				"iconPath": "/static/tab/tab-camera.png",
+				"selectedIconPath": "/static/tab/tab-camera-active.png"
+			},
+			{
+				"pagePath": "pages/user/index",
+				"text": "我的",
+				"iconPath": "/static/tab/tab-user.png",
+				"selectedIconPath": "/static/tab/tab-user-active.png"
+			}
+		]
+	},
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "减肥助手",
+		"navigationBarBackgroundColor": "#79c791",
+		"backgroundColor": "#f5f7fa"
+	},
+	"easycom": {
+		"autoscan": false,
+		"custom": {
+			"^search-input-bar$": "@/components/SearchInputBar.vue",
+			"^add-circle-button$": "@/components/AddCircleButton.vue",
+			"^food-category-sidebar$": "@/components/FoodCategorySidebar.vue",
+			"^food-list-item$": "@/components/FoodListItem.vue",
+			"^selected-bottom-bar$": "@/components/SelectedBottomBar.vue",
+			"^custom-food-popup$": "@/components/CustomFoodPopup.vue",
+			"^sport-list-item$": "@/components/SportListItem.vue",
+			"^sport-record-popup$": "@/components/SportRecordPopup.vue",
+			"^submit-loading-mask$": "@/components/SubmitLoadingMask.vue",
+			"^nutrition-summary-card$": "@/components/NutritionSummaryCard.vue",
+			"^timeline-record-group$": "@/components/TimelineRecordGroup.vue",
+			"^meal-quick-bar$": "@/components/MealQuickBar.vue"
+		}
+	}
+}

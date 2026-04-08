@@ -1,0 +1,1271 @@
+{
+  "version": "2.9",
+  "children": [
+    {
+      "type": "frame",
+      "id": "ris4z",
+      "x": -41,
+      "y": 177,
+      "name": "page-root",
+      "width": 375,
+      "fill": "#F0F7ED",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "ONhO1",
+          "name": "scroll-container",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 20,
+          "padding": [
+            12,
+            16,
+            112,
+            16
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "3ucKS",
+              "name": "plan-summary-card",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 12,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "RHYpy",
+                  "name": "plan-summary-metrics-row",
+                  "width": "fill_container",
+                  "gap": 10,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "kvW09",
+                      "name": "plan-duration",
+                      "width": "fill_container",
+                      "fill": "#FFFFFF",
+                      "cornerRadius": 14,
+                      "effect": {
+                        "type": "shadow",
+                        "shadowType": "outer",
+                        "color": "#0000000A",
+                        "offset": {
+                          "x": 0,
+                          "y": 1
+                        },
+                        "blur": 4
+                      },
+                      "layout": "vertical",
+                      "gap": 6,
+                      "padding": [
+                        14,
+                        12
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "HGdMW",
+                          "name": "plan-duration-label",
+                          "fill": "#888888",
+                          "content": "计划周期",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "nVXHr",
+                          "name": "plan-duration-value",
+                          "fill": "#1A1A1A",
+                          "content": "8周",
+                          "fontFamily": "Inter",
+                          "fontSize": 22,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "eFpjH",
+                      "name": "plan-weight-range",
+                      "width": "fill_container",
+                      "fill": "#FFFFFF",
+                      "cornerRadius": 14,
+                      "effect": {
+                        "type": "shadow",
+                        "shadowType": "outer",
+                        "color": "#0000000A",
+                        "offset": {
+                          "x": 0,
+                          "y": 1
+                        },
+                        "blur": 4
+                      },
+                      "layout": "vertical",
+                      "gap": 6,
+                      "padding": [
+                        14,
+                        12
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "vEnxu",
+                          "name": "plan-weight-range-label",
+                          "fill": "#888888",
+                          "content": "减重目标",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "9GGSH",
+                          "name": "weight-range-text",
+                          "fill": "#1A1A1A",
+                          "content": "162-154斤",
+                          "fontFamily": "Inter",
+                          "fontSize": 20,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "hC0Lv",
+                  "name": "weekly-weight-loss",
+                  "width": "fill_container",
+                  "gap": 10,
+                  "padding": [
+                    4,
+                    0
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "cfr3h",
+                      "name": "image-placeholder",
+                      "width": 56,
+                      "height": 48,
+                      "fill": "#EEF3EE",
+                      "cornerRadius": 12,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#C8D8C8"
+                      },
+                      "layout": "vertical",
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "TUWTb",
+                          "fill": "#7A8F7A",
+                          "content": "image-placeholder",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "OSyWe",
+                      "name": "weekly-weight-loss-bubble",
+                      "width": "fill_container",
+                      "fill": "#E3F2E0",
+                      "cornerRadius": 16,
+                      "padding": [
+                        12,
+                        14
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "LVVxl",
+                          "name": "weekly-weight-loss-text-row",
+                          "width": "fill_container",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "CVi76",
+                              "name": "weekly-weight-loss-prefix",
+                              "fill": "#333333",
+                              "content": "每周减重 ",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "jDIJj",
+                              "name": "weekly-weight-loss-value",
+                              "fill": "#2E7D32",
+                              "content": "1",
+                              "fontFamily": "Inter",
+                              "fontSize": 16,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "ZYtAl",
+                              "name": "weekly-weight-loss-suffix",
+                              "fill": "#333333",
+                              "content": " 斤",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "h5RFT",
+              "name": "plan-bmi-card",
+              "width": "fill_container",
+              "fill": "#FFFFFF",
+              "cornerRadius": 16,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#00000010",
+                "offset": {
+                  "x": 0,
+                  "y": 2
+                },
+                "blur": 8
+              },
+              "layout": "vertical",
+              "gap": 12,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "DuyTY",
+                  "name": "plan-bmi-header-row",
+                  "width": "fill_container",
+                  "gap": 6,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "AbF5O",
+                      "name": "bmi-value",
+                      "fill": "#1A1A1A",
+                      "content": "当前BMI: 26.4",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "awELe",
+                      "name": "bmi-status-tag",
+                      "fill": "#E65100",
+                      "content": "(超重)",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "01mSY",
+                  "name": "bmi-progress-bar",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "09rO8",
+                      "name": "bmi-scale-labels",
+                      "width": "fill_container",
+                      "justifyContent": "space_between",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "xVdCQ",
+                          "fill": "#888888",
+                          "content": "偏低",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "nusZf",
+                          "fill": "#888888",
+                          "content": "标准",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "blOhT",
+                          "fill": "#1A1A1A",
+                          "content": "超重",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "R0SxJ",
+                          "fill": "#888888",
+                          "content": "肥胖",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "uhyoe",
+                      "name": "bmi-segment-track",
+                      "width": "fill_container",
+                      "height": 8,
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 4,
+                          "id": "wRt4a",
+                          "name": "bmi-segment-underweight",
+                          "fill": "#B3E5FC",
+                          "width": "fill_container",
+                          "height": 8
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 4,
+                          "id": "tEBAI",
+                          "name": "bmi-segment-normal",
+                          "fill": "#C8E6C9",
+                          "width": "fill_container",
+                          "height": 8
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 4,
+                          "id": "ETwdi",
+                          "name": "bmi-segment-overweight",
+                          "fill": "#FFCC80",
+                          "width": "fill_container",
+                          "height": 8
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 4,
+                          "id": "HMqTR",
+                          "name": "bmi-segment-obese",
+                          "fill": "#FFAB91",
+                          "width": "fill_container",
+                          "height": 8
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "P5TZ7",
+                      "name": "bmi-threshold-row",
+                      "width": "fill_container",
+                      "padding": [
+                        0,
+                        8
+                      ],
+                      "justifyContent": "space_between",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "eMUVb",
+                          "fill": "#999999",
+                          "content": "18.5",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "W5oHw",
+                          "fill": "#999999",
+                          "content": "24",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "tDfuM",
+                          "fill": "#999999",
+                          "content": "30",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "VEUc5",
+                  "name": "bmi-description-text",
+                  "fill": "#555555",
+                  "textGrowth": "fixed-width",
+                  "width": 310,
+                  "content": "您的体重超重，处于肥胖前期。建议控制总能量摄入，注重均衡，增加蔬果、谷物及优质蛋白质摄入，并保持规律运动。",
+                  "lineHeight": 1.45,
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "OUsbA",
+              "name": "plan-progress-card",
+              "width": "fill_container",
+              "fill": "#FFFFFF",
+              "cornerRadius": 16,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#00000010",
+                "offset": {
+                  "x": 0,
+                  "y": 2
+                },
+                "blur": 8
+              },
+              "layout": "vertical",
+              "gap": 14,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "zk2WU",
+                  "name": "plan-progress-headline-pill",
+                  "fill": "#D9EFD4",
+                  "cornerRadius": 20,
+                  "padding": [
+                    8,
+                    16
+                  ],
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "A2xJn",
+                      "name": "plan-progress-headline-text",
+                      "fill": "#2E7D32",
+                      "content": "计划在 8 周减重 8.0 斤",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "cpcxr",
+                  "name": "plan-social-proof-text",
+                  "fill": "#666666",
+                  "content": "已有92%的人按计划达成目标",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "UCY6q",
+                  "name": "phase-timeline",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 10,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "DGH8S",
+                      "name": "phase-section-title-pill",
+                      "fill": "#D9EFD4",
+                      "cornerRadius": 18,
+                      "padding": [
+                        6,
+                        14
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "VzSiD",
+                          "fill": "#2E7D32",
+                          "content": "减脂是最好的逆袭",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "x1Yz2",
+                      "name": "phase-curve-line",
+                      "width": "fill_container",
+                      "height": 28,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 2,
+                          "id": "c0Lla",
+                          "name": "phase-string-line",
+                          "fill": "#F5D76E",
+                          "width": "fill_container",
+                          "height": 3
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "YkRmA",
+                      "name": "phase-polaroid-row",
+                      "width": "fill_container",
+                      "gap": 8,
+                      "justifyContent": "center",
+                      "alignItems": "end",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "cVS2S",
+                          "name": "phase-item",
+                          "width": 88,
+                          "height": 124,
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 3,
+                          "effect": {
+                            "type": "shadow",
+                            "shadowType": "outer",
+                            "color": "#00000020",
+                            "offset": {
+                              "x": 0,
+                              "y": 2
+                            },
+                            "blur": 6
+                          },
+                          "layout": "vertical",
+                          "gap": 4,
+                          "padding": 6,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "QvIDm",
+                              "fill": "#666666",
+                              "content": "启动",
+                              "fontFamily": "Inter",
+                              "fontSize": 9,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "CaqNw",
+                              "name": "phImg",
+                              "width": 76,
+                              "height": 72,
+                              "fill": "#EEF3EE",
+                              "cornerRadius": 12,
+                              "stroke": {
+                                "align": "inside",
+                                "thickness": 1,
+                                "fill": "#C8D8C8"
+                              },
+                              "layout": "vertical",
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "hxYxp",
+                                  "fill": "#7A8F7A",
+                                  "content": "image-placeholder",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "zEmHb",
+                          "name": "phase-item",
+                          "width": 88,
+                          "height": 124,
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 3,
+                          "effect": {
+                            "type": "shadow",
+                            "shadowType": "outer",
+                            "color": "#00000020",
+                            "offset": {
+                              "x": 0,
+                              "y": 2
+                            },
+                            "blur": 6
+                          },
+                          "layout": "vertical",
+                          "gap": 4,
+                          "padding": 6,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ymTMW",
+                              "fill": "#666666",
+                              "content": "减脂",
+                              "fontFamily": "Inter",
+                              "fontSize": 9,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "YLnbJ",
+                              "name": "phImg",
+                              "width": 76,
+                              "height": 72,
+                              "fill": "#EEF3EE",
+                              "cornerRadius": 12,
+                              "stroke": {
+                                "align": "inside",
+                                "thickness": 1,
+                                "fill": "#C8D8C8"
+                              },
+                              "layout": "vertical",
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "ZhFYs",
+                                  "fill": "#7A8F7A",
+                                  "content": "image-placeholder",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "bedNT",
+                          "name": "phase-item",
+                          "width": 88,
+                          "height": 124,
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 3,
+                          "effect": {
+                            "type": "shadow",
+                            "shadowType": "outer",
+                            "color": "#00000020",
+                            "offset": {
+                              "x": 0,
+                              "y": 2
+                            },
+                            "blur": 6
+                          },
+                          "layout": "vertical",
+                          "gap": 4,
+                          "padding": 6,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "Hawy3",
+                              "fill": "#666666",
+                              "content": "巩固",
+                              "fontFamily": "Inter",
+                              "fontSize": 9,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "RiCpM",
+                              "name": "phImg",
+                              "width": 76,
+                              "height": 72,
+                              "fill": "#EEF3EE",
+                              "cornerRadius": 12,
+                              "stroke": {
+                                "align": "inside",
+                                "thickness": 1,
+                                "fill": "#C8D8C8"
+                              },
+                              "layout": "vertical",
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "WEItJ",
+                                  "fill": "#7A8F7A",
+                                  "content": "image-placeholder",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "6maVv",
+                  "name": "chart-container",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 10,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "igFVr",
+                      "name": "chart-placeholder-hint",
+                      "fill": "#999999",
+                      "content": "体重趋势（占位）",
+                      "fontFamily": "Inter",
+                      "fontSize": 10,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "vuphy",
+                      "name": "weight-range-display",
+                      "width": "fill_container",
+                      "gap": 4,
+                      "padding": [
+                        8,
+                        0,
+                        0,
+                        0
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "cgFnR",
+                          "name": "weight-milestone-start",
+                          "fill": "#E53935",
+                          "content": "170斤",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "4UF6i",
+                          "fill": "#E53935",
+                          "content": ">>>>",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "SaUEX",
+                          "name": "weight-milestone-mid",
+                          "fill": "#FB8C00",
+                          "content": "150斤",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "7OIWy",
+                          "fill": "#43A047",
+                          "content": ">>>>",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "S8JWE",
+                          "name": "weight-milestone-goal",
+                          "fill": "#2E7D32",
+                          "content": "120斤",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "UcN3f",
+              "name": "plan-strategy-card",
+              "width": "fill_container",
+              "fill": "#FFFFFF",
+              "cornerRadius": 16,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#00000010",
+                "offset": {
+                  "x": 0,
+                  "y": 2
+                },
+                "blur": 8
+              },
+              "layout": "vertical",
+              "gap": 12,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "VtD6q",
+                  "name": "plan-strategy-metrics-row",
+                  "width": "fill_container",
+                  "gap": 10,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "V0lKk",
+                      "name": "calorie-target",
+                      "width": "fill_container",
+                      "fill": "#F7FAF6",
+                      "cornerRadius": 12,
+                      "layout": "vertical",
+                      "gap": 6,
+                      "padding": [
+                        12,
+                        10
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "fJNZc",
+                          "name": "calorie-target-label",
+                          "fill": "#888888",
+                          "content": "热量摄入",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "MaGFu",
+                          "name": "calorie-target-value",
+                          "fill": "#2E7D32",
+                          "content": "约 1500 大卡/日",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "YLuNy",
+                      "name": "exercise-frequency",
+                      "width": "fill_container",
+                      "fill": "#F7FAF6",
+                      "cornerRadius": 12,
+                      "layout": "vertical",
+                      "gap": 6,
+                      "padding": [
+                        12,
+                        10
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "YwWJQ",
+                          "name": "exercise-frequency-label",
+                          "fill": "#888888",
+                          "content": "运动频率",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "Xzoqn",
+                          "name": "exercise-frequency-value",
+                          "fill": "#1A1A1A",
+                          "content": "每周 4 次",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "MlMrP",
+                  "name": "plan-strategy-diet-row",
+                  "width": "fill_container",
+                  "gap": 10,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "32Esc",
+                      "name": "diet-pattern",
+                      "width": "fill_container",
+                      "fill": "#FFFFFF",
+                      "cornerRadius": 14,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#E0E8DE"
+                      },
+                      "layout": "vertical",
+                      "gap": 6,
+                      "padding": [
+                        14,
+                        12
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "PwvpB",
+                          "name": "diet-pattern-label",
+                          "fill": "#888888",
+                          "content": "饮食节奏",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "jGyGU",
+                          "name": "diet-pattern-value",
+                          "fill": "#2E7D32",
+                          "content": "8+16 轻断食",
+                          "fontFamily": "Inter",
+                          "fontSize": 15,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "kmbBs",
+                      "name": "diet-recommendation",
+                      "width": "fill_container",
+                      "fill": "#FFFFFF",
+                      "cornerRadius": 14,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#E0E8DE"
+                      },
+                      "layout": "vertical",
+                      "gap": 6,
+                      "padding": [
+                        14,
+                        12
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "bMSEM",
+                          "name": "diet-recommendation-label",
+                          "fill": "#888888",
+                          "content": "饮食推荐",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "Qoa5c",
+                          "name": "diet-recommendation-value",
+                          "fill": "#1A1A1A",
+                          "textGrowth": "fixed-width",
+                          "width": 140,
+                          "content": "减少糖、盐、油脂",
+                          "lineHeight": 1.3,
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "X6U4N",
+              "name": "plan-user-case-card",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 10,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "pM0k7",
+                  "name": "plan-user-case-header",
+                  "fill": "#D9EFD4",
+                  "cornerRadius": 16,
+                  "padding": [
+                    6,
+                    14
+                  ],
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "BlZJO",
+                      "fill": "#2E7D32",
+                      "content": "真实用户案例",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Z9gq3",
+                  "name": "plan-user-case-row",
+                  "width": "fill_container",
+                  "gap": 10,
+                  "padding": [
+                    10,
+                    0,
+                    0,
+                    0
+                  ],
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "GlPle",
+                      "name": "image-placeholder",
+                      "width": 44,
+                      "height": 44,
+                      "fill": "#EEF3EE",
+                      "cornerRadius": 12,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#C8D8C8"
+                      },
+                      "layout": "vertical",
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "JFQDW",
+                          "fill": "#7A8F7A",
+                          "content": "image-placeholder",
+                          "fontFamily": "Inter",
+                          "fontSize": 10,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "l6BmD",
+                      "name": "plan-user-case-main",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 4,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "V5Ll5",
+                          "name": "plan-user-case-achievement-row",
+                          "width": "fill_container",
+                          "gap": 4,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "iyUwS",
+                              "fill": "#333333",
+                              "content": "18 周减重 ",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "isLrB",
+                              "name": "plan-user-case-loss-value",
+                              "fill": "#2E7D32",
+                              "content": "12.8",
+                              "fontFamily": "Inter",
+                              "fontSize": 16,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "IS5de",
+                              "fill": "#333333",
+                              "content": " 斤",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "l29ke",
+                      "name": "plan-user-case-date",
+                      "fill": "#999999",
+                      "content": "3月7日达成",
+                      "textAlign": "right",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "qd0s9",
+          "name": "fixed-bottom-bar",
+          "width": "fill_container",
+          "fill": "#F0F7ED",
+          "layout": "vertical",
+          "gap": 10,
+          "padding": [
+            12,
+            16,
+            20,
+            16
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "8zZAz",
+              "name": "fixed-bottom-slogan",
+              "fill": "#666666",
+              "textGrowth": "fixed-width",
+              "width": 330,
+              "content": "改变，从这里开始！遇见更好的自己吧！",
+              "textAlign": "center",
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "IOemW",
+              "name": "start-plan-button",
+              "width": "fill_container",
+              "height": 50,
+              "fill": "#8BC34A",
+              "cornerRadius": 25,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#00000014",
+                "offset": {
+                  "x": 0,
+                  "y": 2
+                },
+                "blur": 6
+              },
+              "padding": [
+                0,
+                16,
+                0,
+                20
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "a5XPd",
+                  "name": "start-plan-button-label",
+                  "fill": "#1B5E20",
+                  "textGrowth": "fixed-width",
+                  "width": 140,
+                  "content": "开始使用专属计划",
+                  "fontFamily": "Inter",
+                  "fontSize": 16,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "frame",
+                  "id": "DmROu",
+                  "name": "start-plan-vip-badge",
+                  "width": 30,
+                  "height": 30,
+                  "fill": "#FFD54F",
+                  "cornerRadius": 15,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "VQWnp",
+                      "fill": "#5D4037",
+                      "content": "VIP",
+                      "fontFamily": "Inter",
+                      "fontSize": 8,
+                      "fontWeight": "700"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

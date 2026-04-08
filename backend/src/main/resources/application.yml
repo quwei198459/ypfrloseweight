@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: loseweight-api
+  profiles:
+    active: local
+  codec:
+    max-in-memory-size: 16MB
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/loseweight?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false
+    username: root
+    password: change-me
+
+server:
+  port: 8080
+  tomcat:
+    max-http-form-post-size: 20MB
+    max-swallow-size: 20MB
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  global-config:
+    db-config:
+      id-type: auto
+
+# 密码、AppSecret、AppCode 请在 application-local.yml 中覆盖（该文件已加入 .gitignore）
+
+wechat:
+  miniapp:
+    app-id: wx18b3c99724695bb8
+    app-secret: change-me
+
+aliyun:
+  food:
+    host: https://jmfdcl.market.alicloudapi.com
+    path: /food/calories/query
+    appcode: change-me
+
+# JWT 签发（secret 必须在 application-local.yml 覆盖为≥32字节的随机串）
+app:
+  jwt:
+    secret: dev-only-change-in-application-local-yml-min-32-chars!!
+    expire-seconds: 604800
+  upload:
+    avatar-dir: ./uploads/avatars
+
+logging:
+  level:
+    com.ypfr.loseweight.mapper: debug

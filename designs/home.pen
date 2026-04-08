@@ -1,0 +1,1885 @@
+{
+  "version": "2.10",
+  "children": [
+    {
+      "type": "frame",
+      "id": "YxYqP",
+      "x": 0,
+      "y": 0,
+      "name": "HomePage_Base",
+      "clip": true,
+      "width": 375,
+      "height": 812,
+      "fill": "#F7FBF7",
+      "layout": "none",
+      "children": [
+        {
+          "type": "frame",
+          "id": "QfUlj",
+          "x": 0,
+          "y": 0,
+          "name": "PageContainer",
+          "width": 375,
+          "height": 812,
+          "layout": "none",
+          "children": [
+            {
+              "type": "frame",
+              "id": "TaTRn",
+              "x": 0,
+              "y": 0,
+              "name": "TopHeroSection",
+              "width": 375,
+              "height": 420,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 24,
+                  "id": "a3XJT",
+                  "x": 0,
+                  "y": 0,
+                  "name": "HeroBG",
+                  "fill": "#BFD9A3",
+                  "width": 375,
+                  "height": 226
+                },
+                {
+                  "type": "frame",
+                  "id": "4R7vN",
+                  "x": 16,
+                  "y": 44,
+                  "name": "BrandRow",
+                  "width": 343,
+                  "height": 32,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 8,
+                      "id": "85EPn",
+                      "x": 0,
+                      "y": 0,
+                      "name": "AppLogo",
+                      "fill": "#FFFFFF",
+                      "width": 28,
+                      "height": 28,
+                      "stroke": {
+                        "thickness": 1,
+                        "fill": "#A6C58C"
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "id": "NDeol",
+                      "x": 38,
+                      "y": -1,
+                      "name": "AppTitle",
+                      "fill": "#1F2A1F",
+                      "content": "吃多少",
+                      "fontFamily": "Inter",
+                      "fontSize": 20,
+                      "fontWeight": "800"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "fZL9N",
+                  "x": 16,
+                  "y": 92,
+                  "name": "SearchBar",
+                  "width": 343,
+                  "height": 40,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 20,
+                      "id": "8aiMc",
+                      "x": 0,
+                      "y": 0,
+                      "name": "SearchBG",
+                      "fill": "#FFFFFF",
+                      "width": 343,
+                      "height": 40,
+                      "stroke": {
+                        "thickness": 2,
+                        "fill": "#9EBC86"
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "id": "pxRtD",
+                      "x": 44,
+                      "y": 10,
+                      "name": "SearchPlaceholder",
+                      "fill": "#B3B3B3",
+                      "content": "10w+食物库热量查询",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "ellipse",
+                      "id": "Fg8xf",
+                      "x": 14,
+                      "y": 12,
+                      "name": "SearchIcon",
+                      "fill": "#C8C8C8",
+                      "width": 16,
+                      "height": 16
+                    },
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 8,
+                      "id": "2NbfV",
+                      "x": 305,
+                      "y": 8,
+                      "name": "CameraButton",
+                      "fill": "#EAF6EA",
+                      "width": 24,
+                      "height": 24,
+                      "stroke": {
+                        "thickness": 1,
+                        "fill": "#BFD9BF"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "T30Rb",
+                  "x": 0,
+                  "y": 128,
+                  "name": "PandaDecorRow",
+                  "width": 375,
+                  "height": 76,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "XjRLo",
+                      "x": 16,
+                      "y": 44,
+                      "name": "StarDecorations",
+                      "fill": "#00000000",
+                      "width": 343,
+                      "height": 2
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "umNBr",
+                  "x": 16,
+                  "y": 150,
+                  "name": "SummaryCard",
+                  "width": 343,
+                  "height": 226,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 20,
+                      "id": "O1NjA",
+                      "x": 0,
+                      "y": 0,
+                      "name": "CardBG",
+                      "fill": "#FFFFFF",
+                      "width": 343,
+                      "height": 226,
+                      "stroke": {
+                        "thickness": 1,
+                        "fill": "#E9E2D3"
+                      }
+                    },
+                    {
+                      "type": "frame",
+                      "id": "eHldM",
+                      "x": 0,
+                      "y": 98,
+                      "name": "QuickEntryRow",
+                      "width": 343,
+                      "height": 94,
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "jeW3h",
+                          "x": 0,
+                          "y": 10,
+                          "name": "QuickEntryRow",
+                          "width": 343,
+                          "height": 84,
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "GKcIM",
+                              "x": 18,
+                              "y": 0,
+                              "name": "MealEntry_Breakfast",
+                              "width": 54,
+                              "height": 84,
+                              "layout": "none",
+                              "children": [
+                                {
+                                  "type": "ellipse",
+                                  "id": "kNfJp",
+                                  "x": 2,
+                                  "y": 0,
+                                  "name": "EntryIcon",
+                                  "fill": "#FFFFFF",
+                                  "width": 50,
+                                  "height": 50,
+                                  "stroke": {
+                                    "thickness": 1,
+                                    "fill": "#EEEEEE"
+                                  }
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "apMsz",
+                                  "x": 0,
+                                  "y": 56,
+                                  "name": "EntryLabel",
+                                  "fill": "#555555",
+                                  "textGrowth": "fixed-width",
+                                  "width": 54,
+                                  "content": "早餐",
+                                  "textAlign": "center",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "normal"
+                                },
+                                {
+                                  "type": "ellipse",
+                                  "id": "CoSYX",
+                                  "x": 18,
+                                  "y": 82,
+                                  "name": "EntryAddButton",
+                                  "fill": "#FFFFFF",
+                                  "width": 18,
+                                  "height": 18,
+                                  "stroke": {
+                                    "thickness": 1,
+                                    "fill": "#DDDDDD"
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "z5XM6",
+                              "x": 86,
+                              "y": 0,
+                              "name": "MealEntry_Lunch",
+                              "width": 54,
+                              "height": 84,
+                              "layout": "none",
+                              "children": [
+                                {
+                                  "type": "ellipse",
+                                  "id": "UtRDo",
+                                  "x": 2,
+                                  "y": 0,
+                                  "name": "EntryIcon",
+                                  "fill": "#FFFFFF",
+                                  "width": 50,
+                                  "height": 50,
+                                  "stroke": {
+                                    "thickness": 1,
+                                    "fill": "#EEEEEE"
+                                  }
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "FZTfc",
+                                  "x": 0,
+                                  "y": 56,
+                                  "name": "EntryLabel",
+                                  "fill": "#555555",
+                                  "textGrowth": "fixed-width",
+                                  "width": 54,
+                                  "content": "午餐",
+                                  "textAlign": "center",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "normal"
+                                },
+                                {
+                                  "type": "ellipse",
+                                  "id": "sputv",
+                                  "x": 18,
+                                  "y": 82,
+                                  "name": "EntryAddButton",
+                                  "fill": "#FFFFFF",
+                                  "width": 18,
+                                  "height": 18,
+                                  "stroke": {
+                                    "thickness": 1,
+                                    "fill": "#DDDDDD"
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "e3bHR",
+                              "x": 154,
+                              "y": 0,
+                              "name": "MealEntry_Dinner",
+                              "width": 54,
+                              "height": 84,
+                              "layout": "none",
+                              "children": [
+                                {
+                                  "type": "ellipse",
+                                  "id": "y4JoB",
+                                  "x": 2,
+                                  "y": 0,
+                                  "name": "EntryIcon",
+                                  "fill": "#FFFFFF",
+                                  "width": 50,
+                                  "height": 50,
+                                  "stroke": {
+                                    "thickness": 1,
+                                    "fill": "#EEEEEE"
+                                  }
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "4SYGy",
+                                  "x": 0,
+                                  "y": 56,
+                                  "name": "EntryLabel",
+                                  "fill": "#555555",
+                                  "textGrowth": "fixed-width",
+                                  "width": 54,
+                                  "content": "晚餐",
+                                  "textAlign": "center",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "normal"
+                                },
+                                {
+                                  "type": "ellipse",
+                                  "id": "FgAI4",
+                                  "x": 18,
+                                  "y": 82,
+                                  "name": "EntryAddButton",
+                                  "fill": "#FFFFFF",
+                                  "width": 18,
+                                  "height": 18,
+                                  "stroke": {
+                                    "thickness": 1,
+                                    "fill": "#DDDDDD"
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "Co9AJ",
+                              "x": 222,
+                              "y": 0,
+                              "name": "MealEntry_Snack",
+                              "width": 54,
+                              "height": 84,
+                              "layout": "none",
+                              "children": [
+                                {
+                                  "type": "ellipse",
+                                  "id": "khOVz",
+                                  "x": 2,
+                                  "y": 0,
+                                  "name": "EntryIcon",
+                                  "fill": "#FFFFFF",
+                                  "width": 50,
+                                  "height": 50,
+                                  "stroke": {
+                                    "thickness": 1,
+                                    "fill": "#EEEEEE"
+                                  }
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "Td9tu",
+                                  "x": 0,
+                                  "y": 56,
+                                  "name": "EntryLabel",
+                                  "fill": "#555555",
+                                  "textGrowth": "fixed-width",
+                                  "width": 54,
+                                  "content": "加餐",
+                                  "textAlign": "center",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "normal"
+                                },
+                                {
+                                  "type": "ellipse",
+                                  "id": "VowJH",
+                                  "x": 18,
+                                  "y": 82,
+                                  "name": "EntryAddButton",
+                                  "fill": "#FFFFFF",
+                                  "width": 18,
+                                  "height": 18,
+                                  "stroke": {
+                                    "thickness": 1,
+                                    "fill": "#DDDDDD"
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "z7swl",
+                              "x": 290,
+                              "y": 0,
+                              "name": "MealEntry_Sport",
+                              "width": 54,
+                              "height": 84,
+                              "layout": "none",
+                              "children": [
+                                {
+                                  "type": "ellipse",
+                                  "id": "vgRGy",
+                                  "x": 2,
+                                  "y": 0,
+                                  "name": "EntryIcon",
+                                  "fill": "#FFFFFF",
+                                  "width": 50,
+                                  "height": 50,
+                                  "stroke": {
+                                    "thickness": 1,
+                                    "fill": "#EEEEEE"
+                                  }
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "edgni",
+                                  "x": 0,
+                                  "y": 56,
+                                  "name": "EntryLabel",
+                                  "fill": "#555555",
+                                  "textGrowth": "fixed-width",
+                                  "width": 54,
+                                  "content": "运动",
+                                  "textAlign": "center",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "normal"
+                                },
+                                {
+                                  "type": "ellipse",
+                                  "id": "iNsZ0",
+                                  "x": 18,
+                                  "y": 82,
+                                  "name": "EntryAddButton",
+                                  "fill": "#FFFFFF",
+                                  "width": 18,
+                                  "height": 18,
+                                  "stroke": {
+                                    "thickness": 1,
+                                    "fill": "#DDDDDD"
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "uUN2H",
+                      "x": 16,
+                      "y": 94,
+                      "name": "DividerLine",
+                      "fill": "#F1F1F1",
+                      "width": 311,
+                      "height": 1
+                    },
+                    {
+                      "type": "frame",
+                      "id": "lvDuQ",
+                      "x": 16,
+                      "y": 17,
+                      "name": "IntakeBlock",
+                      "width": 70,
+                      "height": 65,
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "pC27V",
+                          "x": 0,
+                          "y": 0,
+                          "name": "IntakeLabel",
+                          "fill": "#333333",
+                          "textGrowth": "fixed-width",
+                          "width": 70,
+                          "content": "饮食摄入",
+                          "textAlign": "center",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "Rw7cb",
+                          "x": 0,
+                          "y": 24,
+                          "name": "IntakeValue",
+                          "fill": "#222222",
+                          "textGrowth": "fixed-width",
+                          "width": 70,
+                          "content": "0",
+                          "textAlign": "center",
+                          "fontFamily": "Inter",
+                          "fontSize": 22,
+                          "fontWeight": "800"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "iG9vU",
+                      "x": 94,
+                      "y": 17,
+                      "name": "CalorieGauge",
+                      "width": 155,
+                      "height": 74,
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "mk3U1",
+                          "x": 0,
+                          "y": 0,
+                          "name": "GaugeMask",
+                          "clip": true,
+                          "width": 155,
+                          "height": 55,
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "ellipse",
+                              "id": "W2Rep",
+                              "x": 0,
+                              "y": 0,
+                              "name": "GaugeArc",
+                              "fill": "#00000000",
+                              "width": 155,
+                              "height": 155,
+                              "stroke": {
+                                "thickness": 10,
+                                "fill": {
+                                  "type": "gradient",
+                                  "gradientType": "linear",
+                                  "enabled": true,
+                                  "rotation": 0,
+                                  "size": {
+                                    "height": 1
+                                  },
+                                  "colors": [
+                                    {
+                                      "color": "#F39A66",
+                                      "position": 0
+                                    },
+                                    {
+                                      "color": "#F6D675",
+                                      "position": 0.5
+                                    },
+                                    {
+                                      "color": "#8BD28D",
+                                      "position": 1
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "HQeyM",
+                          "x": 0,
+                          "y": 16,
+                          "name": "BudgetHelpEntry",
+                          "width": 155,
+                          "height": 20,
+                          "gap": 5,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "UwmKD",
+                              "name": "BudgetLabelText",
+                              "fill": "#9A9A9A",
+                              "content": "还可吃",
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "PWQ68",
+                              "name": "BudgetHelpIcon",
+                              "width": 14,
+                              "height": 14,
+                              "fill": "#FFFFFF",
+                              "cornerRadius": 7,
+                              "stroke": {
+                                "thickness": 1,
+                                "fill": "#DDDDDD"
+                              },
+                              "layout": "none",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "stLPr",
+                                  "x": 4,
+                                  "y": 2,
+                                  "name": "qMark",
+                                  "fill": "#888888",
+                                  "content": "?",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "9wZOp",
+                          "x": 0,
+                          "y": 44,
+                          "name": "BudgetValueEntry",
+                          "width": 155,
+                          "height": 26,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "3Tncw",
+                              "name": "GaugeValueText",
+                              "fill": "#222222",
+                              "content": "1825 >",
+                              "fontFamily": "Inter",
+                              "fontSize": 18,
+                              "fontWeight": "800"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "tkyVW",
+                      "x": 257,
+                      "y": 17,
+                      "name": "SportBlock",
+                      "width": 70,
+                      "height": 65,
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "k6CLK",
+                          "x": 0,
+                          "y": 0,
+                          "name": "SportLabel",
+                          "fill": "#333333",
+                          "textGrowth": "fixed-width",
+                          "width": 70,
+                          "content": "运动消耗",
+                          "textAlign": "center",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "iQcPS",
+                          "x": 0,
+                          "y": 24,
+                          "name": "SportValue",
+                          "fill": "#222222",
+                          "textGrowth": "fixed-width",
+                          "width": 70,
+                          "content": "0",
+                          "textAlign": "center",
+                          "fontFamily": "Inter",
+                          "fontSize": 22,
+                          "fontWeight": "800"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "PttW0",
+              "x": 16,
+              "y": 393,
+              "name": "FatLossPlanSection",
+              "width": 343,
+              "height": 327,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 24,
+                  "id": "55naG",
+                  "x": 0,
+                  "y": 0,
+                  "name": "PlanBannerCard",
+                  "fill": "#FFFFFF",
+                  "width": 343,
+                  "height": 328,
+                  "stroke": {
+                    "thickness": 1,
+                    "fill": "#F0E6D6"
+                  }
+                },
+                {
+                  "type": "text",
+                  "id": "EdSSB",
+                  "x": 20,
+                  "y": 20,
+                  "name": "PlanTitle",
+                  "fill": "#1F2A1F",
+                  "content": "邀请您加入减脂计划",
+                  "fontFamily": "Inter",
+                  "fontSize": 20,
+                  "fontWeight": "800"
+                },
+                {
+                  "type": "text",
+                  "id": "xAuxa",
+                  "x": 20,
+                  "y": 50,
+                  "name": "PlanSub",
+                  "fill": "#8A8A8A",
+                  "content": "24928 人正在使用",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "SIK9z",
+                  "x": 210,
+                  "y": 34,
+                  "name": "PlanCTA",
+                  "width": 120,
+                  "height": 40,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": 20,
+                      "id": "qoFos",
+                      "x": 0,
+                      "y": 0,
+                      "name": "planBtnBg",
+                      "fill": "#D5E7B1",
+                      "width": 120,
+                      "height": 40,
+                      "stroke": {
+                        "thickness": 2,
+                        "fill": "#9EBC86"
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "id": "3EP7T",
+                      "x": 0,
+                      "y": 10,
+                      "name": "planBtnTxt",
+                      "fill": "#4B5B2D",
+                      "textGrowth": "fixed-width",
+                      "width": 120,
+                      "content": "免费开启计划",
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 20,
+                  "id": "TrH7u",
+                  "x": 20,
+                  "y": 86,
+                  "name": "BannerIllustration",
+                  "fill": "#F5F1E6",
+                  "width": 303,
+                  "height": 220,
+                  "stroke": {
+                    "thickness": 1,
+                    "fill": "#E6DDC8"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "GcgBA",
+              "x": 0,
+              "y": 742,
+              "name": "BottomTabBar",
+              "width": 375,
+              "height": 70,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "59Jt4",
+                  "x": 0,
+                  "y": 0,
+                  "name": "TabBarBackground",
+                  "fill": "#FFFFFF",
+                  "width": 375,
+                  "height": 70,
+                  "stroke": {
+                    "thickness": {
+                      "top": 1
+                    },
+                    "fill": "#EEEEEE"
+                  }
+                },
+                {
+                  "type": "frame",
+                  "id": "wEg9y",
+                  "x": 40,
+                  "y": 10,
+                  "name": "Tab_Home",
+                  "width": 60,
+                  "height": 50,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Yljx9",
+                      "x": 0,
+                      "y": 34,
+                      "name": "TabLabel",
+                      "fill": "#8A8A8A",
+                      "textGrowth": "fixed-width",
+                      "width": 60,
+                      "content": "首页",
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "9TQ8G",
+                      "x": 0,
+                      "y": 0,
+                      "name": "ActiveState",
+                      "width": 60,
+                      "height": 50,
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "ellipse",
+                          "id": "3xb7a",
+                          "x": 6,
+                          "y": -10,
+                          "name": "ActiveBackground",
+                          "opacity": 0,
+                          "fill": "#BFD9A3",
+                          "width": 48,
+                          "height": 48,
+                          "stroke": {
+                            "thickness": 2,
+                            "fill": "#9EBC86"
+                          }
+                        },
+                        {
+                          "type": "ellipse",
+                          "id": "k0ODz",
+                          "x": 19,
+                          "y": 6,
+                          "name": "TabIcon",
+                          "fill": "#FFFFFF",
+                          "width": 22,
+                          "height": 22,
+                          "stroke": {
+                            "thickness": 1,
+                            "fill": "#DDDDDD"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "FrVP7",
+                  "x": 158,
+                  "y": 0,
+                  "name": "Tab_Record",
+                  "width": 60,
+                  "height": 70,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "DdTQC",
+                      "x": 0,
+                      "y": 44,
+                      "name": "TabLabel",
+                      "fill": "#8A8A8A",
+                      "textGrowth": "fixed-width",
+                      "width": 60,
+                      "content": "拍照",
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "SGTwz",
+                      "x": 0,
+                      "y": 0,
+                      "name": "ActiveState",
+                      "width": 60,
+                      "height": 70,
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "ellipse",
+                          "id": "dm1jG",
+                          "x": 6,
+                          "y": -10,
+                          "name": "ActiveBackground",
+                          "fill": "#BFD9A3",
+                          "width": 48,
+                          "height": 48,
+                          "stroke": {
+                            "thickness": 2,
+                            "fill": "#9EBC86"
+                          }
+                        },
+                        {
+                          "type": "ellipse",
+                          "id": "rOpw0",
+                          "x": 18,
+                          "y": 2,
+                          "name": "TabIcon",
+                          "fill": "#FFFFFF",
+                          "width": 24,
+                          "height": 24,
+                          "stroke": {
+                            "thickness": 1,
+                            "fill": "#9EBC86"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "80hdT",
+                  "x": 275,
+                  "y": 10,
+                  "name": "Tab_Me",
+                  "width": 60,
+                  "height": 50,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "xy5Q5",
+                      "x": 0,
+                      "y": 34,
+                      "name": "TabLabel",
+                      "fill": "#8A8A8A",
+                      "textGrowth": "fixed-width",
+                      "width": 60,
+                      "content": "我的",
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "lGmO6",
+                      "x": 0,
+                      "y": 0,
+                      "name": "ActiveState",
+                      "width": 60,
+                      "height": 50,
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "ellipse",
+                          "id": "ENP5i",
+                          "x": 6,
+                          "y": -10,
+                          "name": "ActiveBackground",
+                          "opacity": 0,
+                          "fill": "#BFD9A3",
+                          "width": 48,
+                          "height": 48,
+                          "stroke": {
+                            "thickness": 2,
+                            "fill": "#9EBC86"
+                          }
+                        },
+                        {
+                          "type": "ellipse",
+                          "id": "9640F",
+                          "x": 19,
+                          "y": 6,
+                          "name": "TabIcon",
+                          "fill": "#FFFFFF",
+                          "width": 22,
+                          "height": 22,
+                          "stroke": {
+                            "thickness": 1,
+                            "fill": "#DDDDDD"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "LCHFI",
+      "x": 415,
+      "y": 0,
+      "name": "HomeCustomBmrHelpPage",
+      "width": 375,
+      "height": 812,
+      "fill": "#EEF4E8",
+      "layout": "vertical",
+      "gap": 14,
+      "padding": 16,
+      "children": [
+        {
+          "type": "frame",
+          "id": "RkxfC",
+          "name": "BudgetSummaryCard",
+          "width": 343,
+          "fill": "#FFFFFF",
+          "cornerRadius": 16,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#E8E8E8"
+          },
+          "layout": "vertical",
+          "gap": 12,
+          "padding": 16,
+          "children": [
+            {
+              "type": "frame",
+              "id": "XX95s",
+              "name": "BudgetSummaryTopRow",
+              "width": "fill_container",
+              "height": 75,
+              "justifyContent": "space_between",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "vlIFw",
+                  "name": "BudgetInputBlock",
+                  "width": 72,
+                  "layout": "vertical",
+                  "gap": 6,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "A0n1i",
+                      "name": "BudgetInputLabel",
+                      "fill": "#333333",
+                      "content": "饮食摄入",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "XXwe9",
+                      "name": "BudgetInputValue",
+                      "fill": "#222222",
+                      "content": "0",
+                      "fontFamily": "Inter",
+                      "fontSize": 22,
+                      "fontWeight": "800"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Wf5Kh",
+                  "name": "BudgetGaugeBlock",
+                  "width": 155,
+                  "height": 92,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "sY5n0",
+                      "x": 0,
+                      "y": 0,
+                      "name": "BudgetGaugeArc",
+                      "clip": true,
+                      "width": 155,
+                      "height": 55,
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "ellipse",
+                          "id": "VYwUm",
+                          "x": 0,
+                          "y": 0,
+                          "name": "BudgetGaugeArc",
+                          "fill": "#00000000",
+                          "width": 155,
+                          "height": 155,
+                          "stroke": {
+                            "thickness": 10,
+                            "fill": {
+                              "type": "gradient",
+                              "gradientType": "linear",
+                              "enabled": true,
+                              "rotation": 0,
+                              "size": {
+                                "height": 1
+                              },
+                              "colors": [
+                                {
+                                  "color": "#F39A66",
+                                  "position": 0
+                                },
+                                {
+                                  "color": "#F6D675",
+                                  "position": 0.5
+                                },
+                                {
+                                  "color": "#8BD28D",
+                                  "position": 1
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "BWB8k",
+                      "x": 0,
+                      "y": 16,
+                      "name": "BudgetGaugeInnerContent",
+                      "width": 155,
+                      "height": 58,
+                      "layout": "vertical",
+                      "gap": 6,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "TWfOn",
+                          "name": "BudgetHelpEntry",
+                          "gap": 5,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "MuXg3",
+                              "name": "BudgetLabelText",
+                              "fill": "#9A9A9A",
+                              "content": "还可吃",
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "C4TId",
+                              "name": "BudgetHelpIcon",
+                              "width": 14,
+                              "height": 14,
+                              "fill": "#FFFFFF",
+                              "cornerRadius": 7,
+                              "stroke": {
+                                "thickness": 1,
+                                "fill": "#DDDDDD"
+                              },
+                              "layout": "none",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "v3T8L",
+                                  "x": 4,
+                                  "y": 2,
+                                  "fill": "#888888",
+                                  "content": "?",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "KUbB4",
+                          "name": "BudgetValueEntry",
+                          "gap": 2,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "hkJsq",
+                              "name": "GaugeValueText",
+                              "fill": "#222222",
+                              "content": "1825",
+                              "fontFamily": "Inter",
+                              "fontSize": 18,
+                              "fontWeight": "800"
+                            },
+                            {
+                              "type": "text",
+                              "id": "W3g0M",
+                              "name": "GaugeArrowIcon",
+                              "fill": "#222222",
+                              "content": ">",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Wy31W",
+                  "name": "BudgetExerciseOutputBlock",
+                  "width": 72,
+                  "layout": "vertical",
+                  "gap": 6,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "cAKWW",
+                      "name": "BudgetExerciseLabel",
+                      "fill": "#333333",
+                      "content": "运动消耗",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "DV2Um",
+                      "name": "BudgetExerciseValue",
+                      "fill": "#222222",
+                      "content": "0",
+                      "fontFamily": "Inter",
+                      "fontSize": 22,
+                      "fontWeight": "800"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "rectangle",
+              "id": "7SK6m",
+              "name": "BudgetSummaryDivider",
+              "fill": "#00000000",
+              "width": 311,
+              "height": 1,
+              "stroke": {
+                "align": "center",
+                "thickness": 1,
+                "fill": "#CCCCCC"
+              }
+            },
+            {
+              "type": "frame",
+              "id": "HfSlB",
+              "name": "BudgetFormulaCard",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 10,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "XeUSQ",
+                  "name": "BudgetFormulaHeaderRow",
+                  "width": "fill_container",
+                  "height": 18,
+                  "justifyContent": "space_between",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "z0W0G",
+                      "name": "RemainLabel",
+                      "fill": "#666666",
+                      "content": "还可吃",
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "8dZNJ",
+                      "name": "BudgetLabel",
+                      "fill": "#666666",
+                      "content": "每日预算",
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "mylJo",
+                      "name": "IntakeLabel",
+                      "fill": "#666666",
+                      "content": "饮食",
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "RotfM",
+                      "name": "ExerciseLabel",
+                      "fill": "#666666",
+                      "content": "运动",
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "1B3om",
+                  "name": "BudgetFormulaValueRow",
+                  "width": "fill_container",
+                  "height": 22,
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "i8bcN",
+                      "name": "RemainValue",
+                      "fill": "#5FA854",
+                      "content": "1825",
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "3nL9s",
+                      "name": "EqualSymbol",
+                      "fill": "#333333",
+                      "content": "=",
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "hjNMS",
+                      "name": "BudgetValue",
+                      "fill": "#333333",
+                      "content": "1825",
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "IFCN4",
+                      "name": "MinusSymbol",
+                      "fill": "#333333",
+                      "content": "-",
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "J0dCq",
+                      "name": "IntakeValue",
+                      "fill": "#333333",
+                      "content": "0",
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "IujQ2",
+                      "name": "PlusSymbol",
+                      "fill": "#333333",
+                      "content": "+",
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "sRRm7",
+                      "name": "ExerciseValue",
+                      "fill": "#333333",
+                      "content": "0",
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "DfITa",
+          "name": "CardConnectorStrip",
+          "width": 343,
+          "height": 32,
+          "layout": "none",
+          "children": [
+            {
+              "type": "frame",
+              "id": "2f4Bl",
+              "x": 8,
+              "y": 0,
+              "name": "CardConnectorLeft",
+              "width": 48,
+              "height": 32,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "MOW85",
+                  "x": 21,
+                  "y": 0,
+                  "fill": "#BFD9A3",
+                  "width": 6,
+                  "height": 6
+                },
+                {
+                  "type": "rectangle",
+                  "id": "CRB86",
+                  "x": 23,
+                  "y": 6,
+                  "fill": "#9EBC86",
+                  "width": 2,
+                  "height": 20
+                },
+                {
+                  "type": "ellipse",
+                  "id": "hBXQd",
+                  "x": 21,
+                  "y": 24,
+                  "fill": "#BFD9A3",
+                  "width": 6,
+                  "height": 6
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Rv0cM",
+              "x": 287,
+              "y": 0,
+              "name": "CardConnectorRight",
+              "width": 48,
+              "height": 32,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "FigPd",
+                  "x": 21,
+                  "y": 0,
+                  "fill": "#BFD9A3",
+                  "width": 6,
+                  "height": 6
+                },
+                {
+                  "type": "rectangle",
+                  "id": "6Slct",
+                  "x": 23,
+                  "y": 6,
+                  "fill": "#9EBC86",
+                  "width": 2,
+                  "height": 20
+                },
+                {
+                  "type": "ellipse",
+                  "id": "7jW6J",
+                  "x": 21,
+                  "y": 24,
+                  "fill": "#BFD9A3",
+                  "width": 6,
+                  "height": 6
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "SJkZ8",
+          "name": "BudgetExplanationCard",
+          "width": 343,
+          "fill": "#FFFFFF",
+          "cornerRadius": 16,
+          "stroke": {
+            "thickness": 2,
+            "fill": "#BFD9A3"
+          },
+          "layout": "vertical",
+          "gap": 10,
+          "padding": 16,
+          "children": [
+            {
+              "type": "text",
+              "id": "WY5DR",
+              "name": "SummaryTextBlock",
+              "fill": "#333333",
+              "textGrowth": "fixed-width",
+              "width": 311,
+              "content": "总结：多运动和控制饮食，使得每日还可吃>0，即可达成减重目标。（可调整个人信息更新每日预算）",
+              "lineHeight": 1.5,
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "fKoRu",
+              "name": "DailyBudgetTextBlock",
+              "fill": "#333333",
+              "textGrowth": "fixed-width",
+              "width": 311,
+              "content": "每日预算：根据您的减重目标每日预算(1825)= 基础代谢(2240)-减重所需热量缺口（415）",
+              "lineHeight": 1.5,
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "mnkta",
+              "name": "IntakeTextBlock",
+              "fill": "#333333",
+              "textGrowth": "fixed-width",
+              "width": 311,
+              "content": "饮食热量：根据您记录的饮食计算热量，保证每日记录2次及以上饮食才有效哦。",
+              "lineHeight": 1.5,
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "zCgnx",
+              "name": "ExerciseTextBlock",
+              "fill": "#333333",
+              "textGrowth": "fixed-width",
+              "width": 311,
+              "content": "运动能量：运动能增加热量消耗，如果今日热量超标了请通过运动让今日还可吃保持>0哦~",
+              "lineHeight": 1.5,
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "D34Y1",
+          "name": "BottomSpacerBeforeCta",
+          "width": 343,
+          "height": 252
+        },
+        {
+          "type": "frame",
+          "id": "Cwb5N",
+          "name": "CustomBmrBottomButton",
+          "width": 343,
+          "height": 48,
+          "fill": "#D5E7B1",
+          "cornerRadius": 24,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#9EBC86"
+          },
+          "layout": "none",
+          "children": [
+            {
+              "type": "text",
+              "id": "Pucbn",
+              "x": 96,
+              "y": 14,
+              "name": "CustomBmrButtonLabel",
+              "fill": "#333333",
+              "content": "自定义基础代谢",
+              "fontFamily": "Inter",
+              "fontSize": 16,
+              "fontWeight": "700"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "0xhMs",
+      "x": 800,
+      "y": 0,
+      "name": "HomeCustomBmrDialog",
+      "width": 375,
+      "height": 812,
+      "fill": "#00000000",
+      "layout": "none",
+      "children": [
+        {
+          "type": "rectangle",
+          "id": "nyAiB",
+          "x": 0,
+          "y": 0,
+          "name": "CustomBmrDialogMask",
+          "fill": "#CC000000",
+          "width": 375,
+          "height": 812
+        },
+        {
+          "type": "frame",
+          "id": "o2MyL",
+          "x": 28,
+          "y": 268,
+          "name": "CustomBmrDialogCard",
+          "width": 319,
+          "fill": "#FFFFFF",
+          "cornerRadius": 16,
+          "stroke": {
+            "thickness": 1,
+            "fill": "#E8E8E8"
+          },
+          "layout": "vertical",
+          "gap": 12,
+          "padding": [
+            28,
+            20,
+            20,
+            20
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "sqvz6",
+              "name": "CustomBmrDialogTitle",
+              "fill": "#222222",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "自定义基础代谢",
+              "textAlign": "center",
+              "fontFamily": "Inter",
+              "fontSize": 16,
+              "fontWeight": "700"
+            },
+            {
+              "type": "frame",
+              "id": "5Mh2C",
+              "name": "CustomBmrInputRow",
+              "width": "fill_container",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "lGKcv",
+                  "name": "CustomBmrInputField",
+                  "width": "fill_container",
+                  "height": 44,
+                  "fill": "#F5F5F5",
+                  "cornerRadius": 12,
+                  "stroke": {
+                    "thickness": 1,
+                    "fill": "#E0E0E0"
+                  },
+                  "padding": [
+                    0,
+                    14
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "TrfRW",
+                      "fill": "#222222",
+                      "content": "2240",
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "VfbHz",
+                  "name": "CustomBmrUnitText",
+                  "fill": "#666666",
+                  "content": "千卡",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "yiBIu",
+              "name": "CustomBmrHintRow",
+              "width": "fill_container",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "Cm18S",
+                  "name": "CustomBmrHintText",
+                  "fill": "#888888",
+                  "content": "设置后将不再按个人信息计算预算，",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "Snbt3",
+                  "name": "RestoreBudgetLink",
+                  "fill": "#5FA854",
+                  "content": "恢复",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "2OVtY",
+              "name": "CustomBmrDialogActionRow",
+              "width": "fill_container",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "3uvMX",
+                  "name": "CancelButton",
+                  "width": "fill_container",
+                  "height": 44,
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 22,
+                  "stroke": {
+                    "thickness": 1.5,
+                    "fill": "#5FA854"
+                  },
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "NQqZs",
+                      "fill": "#5FA854",
+                      "content": "取消",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "s9jzp",
+                  "name": "ConfirmButton",
+                  "width": "fill_container",
+                  "height": 44,
+                  "fill": "#D5E7B1",
+                  "cornerRadius": 22,
+                  "stroke": {
+                    "thickness": 1,
+                    "fill": "#9EBC86"
+                  },
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "uq8M7",
+                      "fill": "#222222",
+                      "content": "确定",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "700"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
