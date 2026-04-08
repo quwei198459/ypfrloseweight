@@ -1,5 +1,5 @@
 <template>
-  <view class="page">
+  <view class="page" :class="{ 'page--with-bar': showBottomBar }">
     <view class="hero-bg" />
     <view class="search-row">
       <view class="search-box">
@@ -9,7 +9,7 @@
       <view class="custom-add" @click="customVisible = true">＋</view>
     </view>
 
-    <view class="content" :class="{ 'has-bottom': selectedRows.length > 0 }">
+    <view class="content">
       <scroll-view scroll-y class="sidebar-scroll" :show-scrollbar="false">
         <view
           v-for="c in categories"
@@ -27,7 +27,12 @@
         <view v-for="f in filteredFoods" :key="f.id" class="food-row">
           <image class="thumb" :src="f.image || '/static/category/category-snack.png'" mode="aspectFill" />
           <view class="meta">
-            <text class="name">{{ f.name }}</text>
+            <view class="name-line">
+              <view v-if="giTagText(f.giLevel)" class="gi-tag" :class="'gi-' + f.giLevel">
+                {{ giTagText(f.giLevel) }}
+              </view>
+              <text class="name">{{ f.name }}</text>
+            </view>
             <text class="sub">{{ f.caloriesText }}</text>
           </view>
           <view
@@ -41,19 +46,28 @@
       </scroll-view>
     </view>
 
-    <view v-if="selectedRows.length > 0" class="bottom-selected">
-      <view class="left">
-        <image class="panda" src="/static/category/category-lunch-active.png" mode="aspectFit" />
-        <view class="text-col">
-          <text class="meal">{{ mealLabel }}</text>
-          <view class="summary-row">
-            <text class="summary">共{{ selectedRows.length }}条记录，总计</text>
-            <text class="kcal">{{ selectedKcal }}千卡</text>
-          </view>
-        </view>
-      </view>
-      <view class="done-btn">完成</view>
-    </view>
+    <SelectedRecordBar
+      :visible="selectedRows.length > 0 && !recordSummaryVisible"
+      :meal-label="mealLabel"
+      :count="selectedRows.length"
+      :total-kcal="selectedKcal"
+      @open="openRecordSummary"
+      @complete="finishSelection"
+    />
+
+    <RecordSummaryPopup
+      :visible="recordSummaryVisible"
+      :meal-menu-visible="summaryMealMenuVisible"
+      :meal-type="mealType"
+      :meal-label="mealLabel"
+      :total-kcal="selectedKcal"
+      :items="summaryItems"
+      @close="closeRecordSummary"
+      @toggle-meal-menu="summaryMealMenuVisible = !summaryMealMenuVisible"
+      @pick-meal="onSummaryPickMeal"
+      @remove="removeSelected"
+      @complete="onSummaryComplete"
+    />
 
     <CustomFoodPopup
       v-model:visible="customVisible"
@@ -67,6 +81,8 @@
 import { computed, ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import CustomFoodPopup from '@/components/CustomFoodPopup.vue'
+import RecordSummaryPopup from '@/components/food-search/RecordSummaryPopup.vue'
+import SelectedRecordBar from '@/components/food-search/SelectedRecordBar.vue'
 
 type FoodItem = {
   id: string
@@ -75,6 +91,8 @@ type FoodItem = {
   calories: number
   caloriesText: string
   image?: string
+  /** 与接口 gi_level / giLevel 一致：low | medium | high，缺省则不展示标签 */
+  giLevel?: 'low' | 'medium' | 'high'
 }
 
 const categories = [
@@ -84,15 +102,17 @@ const categories = [
   { code: 'protein', name: '蛋白' },
 ]
 const allFoods = ref<FoodItem[]>([
-  { id: 'f1', category: 'fruit', name: '桔子', calories: 72, caloriesText: '72千卡/1个' },
-  { id: 'f2', category: 'grain', name: '米饭', calories: 300, caloriesText: '300千卡/1大份' },
-  { id: 'f3', category: 'protein', name: '鸡胸肉', calories: 132, caloriesText: '132千卡/100g' },
+  { id: 'f1', category: 'fruit', name: '桔子', calories: 72, caloriesText: '72千卡/1个', giLevel: 'low' },
+  { id: 'f2', category: 'grain', name: '米饭', calories: 300, caloriesText: '300千卡/1大份', giLevel: 'high' },
+  { id: 'f3', category: 'protein', name: '鸡胸肉', calories: 132, caloriesText: '132千卡/100g', giLevel: 'medium' },
 ])
 
 const category = ref('common')
 const selectedIds = ref<string[]>([])
 const mealType = ref<'breakfast' | 'lunch' | 'dinner' | 'snack'>('lunch')
 const customVisible = ref(false)
+const recordSummaryVisible = ref(false)
+const summaryMealMenuVisible = ref(false)
 
 const filteredFoods = computed(() =>
   category.value === 'common' ? allFoods.value : allFoods.value.filter((f) => f.category === category.value),
@@ -105,6 +125,15 @@ const mealLabel = computed(() => {
   if (mealType.value === 'snack') return '加餐'
   return '午餐'
 })
+const summaryItems = computed(() =>
+  selectedRows.value.map((f) => ({
+    id: f.id,
+    name: f.name,
+    caloriesText: f.caloriesText,
+    image: f.image,
+  })),
+)
+const showBottomBar = computed(() => selectedRows.value.length > 0 && !recordSummaryVisible.value)
 
 onLoad((query) => {
   const fromMeal = String(query?.mealType || 'lunch')
@@ -113,10 +142,53 @@ onLoad((query) => {
   }
 })
 
+function giTagText(level?: string) {
+  if (level === 'high') return '高GI'
+  if (level === 'medium') return '中GI'
+  if (level === 'low') return '低GI'
+  return ''
+}
+
 function toggleSelect(id: string) {
   const idx = selectedIds.value.indexOf(id)
   if (idx >= 0) selectedIds.value.splice(idx, 1)
   else selectedIds.value.push(id)
+}
+
+function openRecordSummary() {
+  summaryMealMenuVisible.value = false
+  recordSummaryVisible.value = true
+}
+
+function closeRecordSummary() {
+  recordSummaryVisible.value = false
+  summaryMealMenuVisible.value = false
+}
+
+function onSummaryPickMeal(value: string) {
+  if (value === 'breakfast' || value === 'lunch' || value === 'dinner' || value === 'snack') {
+    mealType.value = value
+  }
+  summaryMealMenuVisible.value = false
+}
+
+function removeSelected(id: string) {
+  const idx = selectedIds.value.indexOf(id)
+  if (idx >= 0) selectedIds.value.splice(idx, 1)
+  if (selectedIds.value.length === 0) closeRecordSummary()
+}
+
+function finishSelection() {
+  uni.navigateBack({
+    fail: () => {
+      uni.showToast({ title: '已完成', icon: 'none' })
+    },
+  })
+}
+
+function onSummaryComplete() {
+  closeRecordSummary()
+  finishSelection()
 }
 
 function handleCustomConfirm(payload: { name: string; weight: string; calories: string }) {
@@ -141,18 +213,34 @@ function handleCustomConfirm(payload: { name: string; weight: string; calories: 
 </script>
 
 <style scoped lang="scss">
+/* 与 SelectedRecordBar.vue 中 .bar 的 bottom、height 保持一致 */
+$selected-bar-height: 76px;
+$selected-bar-bottom: 12px;
+$gap-content-to-bar: 12px;
+$page-bottom-relaxed: 16px;
+
 .page {
   height: 100vh;
+  min-height: 100vh;
+  box-sizing: border-box;
   background: #f7fbf7;
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: calc(#{$page-bottom-relaxed} + env(safe-area-inset-bottom, 0px));
+}
+.page--with-bar {
+  padding-bottom: calc(
+    #{$selected-bar-height} + env(safe-area-inset-bottom, 0px)
+  );
 }
 .hero-bg {
   position: absolute;
   left: 0;
   right: 0;
   top: 0;
-  height: 188px;
+  height: 138px;
   background: #bfd9a3;
   border-radius: 0 0 24px 24px;
   z-index: 0;
@@ -160,6 +248,7 @@ function handleCustomConfirm(payload: { name: string; weight: string; calories: 
 .search-row {
   position: relative;
   z-index: 2;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -199,8 +288,9 @@ function handleCustomConfirm(payload: { name: string; weight: string; calories: 
 .content {
   position: relative;
   z-index: 1;
+  flex: 1;
+  min-height: 0;
   margin: -18px 16px 0;
-  height: calc(100vh - 128px);
   border-radius: 22px;
   background: #fff;
   border: 1px solid #e0ead2;
@@ -209,9 +299,7 @@ function handleCustomConfirm(payload: { name: string; weight: string; calories: 
   display: flex;
   gap: 8px;
   align-items: stretch;
-}
-.content.has-bottom {
-  height: calc(100vh - 212px);
+  margin-top: 10rpx;
 }
 .sidebar-scroll {
   width: 78px;
@@ -229,7 +317,7 @@ function handleCustomConfirm(payload: { name: string; weight: string; calories: 
   padding: 8px 0;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: 4px;
 }
 .cat.active {
@@ -272,7 +360,35 @@ function handleCustomConfirm(payload: { name: string; weight: string; calories: 
   gap: 6px;
   justify-content: center;
 }
+.name-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 6px;
+  min-width: 0;
+}
+.gi-tag {
+  flex-shrink: 0;
+  font-size: 10px;
+  line-height: 16px;
+  padding: 0 6px;
+  border-radius: 6px;
+}
+.gi-low {
+  color: #5f8d45;
+  background: #e8f5e9;
+}
+.gi-medium {
+  color: #d38645;
+  background: #fff3e0;
+}
+.gi-high {
+  color: #d16f6f;
+  background: #ffebee;
+}
 .name {
+  flex: 1;
+  min-width: 0;
   font-size: 14px;
   color: #222;
   font-weight: 600;
@@ -294,65 +410,6 @@ function handleCustomConfirm(payload: { name: string; weight: string; calories: 
 .row-action.selected {
   background: #9ebc86;
   color: #fff;
-}
-.bottom-selected {
-  position: fixed;
-  left: 16px;
-  right: 16px;
-  bottom: 12px;
-  height: 72px;
-  border-radius: 18px;
-  border: 1px solid #d7e3be;
-  background: #f4f8e8;
-  padding: 10px 12px;
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.panda {
-  width: 36px;
-  height: 36px;
-}
-.text-col {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.meal {
-  font-size: 13px;
-  font-weight: 600;
-  color: #212121;
-}
-.summary-row {
-  display: flex;
-  align-items: baseline;
-  gap: 3px;
-}
-.summary {
-  font-size: 11px;
-  color: #6f6f6f;
-}
-.kcal {
-  font-size: 13px;
-  font-weight: 700;
-  color: #8eaf57;
-}
-.done-btn {
-  width: 92px;
-  height: 38px;
-  border-radius: 19px;
-  background: #bfd98a;
-  color: #4b5b2d;
-  font-size: 14px;
-  font-weight: 600;
-  text-align: center;
-  line-height: 38px;
 }
 </style>
 

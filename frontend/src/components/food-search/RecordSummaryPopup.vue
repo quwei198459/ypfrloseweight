@@ -4,23 +4,25 @@
     <view class="sheet">
       <view class="header">
         <image class="panda-peek" src="/static/category/category-lunch-active.png" mode="aspectFit" />
-        <view class="meal-trigger" @click="emit('toggle-meal-menu')">
-          <text class="meal">{{ mealLabel }}</text>
-          <text class="arrow">⌄</text>
+        <view class="meal-anchor">
+          <view class="meal-trigger" @click.stop="emit('toggle-meal-menu')">
+            <text class="meal">{{ mealLabel }}</text>
+            <text v-if="!mealMenuVisible" class="arrow">⌄</text>
+          </view>
+          <view v-if="mealMenuVisible" class="meal-menu">
+            <view
+              v-for="item in mealOptions"
+              :key="item.value"
+              class="meal-item"
+              :class="{ active: item.value === mealType }"
+              @click="emit('pick-meal', item.value)"
+            >
+              {{ item.label }}
+            </view>
+          </view>
         </view>
+        <view class="header-spacer" />
         <text class="close" @click="emit('close')">×</text>
-      </view>
-
-      <view v-if="mealMenuVisible" class="meal-menu">
-        <view
-          v-for="item in mealOptions"
-          :key="item.value"
-          class="meal-item"
-          :class="{ active: item.value === mealType }"
-          @click="emit('pick-meal', item.value)"
-        >
-          {{ item.label }}
-        </view>
       </view>
 
       <scroll-view scroll-y class="list">
@@ -93,19 +95,44 @@ const emit = defineEmits<{
   display: flex;
   flex-direction: column;
 }
-.header { display: flex; align-items: center; justify-content: space-between; }
-.panda-peek { width: 34px; height: 34px; }
-.meal-trigger { display: flex; align-items: center; gap: 3px; margin-left: -80px; }
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.panda-peek {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+}
+.header-spacer {
+  flex: 1;
+  min-width: 0;
+}
+.meal-anchor {
+  position: relative;
+  flex-shrink: 0;
+}
+.meal-trigger {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
 .meal { font-size: 16px; font-weight: 600; }
-.arrow { font-size: 16px; color: #666; }
-.close { font-size: 28px; color: #8b8b8b; padding: 2px 10px; }
+.arrow { font-size: 14px; color: #666; line-height: 1; }
+.close { font-size: 28px; color: #8b8b8b; padding: 2px 6px; flex-shrink: 0; }
 .meal-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 6px;
   width: 110px;
   border: 1px solid #e5e5e5;
   border-radius: 10px;
   background: #fff;
   padding: 4px 0;
-  margin-top: 6px;
+  z-index: 2;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 .meal-item { font-size: 13px; padding: 8px 12px; }
 .meal-item.active { color: #8eaf57; font-weight: 700; background: #f5f8ea; }
@@ -135,4 +162,3 @@ const emit = defineEmits<{
   line-height: 38px; padding: 0;
 }
 </style>
-
