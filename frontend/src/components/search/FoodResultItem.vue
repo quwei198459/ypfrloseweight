@@ -1,26 +1,57 @@
 <template>
   <view class="food-result-item" @click="emit('select', food)">
     <view class="food-image">
-      <text v-if="!food.image" class="food-emoji">{{ foodEmoji }}</text>
-      <image v-else class="food-image-img" :src="food.image" mode="aspectFill" />
+      <text v-if="useEmoji" class="food-emoji">{{ foodEmoji }}</text>
+      <image
+        v-else
+        class="food-image-img"
+        :src="imgSrc"
+        mode="aspectFill"
+        @error="onImgErr"
+      />
     </view>
     <view class="food-info">
       <text class="food-name">{{ food.name }}</text>
       <text class="food-calorie-text">{{ food.calorie }} {{ food.unit }}</text>
     </view>
-    <view class="gi-tag" :class="'gi-' + food.giLevel">
+    <view v-if="food.giLevel" class="gi-tag" :class="'gi-' + food.giLevel">
       <text class="gi-tag-text">{{ giLabel }}</text>
     </view>
   </view>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { FOOD_IMAGE_PLACEHOLDER } from '@/constants/foodImage'
 import type { SearchFoodItem } from '@/types/searchFood'
 
 const props = defineProps<{
   food: SearchFoodItem
 }>()
+
+const imgBroken = ref(false)
+watch(
+  () => props.food.id,
+  () => {
+    imgBroken.value = false
+  }
+)
+
+const imgSrc = computed(() => {
+  if (imgBroken.value) return FOOD_IMAGE_PLACEHOLDER
+  const u = (props.food.image || '').trim()
+  return u || FOOD_IMAGE_PLACEHOLDER
+})
+
+/** 占位图与常量路径一致时用 emoji，避免与缩略图重复一块色 */
+const useEmoji = computed(() => {
+  const u = (props.food.image || '').trim()
+  return !u || imgBroken.value
+})
+
+function onImgErr() {
+  imgBroken.value = true
+}
 
 const emit = defineEmits<{
   (e: 'select', food: SearchFoodItem): void
@@ -35,8 +66,10 @@ const foodEmoji = computed(() => {
 })
 
 const giLabel = computed(() => {
+  const lv = props.food.giLevel
+  if (!lv) return ''
   const m: Record<string, string> = { low: '低Gi', medium: '中Gi', high: '高Gi' }
-  return m[props.food.giLevel] || 'Gi'
+  return m[lv] || 'Gi'
 })
 </script>
 

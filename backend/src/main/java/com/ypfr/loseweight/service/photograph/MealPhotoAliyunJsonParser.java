@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,45 @@ public class MealPhotoAliyunJsonParser {
     this.objectMapper = objectMapper;
   }
 
+  /**
+   * 阿里云市场常见包体：{@code success=false} / {@code code!=200} 时 {@code data} 可能为空，不能再走占位「识别食物」逻辑。
+   *
+   * @return 有值表示供应商明确拒绝或业务失败，应将该段文案展示给用户（可截断）
+   */
+  public Optional<String> readVendorFailureReason(String rawBody) {
+    if (!StringUtils.hasText(rawBody)) {
+      return Optional.empty();
+    }
+    try {
+      JsonNode root = objectMapper.readTree(rawBody);
+      boolean vendorFail = false;
+      if (root.has("success") && root.get("success").isBoolean() && !root.get("success").asBoolean()) {
+        vendorFail = true;
+      }
+      if (root.has("code")) {
+        JsonNode c = root.get("code");
+        if (c.isIntegralNumber()) {
+          int code = c.asInt();
+          if (code != 200 && code != 0) {
+            vendorFail = true;
+          }
+        }
+      }
+      if (!vendorFail) {
+        return Optional.empty();
+      }
+      if (root.has("msg") && root.get("msg").isTextual()) {
+        String m = root.get("msg").asText().trim();
+        if (StringUtils.hasText(m)) {
+          return Optional.of(m);
+        }
+      }
+      return Optional.of("识图服务未返回有效食物数据");
+    } catch (Exception ignored) {
+      return Optional.empty();
+    }
+  }
+
   public List<MealPhotoFoodItemVo> parseFoods(String rawBody) {
     if (!StringUtils.hasText(rawBody)) {
       return defaultList(0);
@@ -30,6 +70,10 @@ public class MealPhotoAliyunJsonParser {
     try {
       JsonNode root = objectMapper.readTree(rawBody);
       List<MealPhotoFoodItemVo> list = tryParseArray(root);
+      if (!list.isEmpty()) {
+        return list;
+      }
+      list = tryParseDataItems(root);
       if (!list.isEmpty()) {
         return list;
       }
@@ -55,6 +99,24 @@ public class MealPhotoAliyunJsonParser {
       return parseArray(node);
     }
     return List.of();
+  }
+
+  /**
+   * 阿里云食物识别常见形态：{@code {"data":{"count":n,"items":[{name,calory},...]},...}}。
+   */
+  private List<MealPhotoFoodItemVo> tryParseDataItems(JsonNode root) {
+    if (root == null || !root.isObject() || !root.has("data")) {
+      return List.of();
+    }
+    JsonNode data = root.get("data");
+    if (data == null || !data.isObject() || !data.has("items")) {
+      return List.of();
+    }
+    JsonNode items = data.get("items");
+    if (items == null || !items.isArray()) {
+      return List.of();
+    }
+    return parseArray(items);
   }
 
   private List<MealPhotoFoodItemVo> parseArray(JsonNode arr) {
@@ -101,7 +163,16 @@ public class MealPhotoAliyunJsonParser {
       return null;
     }
     String name = firstText(n, "name", "foodName", "food_name", "food", "dishName", "title");
-    int cal = firstInt(n, "calorie", "calories", "heat", "energy", "kcal", "cal");
+    int cal =
+        firstInt(
+            n,
+            "calory",
+            "calorie",
+            "calories",
+            "heat",
+            "energy",
+            "kcal",
+            "cal");
     if (!StringUtils.hasText(name) && cal <= 0) {
       return null;
     }

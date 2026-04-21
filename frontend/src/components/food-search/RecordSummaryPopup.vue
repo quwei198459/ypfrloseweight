@@ -27,7 +27,12 @@
 
       <scroll-view scroll-y class="list">
         <view v-for="item in items" :key="item.id" class="row">
-          <image class="thumb" :src="item.image || '/static/category/category-snack.png'" mode="aspectFill" />
+          <image
+            class="thumb"
+            :src="thumbFor(item)"
+            mode="aspectFill"
+            @error="markThumbFail(item.id)"
+          />
           <view class="mid">
             <text class="name">{{ item.name }}</text>
             <text class="meta">{{ item.caloriesText }}</text>
@@ -54,7 +59,10 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
+import { ref, watch } from 'vue'
+import { FOOD_IMAGE_PLACEHOLDER } from '@/constants/foodImage'
+
+const props = defineProps<{
   visible: boolean
   mealMenuVisible: boolean
   mealType: string
@@ -62,6 +70,24 @@ defineProps<{
   totalKcal: number
   items: Array<{ id: string; name: string; caloriesText: string; image?: string }>
 }>()
+
+const thumbFailed = ref<Record<string, boolean>>({})
+watch(
+  () => props.visible,
+  (v) => {
+    if (v) thumbFailed.value = {}
+  }
+)
+
+function thumbFor(item: { id: string; image?: string }) {
+  if (thumbFailed.value[item.id]) return FOOD_IMAGE_PLACEHOLDER
+  const u = (item.image || '').trim()
+  return u || FOOD_IMAGE_PLACEHOLDER
+}
+
+function markThumbFail(id: string) {
+  thumbFailed.value = { ...thumbFailed.value, [id]: true }
+}
 
 const mealOptions = [
   { value: 'breakfast', label: '早餐' },

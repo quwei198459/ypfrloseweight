@@ -17,6 +17,10 @@ public class UpdateProfileRequest {
   private String targetDate;
   /** 活动系数档位 1-5，可选 */
   private Integer activityLevel;
+  /** 1=使用 customBmr，0=恢复系统按资料计算 */
+  private Integer useCustomBmr;
+  /** 自定义基础代谢（kcal），仅 useCustomBmr=1 时生效 */
+  private BigDecimal customBmr;
 
   public String getNickname() {
     return nickname;
@@ -96,5 +100,21 @@ public class UpdateProfileRequest {
 
   public void setActivityLevel(Integer activityLevel) {
     this.activityLevel = activityLevel;
+  }
+
+  public Integer getUseCustomBmr() {
+    return useCustomBmr;
+  }
+
+  public void setUseCustomBmr(Integer useCustomBmr) {
+    this.useCustomBmr = useCustomBmr;
+  }
+
+  public BigDecimal getCustomBmr() {
+    return customBmr;
+  }
+
+  public void setCustomBmr(BigDecimal customBmr) {
+    this.customBmr = customBmr;
   }
 }

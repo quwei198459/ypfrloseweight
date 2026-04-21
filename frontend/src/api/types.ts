@@ -19,6 +19,18 @@ export interface AppUserDto {
   phone: string | null
   /** 资料是否已按后端规则完善 */
   profileCompleted?: boolean | null
+  /** GET profile 时由后端按 BMI 分桶返回的解读文案（库表 bmi_interpretation） */
+  bmiInterpretation?: string | null
+  /** meal_record 累计条数 */
+  mealRecordCount?: number | null
+  /**
+   * 健康饮食天数：后端按「有摄入且剩余热量≥0」的日汇总天计数；与 healthy_diet_flag 规则对齐后可能调整口径。
+   */
+  healthyDietDays?: number | null
+  /** 自注册日起算的加入天数（含当天） */
+  joinedDays?: number | null
+  /** 最近一次体重打卡距今天数；无称重记录为 null */
+  weightRecordedDaysAgo?: number | null
 }
 
 /**
@@ -46,6 +58,10 @@ export interface UpdateProfilePayload {
   targetDate?: string
   /** 1-5，与后端活动系数档位一致 */
   activityLevel?: number
+  /** 1=使用 customBmr，0=恢复系统按资料计算 */
+  useCustomBmr?: number
+  /** 自定义基础代谢（kcal） */
+  customBmr?: number
 }
 
 export interface DashboardDto {

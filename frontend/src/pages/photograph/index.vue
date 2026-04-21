@@ -2,6 +2,7 @@
   <view class="photograph-page">
     <view class="photograph-page__body">
       <PhotographPageHeader
+        :show-main-title="false"
         :show-subtitle="showHeaderSubtitle"
         :meal-label="mealLabel"
       />
@@ -25,6 +26,7 @@
 
       <view class="photograph-page__preview-wrap">
         <CameraPreviewCard
+          ref="cameraPreviewRef"
           :page-state="phase"
           :preview-src="previewSrc"
           :processing-label="processingLabel"
@@ -41,13 +43,16 @@
         <UploadLoadingMask v-if="phase === 'uploading'" />
       </view>
 
-      <!-- 成功态底栏 -->
+      <!-- 成功态底栏：三个同规格按钮 -->
       <view
         v-if="phase === 'success' || phase === 'mealtype_dropdown_open'"
         class="success-bot"
       >
+        <view class="success-bot__btn success-bot__btn--cancel" @click="onCancelRecognizeResult">
+          <text class="success-bot__t success-bot__t--cancel">取消</text>
+        </view>
         <view class="success-bot__btn success-bot__btn--ghost" @click="openRatioSheet">
-          <text class="success-bot__t success-bot__t--ghost">食用比例调节</text>
+          <text class="success-bot__t success-bot__t--ghost">食物比例调节</text>
         </view>
         <view class="success-bot__btn success-bot__btn--solid" @click="onConfirmMain">
           <text class="success-bot__t success-bot__t--solid">确定</text>
@@ -85,13 +90,6 @@
         @continue="onContinuePhoto"
       />
 
-      <view
-        v-if="isDev"
-        class="dev-hint"
-        @click="openAlbumForFailDemo"
-      >
-        <text class="dev-hint__text">开发：模拟识图失败动画（不调接口）</text>
-      </view>
     </view>
 
     <view
@@ -129,7 +127,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { onShow } from '@dcloudio/uni-app'
+import { computed, ref } from 'vue'
 import CameraPreviewCard from '@/components/photograph/CameraPreviewCard.vue'
 import FailedStatePanel from '@/components/photograph/FailedStatePanel.vue'
 import PhotographPageHeader from '@/components/photograph/PhotographPageHeader.vue'
@@ -142,7 +141,20 @@ import UploadLoadingMask from '@/components/photograph/UploadLoadingMask.vue'
 import { usePhotographFlow } from '@/composables/usePhotographFlow'
 import type { MealTypeKey } from '@/types/photograph'
 
-const isDev = import.meta.env.DEV
+const cameraPreviewRef = ref<{
+  takeLivePhoto: () => Promise<string | undefined>
+} | null>(null)
+
+onShow(() => {
+  // #ifdef MP-WEIXIN
+  uni.authorize({
+    scope: 'scope.camera',
+    fail() {
+      /* 用户拒绝时仍可用相册；快门会降级 chooseImage */
+    },
+  })
+  // #endif
+})
 
 const {
   phase,
@@ -173,6 +185,7 @@ const {
   onAddFromSheet,
   onContinuePhoto,
   onExitPhoto,
+  resetToIdle,
 } = usePhotographFlow()
 
 const primaryFood = computed(() => {
@@ -210,6 +223,12 @@ function onDeleteFoodPlaceholder() {
   uni.showToast({ title: '敬请期待', icon: 'none' })
 }
 
+/** 放弃当前识图结果，回到拍照界面 */
+function onCancelRecognizeResult() {
+  closeMealDropdown()
+  resetToIdle()
+}
+
 function openAlbum() {
   if (isProcessing.value) return
   uni.chooseImage({
@@ -224,25 +243,45 @@ function openAlbum() {
 
 function openCamera() {
   if (isProcessing.value) return
-  uni.chooseImage({
-    count: 1,
-    sourceType: ['camera'],
-    success: (res) => {
-      const p = res.tempFilePaths[0]
-      handleImagePicked(p, { source: 'camera' })
-    },
+  void takePhotoOrChooseCamera()
+}
+
+function chooseCameraImage(): Promise<string | undefined> {
+  return new Promise((resolve) => {
+    uni.chooseImage({
+      count: 1,
+      sourceType: ['camera'],
+      success: (res) => resolve(res.tempFilePaths[0]),
+      fail: () => resolve(undefined),
+    })
   })
 }
 
-function openAlbumForFailDemo() {
-  uni.chooseImage({
-    count: 1,
-    sourceType: ['album', 'camera'],
-    success: (res) => {
-      const p = res.tempFilePaths[0]
-      handleImagePicked(p, { failDemo: true })
-    },
-  })
+async function takePhotoOrChooseCamera() {
+  // #ifdef MP-WEIXIN
+  if (phase.value === 'idle' && !previewSrc.value) {
+    uni.showLoading({ title: '拍照中', mask: true })
+    try {
+      let p = await cameraPreviewRef.value?.takeLivePhoto()
+      // 开发者工具/部分机型内嵌 takePhoto 失败时，降级系统相机，仍走同一套上传与识图接口
+      if (!p) {
+        p = await chooseCameraImage()
+      }
+      if (p) {
+        handleImagePicked(p, { source: 'camera' })
+        return
+      }
+      uni.showToast({ title: '拍照失败，请使用相册', icon: 'none' })
+    } finally {
+      uni.hideLoading()
+    }
+    return
+  }
+  // #endif
+  const p = await chooseCameraImage()
+  if (p) {
+    handleImagePicked(p, { source: 'camera' })
+  }
 }
 
 function setRatioPercent(v: number) {
@@ -252,19 +291,32 @@ function setRatioPercent(v: number) {
 
 <style lang="scss" scoped>
 .photograph-page {
+  /* 固定高度便于子项 flex:1 在小程序里正确分配剩余空间，减少预览与快门间大块留白 */
+  height: 100vh;
   min-height: 100vh;
   background: #f7f8f7;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 
 .photograph-page__body {
-  padding: 24rpx 32rpx 0;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0 32rpx 0;
   box-sizing: border-box;
   position: relative;
 }
 
 .photograph-page__preview-wrap {
   position: relative;
+  flex: 1;
+  min-height: 0;
+  height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .meal-anchor {
@@ -297,23 +349,30 @@ function setRatioPercent(v: number) {
 .success-bot {
   display: flex;
   flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 24rpx;
+  align-items: stretch;
+  justify-content: space-between;
+  flex-shrink: 0;
+  gap: 12rpx;
   margin-top: 24rpx;
-  padding: 0 12rpx 24rpx;
+  padding: 0 8rpx 24rpx;
   box-sizing: border-box;
 }
 
 .success-bot__btn {
   flex: 1;
-  max-width: 304rpx;
-  height: 88rpx;
+  min-width: 0;
+  min-height: 88rpx;
+  padding: 12rpx 8rpx;
   border-radius: 44rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
+}
+
+.success-bot__btn--cancel {
+  background: #ffffff;
+  border: 2rpx solid #c8c8c8;
 }
 
 .success-bot__btn--ghost {
@@ -327,8 +386,14 @@ function setRatioPercent(v: number) {
 }
 
 .success-bot__t {
-  font-size: 28rpx;
+  font-size: 24rpx;
   font-weight: 600;
+  text-align: center;
+  line-height: 1.35;
+}
+
+.success-bot__t--cancel {
+  color: #555555;
 }
 
 .success-bot__t--ghost {
@@ -342,15 +407,17 @@ function setRatioPercent(v: number) {
 .action-row {
   display: flex;
   flex-direction: row;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
-  margin-top: 32rpx;
+  flex-shrink: 0;
+  margin-top: 8rpx;
   padding: 0 8rpx 8rpx;
-  min-height: 200rpx;
 }
 
 .action-row__left {
-  width: 160rpx;
+  width: 180rpx;
+  padding-left: 40rpx;
+  box-sizing: border-box;
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -364,7 +431,7 @@ function setRatioPercent(v: number) {
 }
 
 .action-row__right {
-  width: 160rpx;
+  width: 140rpx;
 }
 
 .action-row--disabled {
@@ -403,8 +470,8 @@ function setRatioPercent(v: number) {
 
 .shutter-button {
   position: relative;
-  width: 144rpx;
-  height: 144rpx;
+  width: 176rpx;
+  height: 176rpx;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -414,9 +481,9 @@ function setRatioPercent(v: number) {
   position: absolute;
   left: 0;
   top: 0;
-  width: 144rpx;
-  height: 144rpx;
-  border-radius: 72rpx;
+  width: 176rpx;
+  height: 176rpx;
+  border-radius: 88rpx;
   background: #bfd9a3;
   border: 2rpx solid #9ebc86;
   box-sizing: border-box;
@@ -425,9 +492,9 @@ function setRatioPercent(v: number) {
 .shutter-button__inner {
   position: relative;
   z-index: 1;
-  width: 112rpx;
-  height: 112rpx;
-  border-radius: 56rpx;
+  width: 136rpx;
+  height: 136rpx;
+  border-radius: 68rpx;
   background: #ffffff;
   display: flex;
   align-items: center;
@@ -436,25 +503,19 @@ function setRatioPercent(v: number) {
 }
 
 .shutter-button__glyph {
-  font-size: 44rpx;
+  display: block;
+  width: 100%;
+  font-size: 82rpx;
   color: #333333;
   line-height: 1;
-}
-
-.dev-hint {
-  margin-top: 24rpx;
-  padding: 16rpx;
-  align-self: center;
-}
-
-.dev-hint__text {
-  font-size: 22rpx;
-  color: #999999;
-  text-decoration: underline;
+  text-align: center;
+  /* emoji 字形偏上，略压底边距后视觉更居中 */
+  margin-bottom: 25rpx;
 }
 
 .photograph-page__safe {
-  /* 为原生 tabBar 预留高度（约 50px）+ 安全区 */
-  height: calc(24rpx + 50px + env(safe-area-inset-bottom));
+  /* 异形屏安全区 + 与原生 tabBar 的缓冲，避免 Android / iPhone X 系列贴边 */
+  flex-shrink: 0;
+  height: calc(16rpx + env(safe-area-inset-bottom));
 }
 </style>

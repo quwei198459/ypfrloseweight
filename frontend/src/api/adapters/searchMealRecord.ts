@@ -1,49 +1,32 @@
-import type { CreateMealRecordBody } from '@/api/meal'
+import type { BatchMealItemBody } from '@/api/meal'
 import type { SearchFoodItem } from '@/types/searchFood'
-import { formatRecordedAtNow } from '@/utils/recordedAt'
 
 /**
- * 热量查询页：将搜索结果 + 弹层克数转为写库 body（与 food-search 的 createMealRecord 字段对齐）。
- * 热量：per100 用 calorie×g/100；按份用 calorie×g/servingWeightG。
- * 宏量：按库表常见「每100g」营养字段，用 g/100 缩放。
+ * 热量查询页：与 food-search 一致，将弹层数量转为 batch 单条（foodId + amountValue + amountUnit）。
+ * amountUnit：克为 `g`；按份为「份」（每百克路径）或 `portionUnitLabel`。
  */
-export function buildMealRecordFromSearchSelection(
+export function buildBatchItemFromSearchSelection(
   food: SearchFoodItem,
   quantityInput: string,
-  mealType = 'snack'
-): CreateMealRecordBody | null {
+  inputMode: 'gram' | 'portion'
+): BatchMealItemBody | null {
   const raw = String(quantityInput ?? '').trim()
-  const g = Math.floor(Number(raw))
-  if (!food?.name || !Number.isFinite(g) || g <= 0) return null
+  const amount = Number(raw)
+  if (!food?.name || !Number.isFinite(amount) || amount <= 0) return null
 
   const idNum = Number(food.id)
-  const foodLibraryId = Number.isFinite(idNum) && idNum > 0 ? idNum : null
+  if (!Number.isFinite(idNum) || idNum <= 0) return null
 
-  let calories: number
-  if (food.calorieIsPer100g) {
-    calories = Math.max(1, Math.round((food.calorie * g) / 100))
-  } else {
-    const denom = food.servingWeightG > 0 ? food.servingWeightG : 100
-    calories = Math.max(1, Math.round((food.calorie * g) / denom))
-  }
-
-  const macroScale = g / 100
-  const proteinG =
-    food.proteinG != null ? Math.round(food.proteinG * macroScale * 10) / 10 : 0
-  const fatG = food.fatG != null ? Math.round(food.fatG * macroScale * 10) / 10 : 0
-  const carbsG =
-    food.carbsG != null ? Math.round(food.carbsG * macroScale * 10) / 10 : 0
+  const amountUnit =
+    inputMode === 'gram'
+      ? 'g'
+      : food.calorieIsPer100g
+        ? '份'
+        : food.portionUnitLabel || '份'
 
   return {
-    mealType,
-    foodName: food.name,
-    calories,
-    amountValue: g,
-    amountUnit: 'g',
-    recordedAt: formatRecordedAtNow(),
-    foodLibraryId,
-    proteinG,
-    fatG,
-    carbsG,
+    foodId: idNum,
+    amountValue: amount,
+    amountUnit,
   }
 }

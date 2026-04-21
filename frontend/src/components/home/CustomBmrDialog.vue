@@ -48,15 +48,15 @@ const props = withDefaults(
     defaultBmr?: number
   }>(),
   {
-    defaultBmr: 2240,
+    defaultBmr: 0,
   },
 )
 
 const emit = defineEmits<{
   'update:visible': [value: boolean]
-  /** 恢复为按个人信息自动计算预算（占位） */
+  /** 恢复为按个人信息自动计算预算 */
   restore: []
-  /** 确定提交（占位，未接接口） */
+  /** 确定提交 */
   confirm: [bmr: number]
 }>()
 
@@ -95,8 +95,6 @@ function onInput(e: { detail: { value: string } }) {
 }
 
 function onRestoreTap() {
-  // eslint-disable-next-line no-console
-  console.log('[CustomBmrDialog] restore: 恢复为系统自动计算预算（占位）')
   emit('restore')
 }
 
@@ -106,8 +104,10 @@ function onCancel() {
 
 function onConfirm() {
   const v = localBmr.value
-  // eslint-disable-next-line no-console
-  console.log('[CustomBmrDialog] confirm（占位）', v)
+  if (!Number.isFinite(v) || v <= 0) {
+    uni.showToast({ title: '请输入有效基础代谢', icon: 'none' })
+    return
+  }
   emit('confirm', v)
   close()
 }

@@ -39,13 +39,26 @@
       </scroll-view>
     </view>
 
-    <FoodRecordPopup
-      :visible="popupVisible"
-      :food="selectedFood"
-      :quantity="quantityInput"
-      @update:visible="popupVisible = $event"
-      @update:quantity="quantityInput = $event"
+    <FoodDetailPopup
+      :visible="detailVisible"
+      hide-meal-bar
+      :meal-menu-visible="false"
+      meal-type="snack"
+      meal-label="加餐"
+      :quantity-text="detailQty"
+      :input-mode="detailMode"
+      :portion-unit-label="detailFood?.portionUnitLabel || '份'"
+      :center-kcal="detailCenterKcal"
+      :standard-weight-g="detailFood?.servingWeightG ?? 0"
+      :food="detailFoodPopupModel"
+      @close="closeFoodDetail"
+      @toggle-meal-menu="() => {}"
+      @pick-meal="() => {}"
+      @key="onDetailKey"
+      @delete="onDetailDelete"
       @confirm="onRecordConfirm"
+      @go-gi-guide="goGiGuide"
+      @set-mode="(m) => (detailMode = m)"
     />
   </view>
 </template>
@@ -54,24 +67,28 @@
 import { computed, ref, watch } from 'vue'
 import SearchInputBar from '@/components/search/SearchInputBar.vue'
 import FoodResultItem from '@/components/search/FoodResultItem.vue'
-import FoodRecordPopup from '@/components/search/FoodRecordPopup.vue'
-import { createMealRecord } from '@/api/meal'
+import FoodDetailPopup from '@/components/food-search/FoodDetailPopup.vue'
+import { createMealRecordsBatch } from '@/api/meal'
 import { searchFoodLibrary } from '@/api/food'
-import { buildMealRecordFromSearchSelection } from '@/api/adapters/searchMealRecord'
+import { buildBatchItemFromSearchSelection } from '@/api/adapters/searchMealRecord'
 import { mapFoodsToSearchItems } from '@/api/adapters/searchFood'
 import { resolveUserId, STORAGE_TOKEN } from '@/config/api'
 import { useUserStore } from '@/stores/user'
 import { formatLocalDate } from '@/utils/date'
+import { formatRecordedAtForYmd } from '@/utils/recordedAt'
 import type { SearchFoodItem } from '@/types/searchFood'
 
 const userStore = useUserStore()
 
 const searchKeyword = ref('')
-const popupVisible = ref(false)
-const selectedFood = ref<SearchFoodItem | null>(null)
-const quantityInput = ref('12')
 const apiFoods = ref<SearchFoodItem[]>([])
 let searchDebounce: ReturnType<typeof setTimeout> | null = null
+
+const detailVisible = ref(false)
+const detailFood = ref<SearchFoodItem | null>(null)
+const detailQty = ref('1')
+const detailMode = ref<'gram' | 'portion'>('gram')
+const submitLoading = ref(false)
 
 const showResults = computed(() => searchKeyword.value.trim().length > 0)
 
@@ -80,6 +97,90 @@ const searchPlaceholder = computed(() =>
 )
 
 const filteredList = computed(() => apiFoods.value)
+
+function parsePositiveNumber(s: string): number {
+  const n = Number(String(s ?? '').trim())
+  return Number.isFinite(n) && n > 0 ? n : 1
+}
+
+function estimateKcal(food: SearchFoodItem, amount: number, mode: 'gram' | 'portion'): number {
+  if (mode === 'portion') {
+    if (food.calorieIsPer100g) {
+      const g = amount * (food.servingWeightG > 0 ? food.servingWeightG : 100)
+      return Math.max(1, Math.round((food.calorie * g) / 100))
+    }
+    return Math.max(1, Math.round(food.calorie * amount))
+  }
+  if (food.calorieIsPer100g) {
+    return Math.max(1, Math.round((food.calorie * amount) / 100))
+  }
+  const denom = food.servingWeightG > 0 ? food.servingWeightG : 100
+  return Math.max(1, Math.round((food.calorie * amount) / denom))
+}
+
+/** 与热量换算使用同一套克数口径（见 docs 食物库每百克 + 标准份克数） */
+function consumedGrams(food: SearchFoodItem, amount: number, mode: 'gram' | 'portion'): number {
+  if (mode === 'portion') {
+    return amount * (food.servingWeightG > 0 ? food.servingWeightG : 100)
+  }
+  return amount
+}
+
+/** 宏量按每 100g 营养 × 当前食用克数；热量比例用于非每百克路径与热量对齐 */
+function scaledMacrosForPopup(
+  food: SearchFoodItem,
+  qtyStr: string,
+  mode: 'gram' | 'portion',
+  curKcal: number,
+): { proteinG: number; fatG: number; carbsG: number } {
+  const q = parsePositiveNumber(qtyStr)
+  const gNow = consumedGrams(food, q, mode)
+  const p100 = food.proteinG ?? 0
+  const f100 = food.fatG ?? 0
+  const c100 = food.carbsG ?? 0
+  if (food.calorieIsPer100g) {
+    return {
+      proteinG: (p100 * gNow) / 100,
+      fatG: (f100 * gNow) / 100,
+      carbsG: (c100 * gNow) / 100,
+    }
+  }
+  const refMode = food.servingWeightG > 0 ? 'portion' : 'gram'
+  const refK = estimateKcal(food, 1, refMode)
+  const gRef = consumedGrams(food, 1, refMode)
+  const ratio = refK > 0 ? curKcal / refK : 0
+  return {
+    proteinG: ((p100 * gRef) / 100) * ratio,
+    fatG: ((f100 * gRef) / 100) * ratio,
+    carbsG: ((c100 * gRef) / 100) * ratio,
+  }
+}
+
+const detailFoodPopupModel = computed(() => {
+  const f = detailFood.value
+  if (!f) return null
+  const q = parsePositiveNumber(detailQty.value)
+  const curK = estimateKcal(f, q, detailMode.value)
+  const m = scaledMacrosForPopup(f, detailQty.value, detailMode.value, curK)
+  return {
+    id: f.id,
+    name: f.name,
+    calories: f.calorie,
+    caloriesText: f.calorieSummary || `${f.calorie} ${f.unit}`,
+    proteinG: m.proteinG,
+    fatG: m.fatG,
+    carbsG: m.carbsG,
+    giLevel: f.giLevel,
+    image: f.image,
+  }
+})
+
+const detailCenterKcal = computed(() => {
+  const f = detailFood.value
+  if (!f) return 0
+  const q = parsePositiveNumber(detailQty.value)
+  return estimateKcal(f, q, detailMode.value)
+})
 
 watch(searchKeyword, (kw) => {
   if (searchDebounce != null) clearTimeout(searchDebounce)
@@ -101,12 +202,6 @@ watch(searchKeyword, (kw) => {
   }, 300)
 })
 
-watch(popupVisible, (open) => {
-  if (open && selectedFood.value) {
-    quantityInput.value = '12'
-  }
-})
-
 const onCancel = () => {
   uni.navigateBack({ delta: 1 })
 }
@@ -115,14 +210,50 @@ const onCamera = () => {
   uni.switchTab({ url: '/pages/photograph/index' })
 }
 
+function goGiGuide() {
+  uni.navigateTo({ url: '/pages/gi-guide/index' })
+}
+
 const onSelectFood = (food: SearchFoodItem) => {
-  selectedFood.value = food
-  quantityInput.value = '12'
-  popupVisible.value = true
+  detailFood.value = food
+  detailQty.value = '1'
+  // 有标准份克数时默认「份/碗」，避免每百克食物误选「克」导致 1g≈1 千卡
+  detailMode.value =
+    food.servingWeightG > 0 ? 'portion' : food.calorieIsPer100g ? 'gram' : 'portion'
+  detailVisible.value = true
+}
+
+function closeFoodDetail() {
+  detailVisible.value = false
+  detailFood.value = null
+}
+
+function onDetailKey(key: string) {
+  const cur = detailQty.value
+  if (key === '.') {
+    if (cur.includes('.')) return
+    detailQty.value = cur === '' ? '0.' : cur + '.'
+    return
+  }
+  if (key === '0' && cur === '0') return
+  if (cur === '0' && key !== '.') {
+    detailQty.value = key
+    return
+  }
+  detailQty.value = cur + key
+}
+
+function onDetailDelete() {
+  const cur = detailQty.value
+  if (cur.length <= 1) {
+    detailQty.value = '0'
+    return
+  }
+  detailQty.value = cur.slice(0, -1)
 }
 
 const onRecordConfirm = async () => {
-  const food = selectedFood.value
+  const food = detailFood.value
   if (!food) {
     uni.showToast({ title: '请选择食物', icon: 'none' })
     return
@@ -137,22 +268,32 @@ const onRecordConfirm = async () => {
     uni.showToast({ title: '请先登录', icon: 'none' })
     return
   }
-  const body = buildMealRecordFromSearchSelection(food, quantityInput.value, 'snack')
-  if (!body) {
-    uni.showToast({ title: '请输入有效克数', icon: 'none' })
+  const item = buildBatchItemFromSearchSelection(food, detailQty.value, detailMode.value)
+  if (!item) {
+    uni.showToast({ title: '请输入有效数量', icon: 'none' })
     return
   }
+  if (submitLoading.value) return
+  submitLoading.value = true
+  uni.showLoading({ title: '提交中', mask: true })
+  const ymd = formatLocalDate(new Date())
   try {
-    await createMealRecord(uid, token, body)
-    popupVisible.value = false
-    const ymd = formatLocalDate(new Date())
-    uni.showToast({ title: '已记录', icon: 'success' })
+    await createMealRecordsBatch(uid, token, {
+      recordDate: ymd,
+      mealType: 'snack',
+      recordedAt: formatRecordedAtForYmd(ymd),
+      items: [item],
+    })
+    closeFoodDetail()
     uni.navigateTo({
-      url: `/pages/daily-record/index?date=${encodeURIComponent(ymd)}`,
+      url: `/pages/record-success/index?date=${encodeURIComponent(ymd)}`,
     })
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : '记录失败'
     uni.showToast({ title: msg, icon: 'none' })
+  } finally {
+    uni.hideLoading()
+    submitLoading.value = false
   }
 }
 </script>

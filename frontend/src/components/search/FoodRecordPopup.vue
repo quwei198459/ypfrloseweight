@@ -18,7 +18,7 @@
         <view class="food-header-text">
           <text class="food-name">{{ food.name }}</text>
           <text class="food-calorie-summary">{{ calorieSummaryLine }}</text>
-          <view class="gi-tag" :class="'gi-' + food.giLevel">
+          <view v-if="food.giLevel" class="gi-tag" :class="'gi-' + food.giLevel">
             <text class="gi-tag-text">{{ giLabel }}</text>
           </view>
         </view>

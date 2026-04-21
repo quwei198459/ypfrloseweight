@@ -9,14 +9,20 @@ import com.ypfr.loseweight.mapper.DietRecordMapper;
 import com.ypfr.loseweight.mapper.FoodMapper;
 import com.ypfr.loseweight.mapper.MealRecordMapper;
 import com.ypfr.loseweight.util.RecordedAtParser;
+import com.ypfr.loseweight.web.dto.BatchMealItemRequest;
 import com.ypfr.loseweight.web.dto.CreateMealRecordRequest;
+import com.ypfr.loseweight.web.dto.CreateMealRecordsBatchRequest;
+import com.ypfr.loseweight.web.dto.CreateMealRecordsBatchResponse;
 import com.ypfr.loseweight.web.dto.MealEntryVo;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 @Service
@@ -105,6 +111,152 @@ public class MealRecordService {
     } catch (Exception ignored) {
     }
     return toEntryDto(userId, dietRecordMapper.selectById(d.getId()), mealType, fn);
+  }
+
+  /**
+   * 同一用户、同一 recordDate、同一 mealType：向已有 meal_record 追加多条 diet_record；若无头表则先创建空头再写入。
+   */
+  @Transactional
+  public CreateMealRecordsBatchResponse createBatchAppend(
+      Long userId, CreateMealRecordsBatchRequest batch) {
+    if (batch == null) {
+      throw new ApiException(400, "请求体不能为空");
+    }
+    if (!StringUtils.hasText(batch.getRecordDate())) {
+      throw new ApiException(400, "recordDate 必填，格式 yyyy-MM-dd");
+    }
+    if (!StringUtils.hasText(batch.getMealType()) || !MEAL_TYPES.contains(batch.getMealType().trim())) {
+      throw new ApiException(400, "mealType 须为 breakfast/lunch/dinner/snack");
+    }
+    if (batch.getItems() == null || batch.getItems().isEmpty()) {
+      throw new ApiException(400, "items 不能为空");
+    }
+    if (batch.getItems().size() > 100) {
+      throw new ApiException(400, "单次最多 100 条");
+    }
+
+    LocalDate recordDate;
+    try {
+      recordDate = LocalDate.parse(batch.getRecordDate().trim());
+    } catch (Exception e) {
+      throw new ApiException(400, "recordDate 格式须为 yyyy-MM-dd");
+    }
+    String mealType = batch.getMealType().trim();
+
+    LocalDateTime defaultRowTime = resolveDefaultRowTime(batch.getRecordedAt(), recordDate);
+
+    MealRecord meal = findOrCreateMealHeader(userId, recordDate, mealType);
+    List<MealEntryVo> entries = new ArrayList<>();
+
+    for (BatchMealItemRequest item : batch.getItems()) {
+      if (item.getFoodId() == null) {
+        throw new ApiException(400, "每条明细 foodId 不能为空");
+      }
+      Food food = foodMapper.selectById(item.getFoodId());
+      if (food == null) {
+        throw new ApiException(400, "食物不存在: " + item.getFoodId());
+      }
+
+      LocalDateTime rowTime =
+          StringUtils.hasText(item.getRecordedAt())
+              ? RecordedAtParser.parse(item.getRecordedAt())
+              : defaultRowTime;
+      if (!rowTime.toLocalDate().equals(recordDate)) {
+        throw new ApiException(400, "单条 recordedAt 须落在 recordDate 当日");
+      }
+
+      String fn = food.getName() != null ? food.getName().trim() : "未命名";
+      if (fn.length() > 128) {
+        fn = fn.substring(0, 128);
+      }
+
+      CreateMealRecordRequest sub = new CreateMealRecordRequest();
+      sub.setFoodName(fn);
+      sub.setFoodLibraryId(food.getId());
+      sub.setAmountValue(item.getAmountValue());
+      sub.setAmountUnit(item.getAmountUnit());
+      sub.setMealType(mealType);
+      sub.setRecordedAt(rowTime.toString());
+
+      NutritionCalc nutrition = calculateNutrition(sub, food);
+      if (nutrition.caloriesTotal.compareTo(BigDecimal.ZERO) <= 0) {
+        throw new ApiException(400, "食物 " + fn + " 热量计算无效，请检查份量与单位");
+      }
+
+      DietRecordRow d = new DietRecordRow();
+      d.setMealId(meal.getId());
+      d.setUserId(userId);
+      d.setRecordDate(recordDate);
+      d.setMealType(mealType);
+      d.setFoodId(food.getId());
+      d.setFoodNameSnapshot(fn);
+      d.setImageSnapshot(food.getImage());
+      d.setGiLevelSnapshot(food.getGiLevel());
+      d.setCaloriesTotal(nutrition.caloriesTotal);
+      d.setProteinTotalG(nutrition.proteinTotal);
+      d.setFatTotalG(nutrition.fatTotal);
+      d.setCarbTotalG(nutrition.carbTotal);
+      d.setAmount(nutrition.amount);
+      d.setAmountUnit(nutrition.amountUnit);
+      d.setWeightG(nutrition.weightG);
+      d.setSource("search");
+      d.setRecordTime(rowTime);
+      dietRecordMapper.insert(d);
+
+      entries.add(toEntryDto(userId, dietRecordMapper.selectById(d.getId()), mealType, fn));
+    }
+
+    recalcMealTotals(meal.getId());
+    try {
+      dailySummaryService.updateForDay(userId, recordDate);
+    } catch (Exception ignored) {
+    }
+
+    CreateMealRecordsBatchResponse resp = new CreateMealRecordsBatchResponse();
+    resp.setMealRecordId(meal.getId());
+    resp.setEntries(entries);
+    return resp;
+  }
+
+  private static LocalDateTime resolveDefaultRowTime(String batchRecordedAt, LocalDate recordDate) {
+    if (StringUtils.hasText(batchRecordedAt)) {
+      LocalDateTime t = RecordedAtParser.parse(batchRecordedAt);
+      if (!t.toLocalDate().equals(recordDate)) {
+        throw new ApiException(400, "recordedAt 日期须与 recordDate 一致");
+      }
+      return t;
+    }
+    LocalDate today = LocalDate.now();
+    if (recordDate.equals(today)) {
+      return LocalDateTime.now();
+    }
+    return LocalDateTime.of(recordDate, LocalTime.of(12, 0, 0));
+  }
+
+  private MealRecord findOrCreateMealHeader(Long userId, LocalDate recordDate, String mealType) {
+    List<MealRecord> existing =
+        mealRecordMapper.selectList(
+            new LambdaQueryWrapper<MealRecord>()
+                .eq(MealRecord::getUserId, userId)
+                .eq(MealRecord::getRecordDate, recordDate)
+                .eq(MealRecord::getMealType, mealType)
+                .orderByDesc(MealRecord::getId)
+                .last("LIMIT 1"));
+    if (!existing.isEmpty()) {
+      return existing.get(0);
+    }
+    MealRecord meal = new MealRecord();
+    meal.setUserId(userId);
+    meal.setRecordDate(recordDate);
+    meal.setMealType(mealType);
+    meal.setTotalCalories(BigDecimal.ZERO);
+    meal.setTotalProteinG(BigDecimal.ZERO);
+    meal.setTotalFatG(BigDecimal.ZERO);
+    meal.setTotalCarbG(BigDecimal.ZERO);
+    meal.setFoodCount(0);
+    meal.setStatus("submitted");
+    mealRecordMapper.insert(meal);
+    return meal;
   }
 
   private NutritionCalc calculateNutrition(CreateMealRecordRequest req, Food food) {

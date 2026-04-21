@@ -19,13 +19,22 @@ public class Food {
   private String name;
   private String image;
   private String giLevel;
+  /** 库列 calories_per_100g；须显式映射，否则 MP 会生成错误的 calories_per100g */
+  @TableField("calories_per_100g")
   private BigDecimal caloriesPer100g;
+
   private BigDecimal caloriesPerUnit;
   private String unitName;
   private BigDecimal standardWeightG;
   private BigDecimal ediblePortionRate;
+
+  @TableField("protein_per_100g")
   private BigDecimal proteinPer100g;
+
+  @TableField("fat_per_100g")
   private BigDecimal fatPer100g;
+
+  @TableField("carb_per_100g")
   private BigDecimal carbPer100g;
   private String keywords;
   private Integer isCustom;

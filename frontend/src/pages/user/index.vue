@@ -13,14 +13,20 @@
           <view class="me-hero__row">
             <view class="avatar-block">
               <view class="avatar-frame">
-                <view class="user-avatar" />
+                <image
+                  v-if="avatarSrc"
+                  class="user-avatar user-avatar--img"
+                  :src="avatarSrc"
+                  mode="aspectFill"
+                />
+                <view v-else class="user-avatar user-avatar--ph" />
                 <view class="edit-badge" @click.stop="goAccountEdit">
                   <text class="edit-badge__ico">✎</text>
                 </view>
               </view>
               <view class="user-meta">
-                <text class="user-name">{{ profileData.nickname }}</text>
-                <text class="user-joined">已加入 42 天</text>
+                <text class="user-name">{{ profileData.nickname || '用户' }}</text>
+                <text class="user-joined">{{ joinedLine }}</text>
               </view>
             </view>
             <view class="panda-slot" aria-hidden="true">
@@ -30,7 +36,7 @@
         </view>
 
         <view class="me-stats-wrap">
-          <UserStatsCard />
+          <UserStatsCard :record-count="profileData.mealRecordCount" :healthy-days="profileData.healthyDietDays" />
         </view>
       </view>
 
@@ -55,7 +61,7 @@
             aria-label="打开减脂趋势"
             @tap.stop="goWeightTrend"
           >
-            <UserHomeMetricCard title="当前体重" :value="profileData.currentWeight" desc="6天前记录" />
+            <UserHomeMetricCard title="当前体重" :value="profileData.currentWeight" :desc="weightRecordDesc" />
           </view>
         </view>
         <view class="me-bottom-gap" />
@@ -67,7 +73,7 @@
 <script setup lang="ts">
 import { onShow } from '@dcloudio/uni-app'
 import { storeToRefs } from 'pinia'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { fetchCurrentUser, fetchWeekStats } from '@/api/loseweight'
 import { getRolling7DaysRange } from '@/utils/rolling7Days'
 import UserBannerCard from '../../components/user/UserBannerCard.vue'
@@ -77,6 +83,23 @@ import { useUserProfileStore } from '../../stores/userProfile'
 
 const store = useUserProfileStore()
 const { profileData } = storeToRefs(store)
+
+/** 后端头像 URL（相对路径会拼 API 根地址） */
+const avatarSrc = computed(() => profileData.value.avatar?.trim() || '')
+
+const joinedLine = computed(() => {
+  const d = profileData.value.joinedDays
+  if (d != null && d >= 1) return `已加入 ${d} 天`
+  return '已加入 —'
+})
+
+/** 当前展示体重相对「最近一次称重打卡」的说明（体重数值仍来自资料 currentWeightKg） */
+const weightRecordDesc = computed(() => {
+  const ago = profileData.value.weightRecordedDaysAgo
+  if (ago === null) return '无单独称重记录'
+  if (ago <= 0) return '今日有称重记录'
+  return `${ago} 天前有称重记录`
+})
 
 const weekDeficitSummary = ref('0千卡')
 
@@ -241,6 +264,15 @@ $me-page-bg: #f6f6f6;
   width: 128rpx;
   height: 128rpx;
   border-radius: 50%;
+  box-sizing: border-box;
+}
+
+.user-avatar--img {
+  display: block;
+  background: #f0f0f0;
+}
+
+.user-avatar--ph {
   background: #e0e0e0;
 }
 

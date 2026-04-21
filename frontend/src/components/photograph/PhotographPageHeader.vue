@@ -1,6 +1,6 @@
 <template>
-  <view class="ph-header">
-    <view class="ph-header__title-row">
+  <view v-if="showMainTitle || showSubtitle" class="ph-header">
+    <view v-if="showMainTitle" class="ph-header__title-row">
       <text class="ph-header__title">餐前拍一拍</text>
     </view>
     <view v-if="showSubtitle" class="ph-header__sub-row">
@@ -12,10 +12,13 @@
 <script setup lang="ts">
 withDefaults(
   defineProps<{
+    /** 为 false 时不展示大标题（与小程序 navigationBarTitleText 重复时可关） */
+    showMainTitle?: boolean
     showSubtitle?: boolean
     mealLabel?: string
   }>(),
   {
+    showMainTitle: true,
     showSubtitle: false,
     mealLabel: '晚餐',
   },

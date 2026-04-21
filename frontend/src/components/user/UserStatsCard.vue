@@ -18,7 +18,7 @@ withDefaults(
     healthyDays?: string | number
   }>(),
   {
-    recordCount: 6,
+    recordCount: 0,
     healthyDays: 0,
   }
 )

@@ -1,6 +1,7 @@
 package com.ypfr.loseweight.common;
 
 import java.sql.SQLException;
+import org.apache.ibatis.type.TypeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -37,6 +38,18 @@ public class GlobalExceptionHandler {
         .body(ApiResponse.fail(500, friendlySqlMessage(e.getMostSpecificCause())));
   }
 
+  /** 常见：vip_product.enabled 为 TINYINT(1) 时 JDBC 当 Boolean，与 Integer 映射冲突 */
+  @ExceptionHandler(TypeException.class)
+  public ResponseEntity<ApiResponse<Void>> handleMyBatisType(TypeException e) {
+    log.error("MyBatis type mapping", e);
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(
+            ApiResponse.fail(
+                500,
+                "数据库列与类型映射失败。若涉及会员表 vip_product，请在 MySQL 执行 "
+                    + "database/migrations/V021__vip_product_enabled_int.sql 后重启后端。详情见服务端日志。"));
+  }
+
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ApiResponse<Void>> handleOther(Exception e) {
     log.error("Unhandled error", e);
@@ -58,6 +71,11 @@ public class GlobalExceptionHandler {
     }
     String m = cause.getMessage() != null ? cause.getMessage() : "";
     String ml = m.toLowerCase();
+    if (m.contains("vip_product") && (ml.contains("doesn't exist") || m.contains("不存在"))) {
+      return "缺少会员档位表或结构不匹配。请在 MySQL 对库 loseweight 依次执行 database/migrations/V020__vip_product.sql、"
+          + "V021__vip_product_enabled_int.sql 后重启后端。原始错误: "
+          + shortenForClient(m, 220);
+    }
     if (m.contains("Unknown column") || ml.contains("doesn't exist")) {
       if (m.contains("'code'") && ml.contains("field list")) {
         return "food_category 等表缺少 code 列（食物分类接口需要）。请在 MySQL 对库 loseweight 执行 "

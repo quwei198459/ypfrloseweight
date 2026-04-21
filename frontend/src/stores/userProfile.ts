@@ -13,13 +13,21 @@ export interface ProfileData {
   targetDate: string
   /** 脱敏展示，未绑定为「未绑定」 */
   phoneDisplay: string
+  /** 「我的」统计：餐次条数 */
+  mealRecordCount: number
+  /** 健康饮食（天），口径与后端一致 */
+  healthyDietDays: number
+  /** 加入天数；未拉到资料前为 null */
+  joinedDays: number | null
+  /** 最近一次称重距今天数；无称重记录为 null */
+  weightRecordedDaysAgo: number | null
 }
 
 export const useUserProfileStore = defineStore('userProfile', {
   state: () => ({
     profileData: {
       avatar: '',
-      nickname: '想瘦的3508',
+      nickname: '',
       gender: '男',
       age: '25岁',
       height: '175cm',
@@ -27,6 +35,10 @@ export const useUserProfileStore = defineStore('userProfile', {
       targetWeight: '154斤',
       targetDate: '2026-05-05',
       phoneDisplay: '未绑定',
+      mealRecordCount: 0,
+      healthyDietDays: 0,
+      joinedDays: null,
+      weightRecordedDaysAgo: null,
     } as ProfileData,
     showGenderPopup: false,
     showAgePopup: false,
@@ -67,6 +79,8 @@ export const useUserProfileStore = defineStore('userProfile', {
           av = API_BASE_URL + (av.startsWith('/') ? av : `/${av}`)
         }
         this.profileData.avatar = av
+      } else {
+        this.profileData.avatar = ''
       }
       const p = user.phone
       if (p && p.length >= 7) {
@@ -76,6 +90,19 @@ export const useUserProfileStore = defineStore('userProfile', {
       } else {
         this.profileData.phoneDisplay = '未绑定'
       }
+
+      this.profileData.mealRecordCount =
+        user.mealRecordCount != null && user.mealRecordCount >= 0 ? Math.floor(user.mealRecordCount) : 0
+      this.profileData.healthyDietDays =
+        user.healthyDietDays != null && user.healthyDietDays >= 0
+          ? Math.floor(user.healthyDietDays)
+          : 0
+      this.profileData.joinedDays =
+        user.joinedDays != null && user.joinedDays >= 1 ? Math.floor(user.joinedDays) : null
+      this.profileData.weightRecordedDaysAgo =
+        user.weightRecordedDaysAgo != null && user.weightRecordedDaysAgo >= 0
+          ? Math.floor(user.weightRecordedDaysAgo)
+          : null
     },
   },
 })

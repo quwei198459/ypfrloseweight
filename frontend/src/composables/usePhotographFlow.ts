@@ -453,7 +453,18 @@ export function usePhotographFlow() {
 
   function onExitPhoto() {
     clearTimers()
-    uni.navigateBack({ delta: 1 })
+    const stack = getCurrentPages()
+    if (stack.length > 1) {
+      uni.navigateBack({
+        delta: 1,
+        fail: () => {
+          resetToIdle()
+        },
+      })
+      return
+    }
+    // Tab 等入口无上一页时 navigateBack 无效，回到 idle 拍照态
+    resetToIdle()
   }
 
   onUnmounted(() => {

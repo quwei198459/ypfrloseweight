@@ -2,8 +2,9 @@
   <!-- login_01：默认；login_02：isLogging；login_03：showAgreementPopup -->
   <view class="page">
     <view class="brand">
-      <image class="app-icon" src="/static/logo/logo-c-dark.png" mode="aspectFit" />
-      <text class="title">瘦多少</text>
+      <!-- Logo 以 import 绑定源文件，换图请只改 frontend/src/static/logo/logo-c-dark.png 后重新编译 -->
+      <image class="app-icon" :src="logoDark" mode="aspectFit" />
+      <text class="title">宝护健康瘦</text>
       <text class="subtitle">拍一拍，热量知多少</text>
       <text class="login-lite-hint">使用微信账号快速登录</text>
     </view>
@@ -80,6 +81,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useUserStore } from '@/stores/user'
+import logoDark from '@/static/logo/logo-c-dark.png'
 
 const userStore = useUserStore()
 const agreed = ref(false)

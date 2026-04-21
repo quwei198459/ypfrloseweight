@@ -69,7 +69,10 @@ public class DailyRecordService {
     for (SportRecord s : sports) {
       timeline.add(toSportItem(s));
     }
-    timeline.sort(Comparator.comparing(DailyRecordItemDto::getRecordedAt));
+    timeline.sort(
+        Comparator.comparing(
+                DailyRecordItemDto::getRecordedAt, Comparator.nullsLast(String::compareTo))
+            .reversed());
 
     DailyRecordDto dto = new DailyRecordDto();
     dto.setDate(day.toString());

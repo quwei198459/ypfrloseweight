@@ -27,6 +27,7 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -100,6 +101,16 @@ public class MealPhotoRecognizeService {
       String body = resp.getBody() != null ? resp.getBody() : "";
       row.setRawResult(body);
       if (resp.getStatusCode().is2xxSuccessful()) {
+        Optional<String> vendorFail = aliyunJsonParser.readVendorFailureReason(body);
+        if (vendorFail.isPresent()) {
+          row.setRecognizeStatus("fail");
+          row.setErrorCode("ALIYUN_VENDOR");
+          row.setErrorMessage(truncate(vendorFail.get(), 512));
+          row.setConfirmStatus("none");
+          row.setParsedResultJson("[]");
+          mealPhotoRecognitionMapper.updateById(row);
+          return buildResultVo(row, List.of(), row.getErrorCode(), row.getErrorMessage());
+        }
         List<MealPhotoFoodItemVo> foods = aliyunJsonParser.parseFoods(body);
         row.setParsedResultJson(aliyunJsonParser.toJson(foods));
         row.setResultType("candidate_foods");

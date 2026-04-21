@@ -8,13 +8,9 @@
         <!-- Brand Row -->
         <view class="brand-row">
           <view class="app-logo-pedestal">
-            <image
-              class="app-logo"
-              src="/static/logo/logo-c-contrast.png"
-              mode="heightFix"
-            />
+            <image class="app-logo" :src="logoContrast" mode="heightFix" />
           </view>
-          <text class="app-title">瘦多少</text>
+          <text class="app-title">宝护健康瘦</text>
         </view>
 
         <!-- Search Bar -->
@@ -114,7 +110,11 @@
       <!-- Fat Loss Plan Section -->
       <view class="fat-loss-plan-section">
         <view class="plan-banner-card">
-          <view class="banner-illustration"></view>
+          <image
+            class="banner-illustration"
+            src="/static/home/fat-loss-plan-banner.png"
+            mode="aspectFill"
+          />
           <view class="plan-content-overlay">
             <view class="plan-text-group">
               <text class="plan-title">邀请您加入减脂计划</text>
@@ -134,6 +134,7 @@
 import { onShow } from '@dcloudio/uni-app'
 import { ref } from 'vue'
 import { fetchDashboard } from '@/api/loseweight'
+import logoContrast from '@/static/logo/logo-c-contrast.png'
 import HomeCalorieGauge from '@/components/home/HomeCalorieGauge.vue'
 import { formatLocalDate } from '@/utils/date'
 
@@ -193,8 +194,9 @@ const handleMealEntry = (mealType: string) => {
   }
 
   const mt = mealMap[mealType] || 'breakfast'
+  const date = formatLocalDate(new Date())
   uni.navigateTo({
-    url: `/pages/food-search/index?mealType=${mt}`,
+    url: `/pages/food-search/index?mealType=${mt}&date=${encodeURIComponent(date)}`,
   })
 }
 
@@ -474,9 +476,10 @@ const openPhotographFromSearchBar = () => {
   top: 86px;
   width: 303px;
   height: 220px;
-  background-color: #f5f1e6;
   border: 1px solid #e6ddc8;
   border-radius: 20px;
+  overflow: hidden;
+  background-color: #f5f1e6;
 }
 
 .plan-content-overlay {

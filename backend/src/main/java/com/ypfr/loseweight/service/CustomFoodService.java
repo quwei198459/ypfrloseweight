@@ -66,11 +66,16 @@ public class CustomFoodService {
     food.setCreatorUserId(userId);
     food.setCategoryId(otherCat.getId());
     food.setName(name);
+    food.setImage("/api/v1/public/food-images/default.png");
+    food.setGiLevel(null);
     food.setStandardWeightG(weightG);
     food.setCaloriesPer100g(per100);
     food.setCaloriesPerUnit(caloriesTotal);
     food.setUnitName("份");
     food.setKeywords(name);
+    food.setProteinPer100g(BigDecimal.ZERO);
+    food.setFatPer100g(BigDecimal.ZERO);
+    food.setCarbPer100g(BigDecimal.ZERO);
     food.setIsCustom(1);
     food.setStatus(1);
     food.setCreatedAt(now);

@@ -27,12 +27,24 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
+import { onLoad } from '@dcloudio/uni-app'
 import SuccessNutritionCard from '@/components/record/SuccessNutritionCard.vue'
 import NutritionCommentSection from '@/components/record/NutritionCommentSection.vue'
 
+/** 从上游页带入，确定后回到对应日期的饮食记录 */
+const recordDateYmd = ref('')
+
+onLoad((query) => {
+  const d = String(query?.date || '').trim()
+  recordDateYmd.value = /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : ''
+})
+
 const goDailyRecord = () => {
+  const d = recordDateYmd.value
+  const q = d ? `?date=${encodeURIComponent(d)}` : ''
   uni.navigateTo({
-    url: '/pages/daily-record/index',
+    url: `/pages/daily-record/index${q}`,
   })
 }
 </script>

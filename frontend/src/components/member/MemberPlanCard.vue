@@ -106,17 +106,18 @@ function onClick() {
 
 .mpc__corner-wrap {
   position: absolute;
-  top: -6rpx;
-  left: -4rpx;
+  /* 上移，避免挂角与「永久会员」标题重叠 */
+  top: -22rpx;
+  left: -2rpx;
   z-index: 2;
   pointer-events: none;
 }
 
 .mpc__corner-badge {
-  padding: 6rpx 16rpx;
+  padding: 6rpx 14rpx;
   background: #e53935;
   border-radius: 8rpx;
-  transform: rotate(-4deg);
+  transform: rotate(-3deg);
   box-shadow: 0 4rpx 8rpx rgba(229, 57, 53, 0.25);
 }
 

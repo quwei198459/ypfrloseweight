@@ -3,15 +3,26 @@
     <view class="member-notice-bar__icon-wrap">
       <text class="member-notice-bar__icon">🔊</text>
     </view>
-    <text class="member-notice-bar__text">{{ text }}</text>
+    <swiper
+      class="member-notice-bar__swiper"
+      vertical
+      circular
+      autoplay
+      :interval="2600"
+      :duration="400"
+    >
+      <swiper-item v-for="(line, i) in lines" :key="i" class="member-notice-bar__item">
+        <text class="member-notice-bar__text">{{ line }}</text>
+      </swiper-item>
+    </swiper>
   </view>
 </template>
 
-<script setup>
+<script setup lang="ts">
 defineProps({
-  text: {
-    type: String,
-    default: '旋***成为了年费会员',
+  lines: {
+    type: Array,
+    required: true,
   },
 })
 </script>
@@ -23,7 +34,7 @@ defineProps({
   align-items: center;
   gap: 16rpx;
   width: 100%;
-  padding: 24rpx 28rpx;
+  padding: 20rpx 28rpx;
   background: #f0f0f0;
   border-radius: 48rpx;
   box-sizing: border-box;
@@ -43,11 +54,25 @@ defineProps({
   line-height: 1;
 }
 
-.member-notice-bar__text {
+.member-notice-bar__swiper {
   flex: 1;
   min-width: 0;
+  height: 40rpx;
+}
+
+.member-notice-bar__item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.member-notice-bar__text {
   font-size: 24rpx;
   color: #666666;
-  line-height: 1.5;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
 }
 </style>

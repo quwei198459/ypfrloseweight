@@ -79,7 +79,6 @@ public class WeekStatsService {
     double sumIntake = 0d;
     double sumSport = 0d;
     double sumEating = 0d;
-    int validDays = 0;
     int eatingCount = 0;
 
     for (LocalDate d : days) {
@@ -99,9 +98,6 @@ public class WeekStatsService {
               : 0d;
       eatingVals.add(round2(eh));
 
-      if (summary != null) {
-        validDays++;
-      }
       sumDeficit += deficit;
       sumIntake += in;
       sumSport += sp;
@@ -111,10 +107,11 @@ public class WeekStatsService {
       }
     }
 
-    int denominator = Math.max(1, validDays);
-    double avgDeficit = sumDeficit / denominator;
-    double avgIntake = sumIntake / denominator;
-    double avgSport = sumSport / denominator;
+    // 与文档「周统计 = daily_summary 聚合」「avg = Σ / 天数」一致：天数为区间内日历天数（含无汇总日）
+    int rangeDays = Math.max(1, days.size());
+    double avgDeficit = sumDeficit / rangeDays;
+    double avgIntake = sumIntake / rangeDays;
+    double avgSport = sumSport / rangeDays;
     double avgEating = eatingCount > 0 ? sumEating / eatingCount : 0;
 
     WeekStatsDto dto = new WeekStatsDto();

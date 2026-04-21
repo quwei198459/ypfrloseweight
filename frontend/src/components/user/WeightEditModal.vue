@@ -49,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { nextTick, ref, watch } from 'vue'
 
 const props = defineProps<{
   show: boolean
@@ -65,16 +65,35 @@ const emit = defineEmits<{
 
 const unit = ref<'jin' | 'kg'>('jin')
 const inputVal = ref('')
+/** 打开弹层时重置单位，避免与「斤/公斤换算」watch 打架 */
+const skipUnitConvert = ref(false)
 
 watch(
   () => props.show,
   (v) => {
     if (v) {
+      skipUnitConvert.value = true
       unit.value = 'jin'
       inputVal.value = props.defaultValue
+      void nextTick(() => {
+        skipUnitConvert.value = false
+      })
     }
   },
 )
+
+/** 斤 ↔ 公斤切换时同步输入框数值，避免「同一数字被当成两种单位」误存库 */
+watch(unit, (to, from) => {
+  if (skipUnitConvert.value || !props.show) return
+  if (from !== 'jin' && from !== 'kg') return
+  const raw = parseFloat(String(inputVal.value).trim().replace(/,/g, ''))
+  if (!Number.isFinite(raw) || raw <= 0) return
+  if (to === 'kg' && from === 'jin') {
+    inputVal.value = String(Math.round((raw / 2) * 100) / 100)
+  } else if (to === 'jin' && from === 'kg') {
+    inputVal.value = String(Math.round(raw * 2 * 10) / 10)
+  }
+})
 
 function onInput(e: { detail?: { value?: string } }) {
   inputVal.value = String(e.detail?.value ?? '')

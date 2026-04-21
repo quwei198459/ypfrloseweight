@@ -4,7 +4,14 @@
     <view class="search-row">
       <view class="search-box">
         <text class="search-icon">🔍</text>
-        <text class="search-placeholder">海量食物库搜索</text>
+        <input
+          v-model="searchKeyword"
+          class="search-input"
+          type="text"
+          confirm-type="search"
+          placeholder="海量食物库搜索"
+          placeholder-class="search-placeholder"
+        />
       </view>
       <view class="custom-add" @click="customVisible = true">＋</view>
     </view>
@@ -15,32 +22,50 @@
           v-for="c in categories"
           :key="c.code"
           class="cat"
-          :class="{ active: c.code === category }"
-          @click="category = c.code"
+          :class="{ active: c.code === categoryCode }"
+          @click="onPickCategory(c.code)"
         >
           <text>{{ c.name }}</text>
-          <view v-if="c.code === category" class="cat-underline" />
+          <view v-if="c.code === categoryCode" class="cat-underline" />
         </view>
       </scroll-view>
 
       <scroll-view scroll-y class="list" :show-scrollbar="false">
-        <view v-for="f in filteredFoods" :key="f.id" class="food-row">
-          <image class="thumb" :src="f.image || '/static/category/category-snack.png'" mode="aspectFill" />
+        <view v-if="listLoading" class="list-hint">加载中…</view>
+        <view v-else-if="!filteredFoods.length" class="list-hint">暂无食物</view>
+        <view
+          v-for="f in filteredFoods"
+          v-else
+          :key="f.id"
+          class="food-row"
+          @click="openFoodDetail(f)"
+        >
+          <image
+            class="thumb"
+            :src="rowThumbSrc(f)"
+            mode="aspectFill"
+            @error="onFoodRowImgErr(f.id)"
+          />
           <view class="meta">
             <view class="name-line">
-              <view v-if="giTagText(f.giLevel)" class="gi-tag" :class="'gi-' + f.giLevel">
+              <view
+                v-if="giTagText(f.giLevel)"
+                class="gi-tag"
+                :class="'gi-' + f.giLevel"
+                @click.stop="goGiGuide"
+              >
                 {{ giTagText(f.giLevel) }}
               </view>
               <text class="name">{{ f.name }}</text>
             </view>
-            <text class="sub">{{ f.caloriesText }}</text>
+            <text class="sub">{{ f.calorieSummary || f.unit }}</text>
           </view>
           <view
             class="row-action"
-            :class="{ selected: selectedIds.includes(f.id) }"
-            @click.stop="toggleSelect(f.id)"
+            :class="{ selected: Boolean(draftByFoodId[f.id]) }"
+            @click.stop="toggleRowQuick(f)"
           >
-            {{ selectedIds.includes(f.id) ? '✓' : '+' }}
+            {{ draftByFoodId[f.id] ? '✓' : '+' }}
           </view>
         </view>
       </scroll-view>
@@ -65,12 +90,35 @@
       @close="closeRecordSummary"
       @toggle-meal-menu="summaryMealMenuVisible = !summaryMealMenuVisible"
       @pick-meal="onSummaryPickMeal"
-      @remove="removeSelected"
+      @remove="removeDraft"
       @complete="onSummaryComplete"
+    />
+
+    <FoodDetailPopup
+      :visible="detailVisible"
+      hide-meal-bar
+      :meal-menu-visible="false"
+      :meal-type="mealType"
+      :meal-label="mealLabel"
+      :quantity-text="detailQty"
+      :input-mode="detailMode"
+      :portion-unit-label="detailFood?.portionUnitLabel || '份'"
+      :center-kcal="detailCenterKcal"
+      :standard-weight-g="detailFood?.servingWeightG ?? 0"
+      :food="detailFoodPopupModel"
+      @close="closeFoodDetail"
+      @toggle-meal-menu="() => {}"
+      @pick-meal="() => {}"
+      @key="onDetailKey"
+      @delete="onDetailDelete"
+      @confirm="confirmFoodDetail"
+      @go-gi-guide="goGiGuide"
+      @set-mode="(m) => (detailMode = m)"
     />
 
     <CustomFoodPopup
       v-model:visible="customVisible"
+      :confirm-loading="customSubmitting"
       @cancel="customVisible = false"
       @confirm="handleCustomConfirm"
     />
@@ -78,61 +126,91 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
+import { createCustomFood, listFoodCategories, searchFoodLibrary, type FoodCategoryItemJson } from '@/api/food'
+import { FOOD_IMAGE_PLACEHOLDER } from '@/constants/foodImage'
+import { createMealRecordsBatch } from '@/api/meal'
+import { mapFoodsToSearchItems } from '@/api/adapters/searchFood'
 import CustomFoodPopup from '@/components/CustomFoodPopup.vue'
+import FoodDetailPopup from '@/components/food-search/FoodDetailPopup.vue'
 import RecordSummaryPopup from '@/components/food-search/RecordSummaryPopup.vue'
 import SelectedRecordBar from '@/components/food-search/SelectedRecordBar.vue'
+import { resolveUserId, STORAGE_TOKEN } from '@/config/api'
+import type { SearchFoodItem } from '@/types/searchFood'
+import { formatLocalDate } from '@/utils/date'
+import { formatRecordedAtForYmd } from '@/utils/recordedAt'
+import { useUserStore } from '@/stores/user'
 
-type FoodItem = {
-  id: string
-  category: string
-  name: string
-  calories: number
-  caloriesText: string
-  image?: string
-  /** 与接口 gi_level / giLevel 一致：low | medium | high，缺省则不展示标签 */
-  giLevel?: 'low' | 'medium' | 'high'
+type DraftEntry = {
+  foodId: number
+  amountValue: number
+  amountUnit: string
+  inputMode: 'gram' | 'portion'
+  item: SearchFoodItem
 }
 
-const categories = [
-  { code: 'common', name: '常用' },
-  { code: 'fruit', name: '水果' },
-  { code: 'grain', name: '主食' },
-  { code: 'protein', name: '蛋白' },
-]
-const allFoods = ref<FoodItem[]>([
-  { id: 'f1', category: 'fruit', name: '桔子', calories: 72, caloriesText: '72千卡/1个', giLevel: 'low' },
-  { id: 'f2', category: 'grain', name: '米饭', calories: 300, caloriesText: '300千卡/1大份', giLevel: 'high' },
-  { id: 'f3', category: 'protein', name: '鸡胸肉', calories: 132, caloriesText: '132千卡/100g', giLevel: 'medium' },
-])
+const userStore = useUserStore()
 
-const category = ref('common')
-const selectedIds = ref<string[]>([])
+const categories = ref<FoodCategoryItemJson[]>([])
+const categoryCode = ref('')
+const searchKeyword = ref('')
+const allFoods = ref<SearchFoodItem[]>([])
+const listLoading = ref(false)
+const recordDateYmd = ref(formatLocalDate(new Date()))
+
+const draftByFoodId = ref<Record<string, DraftEntry>>({})
+
 const mealType = ref<'breakfast' | 'lunch' | 'dinner' | 'snack'>('lunch')
+/** 列表缩略图加载失败（如 404）时按 id 回退到统一占位图 */
+const rowThumbFailed = ref<Record<string, boolean>>({})
+
+function rowThumbSrc(f: SearchFoodItem) {
+  if (rowThumbFailed.value[f.id]) return FOOD_IMAGE_PLACEHOLDER
+  return (f.image || '').trim() || FOOD_IMAGE_PLACEHOLDER
+}
+
+function onFoodRowImgErr(id: string) {
+  rowThumbFailed.value = { ...rowThumbFailed.value, [id]: true }
+}
+
 const customVisible = ref(false)
+const customSubmitting = ref(false)
 const recordSummaryVisible = ref(false)
 const summaryMealMenuVisible = ref(false)
+const submitLoading = ref(false)
 
-const filteredFoods = computed(() =>
-  category.value === 'common' ? allFoods.value : allFoods.value.filter((f) => f.category === category.value),
+const detailVisible = ref(false)
+const detailFood = ref<SearchFoodItem | null>(null)
+const detailQty = ref('1')
+const detailMode = ref<'gram' | 'portion'>('gram')
+
+let searchDebounce: ReturnType<typeof setTimeout> | null = null
+
+const filteredFoods = computed(() => allFoods.value)
+
+const selectedRows = computed(() => Object.values(draftByFoodId.value).map((d) => d.item))
+
+const selectedKcal = computed(() =>
+  Object.values(draftByFoodId.value).reduce((s, d) => s + estimateKcal(d.item, d.amountValue, d.inputMode), 0),
 )
-const selectedRows = computed(() => allFoods.value.filter((f) => selectedIds.value.includes(f.id)))
-const selectedKcal = computed(() => selectedRows.value.reduce((sum, i) => sum + i.calories, 0))
+
 const mealLabel = computed(() => {
   if (mealType.value === 'breakfast') return '早餐'
   if (mealType.value === 'dinner') return '晚餐'
   if (mealType.value === 'snack') return '加餐'
   return '午餐'
 })
+
 const summaryItems = computed(() =>
-  selectedRows.value.map((f) => ({
-    id: f.id,
-    name: f.name,
-    caloriesText: f.caloriesText,
-    image: f.image,
+  Object.values(draftByFoodId.value).map((d) => ({
+    id: d.item.id,
+    name: d.item.name,
+    caloriesText: `${estimateKcal(d.item, d.amountValue, d.inputMode)}千卡/${formatAmountUnit(d)}`,
+    image: d.item.image,
   })),
 )
+
 const showBottomBar = computed(() => selectedRows.value.length > 0 && !recordSummaryVisible.value)
 
 onLoad((query) => {
@@ -140,6 +218,110 @@ onLoad((query) => {
   if (fromMeal === 'breakfast' || fromMeal === 'lunch' || fromMeal === 'dinner' || fromMeal === 'snack') {
     mealType.value = fromMeal
   }
+  const qd = String(query?.date || '').trim()
+  if (/^\d{4}-\d{2}-\d{2}$/.test(qd)) {
+    recordDateYmd.value = qd
+  }
+  void loadCategories()
+})
+
+watch(categoryCode, () => {
+  void fetchFoodList()
+})
+
+watch(searchKeyword, () => {
+  if (searchDebounce != null) clearTimeout(searchDebounce)
+  searchDebounce = setTimeout(() => {
+    void fetchFoodList()
+  }, 280)
+})
+
+function formatAmountUnit(d: DraftEntry): string {
+  if (d.inputMode === 'gram' || d.amountUnit === 'g' || d.amountUnit === '克') {
+    return `${d.amountValue}克`
+  }
+  return `${d.amountValue}${d.amountUnit}`
+}
+
+function parsePositiveNumber(s: string): number {
+  const n = Number(String(s ?? '').trim())
+  return Number.isFinite(n) && n > 0 ? n : 1
+}
+
+function estimateKcal(food: SearchFoodItem, amount: number, mode: 'gram' | 'portion'): number {
+  if (mode === 'portion') {
+    if (food.calorieIsPer100g) {
+      const g = amount * (food.servingWeightG > 0 ? food.servingWeightG : 100)
+      return Math.max(1, Math.round((food.calorie * g) / 100))
+    }
+    return Math.max(1, Math.round(food.calorie * amount))
+  }
+  if (food.calorieIsPer100g) {
+    return Math.max(1, Math.round((food.calorie * amount) / 100))
+  }
+  const denom = food.servingWeightG > 0 ? food.servingWeightG : 100
+  return Math.max(1, Math.round((food.calorie * amount) / denom))
+}
+
+function consumedGrams(food: SearchFoodItem, amount: number, mode: 'gram' | 'portion'): number {
+  if (mode === 'portion') {
+    return amount * (food.servingWeightG > 0 ? food.servingWeightG : 100)
+  }
+  return amount
+}
+
+function scaledMacrosForPopup(
+  food: SearchFoodItem,
+  qtyStr: string,
+  mode: 'gram' | 'portion',
+  curKcal: number,
+): { proteinG: number; fatG: number; carbsG: number } {
+  const q = parsePositiveNumber(qtyStr)
+  const gNow = consumedGrams(food, q, mode)
+  const p100 = food.proteinG ?? 0
+  const f100 = food.fatG ?? 0
+  const c100 = food.carbsG ?? 0
+  if (food.calorieIsPer100g) {
+    return {
+      proteinG: (p100 * gNow) / 100,
+      fatG: (f100 * gNow) / 100,
+      carbsG: (c100 * gNow) / 100,
+    }
+  }
+  const refMode = food.servingWeightG > 0 ? 'portion' : 'gram'
+  const refK = estimateKcal(food, 1, refMode)
+  const gRef = consumedGrams(food, 1, refMode)
+  const ratio = refK > 0 ? curKcal / refK : 0
+  return {
+    proteinG: ((p100 * gRef) / 100) * ratio,
+    fatG: ((f100 * gRef) / 100) * ratio,
+    carbsG: ((c100 * gRef) / 100) * ratio,
+  }
+}
+
+const detailFoodPopupModel = computed(() => {
+  const f = detailFood.value
+  if (!f) return null
+  const curK = estimateKcal(f, parsePositiveNumber(detailQty.value), detailMode.value)
+  const m = scaledMacrosForPopup(f, detailQty.value, detailMode.value, curK)
+  return {
+    id: f.id,
+    name: f.name,
+    calories: f.calorie,
+    caloriesText: f.calorieSummary || `${f.calorie} ${f.unit}`,
+    proteinG: m.proteinG,
+    fatG: m.fatG,
+    carbsG: m.carbsG,
+    giLevel: f.giLevel,
+    image: f.image,
+  }
+})
+
+const detailCenterKcal = computed(() => {
+  const f = detailFood.value
+  if (!f) return 0
+  const q = parsePositiveNumber(detailQty.value)
+  return estimateKcal(f, q, detailMode.value)
 })
 
 function giTagText(level?: string) {
@@ -149,10 +331,120 @@ function giTagText(level?: string) {
   return ''
 }
 
-function toggleSelect(id: string) {
-  const idx = selectedIds.value.indexOf(id)
-  if (idx >= 0) selectedIds.value.splice(idx, 1)
-  else selectedIds.value.push(id)
+function goGiGuide() {
+  uni.navigateTo({ url: '/pages/gi-guide/index' })
+}
+
+async function loadCategories() {
+  try {
+    const token = userStore.token || (uni.getStorageSync(STORAGE_TOKEN) as string | undefined)
+    const list = await listFoodCategories(token)
+    const sorted = [...list].sort((a, b) => (a.sortNo ?? 0) - (b.sortNo ?? 0))
+    categories.value = sorted
+    if (sorted.length && !categoryCode.value) {
+      categoryCode.value = sorted[0].code
+    } else {
+      void fetchFoodList()
+    }
+  } catch {
+    uni.showToast({ title: '分类加载失败', icon: 'none' })
+  }
+}
+
+function onPickCategory(code: string) {
+  categoryCode.value = code
+}
+
+async function fetchFoodList() {
+  if (!categoryCode.value) return
+  listLoading.value = true
+  try {
+    const token = userStore.token || (uni.getStorageSync(STORAGE_TOKEN) as string | undefined)
+    const q = searchKeyword.value.trim()
+    const raw = await searchFoodLibrary(q || undefined, 80, token, resolveUserId(), categoryCode.value)
+    rowThumbFailed.value = {}
+    allFoods.value = mapFoodsToSearchItems(raw)
+  } catch {
+    allFoods.value = []
+  } finally {
+    listLoading.value = false
+  }
+}
+
+function openFoodDetail(f: SearchFoodItem) {
+  detailFood.value = f
+  const exist = draftByFoodId.value[f.id]
+  if (exist) {
+    detailQty.value = String(exist.amountValue)
+    detailMode.value = exist.inputMode
+  } else {
+    detailQty.value = '1'
+    detailMode.value =
+      f.servingWeightG > 0 ? 'portion' : f.calorieIsPer100g ? 'gram' : 'portion'
+  }
+  detailVisible.value = true
+}
+
+function closeFoodDetail() {
+  detailVisible.value = false
+  detailFood.value = null
+}
+
+function toggleRowQuick(f: SearchFoodItem) {
+  if (draftByFoodId.value[f.id]) {
+    const next = { ...draftByFoodId.value }
+    delete next[f.id]
+    draftByFoodId.value = next
+    return
+  }
+  openFoodDetail(f)
+}
+
+function onDetailKey(key: string) {
+  const cur = detailQty.value
+  if (key === '.') {
+    if (cur.includes('.')) return
+    detailQty.value = cur === '' ? '0.' : cur + '.'
+    return
+  }
+  if (key === '0' && cur === '0') return
+  if (cur === '0' && key !== '.') {
+    detailQty.value = key
+    return
+  }
+  detailQty.value = cur + key
+}
+
+function onDetailDelete() {
+  const cur = detailQty.value
+  if (cur.length <= 1) {
+    detailQty.value = '0'
+    return
+  }
+  detailQty.value = cur.slice(0, -1)
+}
+
+function confirmFoodDetail() {
+  const f = detailFood.value
+  if (!f) return
+  const amount = parsePositiveNumber(detailQty.value)
+  const unit =
+    detailMode.value === 'gram'
+      ? 'g'
+      : f.calorieIsPer100g
+        ? '份'
+        : f.portionUnitLabel || '份'
+  draftByFoodId.value = {
+    ...draftByFoodId.value,
+    [f.id]: {
+      foodId: Number(f.id),
+      amountValue: amount,
+      amountUnit: unit,
+      inputMode: detailMode.value,
+      item: f,
+    },
+  }
+  closeFoodDetail()
 }
 
 function openRecordSummary() {
@@ -172,26 +464,56 @@ function onSummaryPickMeal(value: string) {
   summaryMealMenuVisible.value = false
 }
 
-function removeSelected(id: string) {
-  const idx = selectedIds.value.indexOf(id)
-  if (idx >= 0) selectedIds.value.splice(idx, 1)
-  if (selectedIds.value.length === 0) closeRecordSummary()
+function removeDraft(id: string) {
+  const next = { ...draftByFoodId.value }
+  delete next[id]
+  draftByFoodId.value = next
+  if (Object.keys(next).length === 0) closeRecordSummary()
 }
 
-function finishSelection() {
-  uni.navigateBack({
-    fail: () => {
-      uni.showToast({ title: '已完成', icon: 'none' })
-    },
-  })
+async function finishSelection() {
+  const entries = Object.values(draftByFoodId.value)
+  if (entries.length === 0) {
+    uni.showToast({ title: '请先选择食物', icon: 'none' })
+    return
+  }
+  const token = userStore.token || (uni.getStorageSync(STORAGE_TOKEN) as string | undefined)
+  if (!token) {
+    uni.showToast({ title: '请先登录', icon: 'none' })
+    return
+  }
+  if (submitLoading.value) return
+  submitLoading.value = true
+  try {
+    await createMealRecordsBatch(resolveUserId(), token, {
+      recordDate: recordDateYmd.value,
+      mealType: mealType.value,
+      recordedAt: formatRecordedAtForYmd(recordDateYmd.value),
+      items: entries.map((e) => ({
+        foodId: e.foodId,
+        amountValue: e.amountValue,
+        amountUnit: e.amountUnit,
+      })),
+    })
+    draftByFoodId.value = {}
+    closeRecordSummary()
+    uni.navigateTo({
+      url: `/pages/daily-record/index?date=${encodeURIComponent(recordDateYmd.value)}`,
+    })
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : '提交失败'
+    uni.showToast({ title: msg, icon: 'none' })
+  } finally {
+    submitLoading.value = false
+  }
 }
 
 function onSummaryComplete() {
   closeRecordSummary()
-  finishSelection()
+  void finishSelection()
 }
 
-function handleCustomConfirm(payload: { name: string; weight: string; calories: string }) {
+async function handleCustomConfirm(payload: { name: string; weight: string; calories: string }) {
   const name = payload.name.trim()
   const calories = Number(payload.calories)
   const weight = Number(payload.weight)
@@ -199,21 +521,31 @@ function handleCustomConfirm(payload: { name: string; weight: string; calories: 
     uni.showToast({ title: '请填写有效食物信息', icon: 'none' })
     return
   }
-  allFoods.value.unshift({
-    id: `custom-${Date.now()}`,
-    category: 'common',
-    name,
-    calories: Math.round(calories),
-    caloriesText: `${Math.round(calories)}千卡/${Math.round(weight)}g`,
-  })
-  customVisible.value = false
-  category.value = 'common'
-  uni.showToast({ title: '已添加自定义食物', icon: 'none' })
+  const token = userStore.token || (uni.getStorageSync(STORAGE_TOKEN) as string | undefined)
+  if (!token) {
+    uni.showToast({ title: '请先登录', icon: 'none' })
+    return
+  }
+  customSubmitting.value = true
+  try {
+    await createCustomFood(resolveUserId(), token, {
+      name,
+      weightG: Math.round(weight),
+      calories: Math.round(calories),
+    })
+    customVisible.value = false
+    uni.showToast({ title: '已保存', icon: 'none' })
+    void fetchFoodList()
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : '保存失败'
+    uni.showToast({ title: msg, icon: 'none' })
+  } finally {
+    customSubmitting.value = false
+  }
 }
 </script>
 
 <style scoped lang="scss">
-/* 与 SelectedRecordBar.vue 中 .bar 的 bottom、height 保持一致 */
 $selected-bar-height: 76px;
 $selected-bar-bottom: 12px;
 $gap-content-to-bar: 12px;
@@ -232,7 +564,7 @@ $page-bottom-relaxed: 16px;
 }
 .page--with-bar {
   padding-bottom: calc(
-    #{$selected-bar-height} + env(safe-area-inset-bottom, 0px)
+    #{$selected-bar-bottom} + #{$selected-bar-height} + #{$gap-content-to-bar} + env(safe-area-inset-bottom, 0px)
   );
 }
 .hero-bg {
@@ -269,8 +601,13 @@ $page-bottom-relaxed: 16px;
   font-size: 13px;
   color: #8f8f8f;
 }
-.search-placeholder {
+.search-input {
+  flex: 1;
+  height: 38px;
   font-size: 13px;
+  color: #222;
+}
+.search-placeholder {
   color: #9a9a9a;
 }
 .custom-add {
@@ -334,6 +671,12 @@ $page-bottom-relaxed: 16px;
   flex: 1;
   min-height: 0;
   height: 100%;
+}
+.list-hint {
+  padding: 24px 8px;
+  font-size: 13px;
+  color: #999;
+  text-align: center;
 }
 .food-row {
   display: flex;
@@ -412,4 +755,3 @@ $page-bottom-relaxed: 16px;
   color: #fff;
 }
 </style>
-

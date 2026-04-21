@@ -5,33 +5,32 @@
     </view>
     <text class="social-proof">已有{{ socialProofPercent }}%的人按计划达成目标</text>
 
-    <view class="phase-timeline">
-      <view class="section-title-pill">
-        <text class="section-title-text">{{ sectionTitle }}</text>
-      </view>
-      <view class="phase-curve-line">
-        <view class="phase-string-line" />
-      </view>
-      <view class="phase-polaroid-row">
-        <view v-for="(p, idx) in phaseList" :key="idx" class="phase-item">
-          <view class="polaroid-inner image-placeholder">
-            <text class="placeholder-text">image-placeholder</text>
-          </view>
-          <text class="phase-name">{{ p.phaseName }}</text>
-        </view>
-      </view>
+    <view class="section-title-pill">
+      <text class="section-title-text">{{ sectionTitle }}</text>
+    </view>
+    <image
+      class="banner-img"
+      src="/static/plan/plan-transformation.png"
+      mode="widthFix"
+    />
+
+    <view class="weight-range-display">
+      <block v-for="(m, mi) in milestones" :key="mi">
+        <text class="milestone" :style="{ color: m.color }">{{ m.value }}{{ unit }}</text>
+        <text v-if="mi < milestones.length - 1" class="arrow" :style="{ color: m.arrowColor || m.color }">
+          {{ arrowSymbol }}
+        </text>
+      </block>
     </view>
 
-    <view class="chart-container">
-      <text class="chart-hint">{{ chartHint }}</text>
-      <view class="weight-range-display">
-        <block v-for="(m, mi) in milestones" :key="mi">
-          <text class="milestone" :style="{ color: m.color }">{{ m.value }}{{ unit }}</text>
-          <text v-if="mi < milestones.length - 1" class="arrow" :style="{ color: m.arrowColor || m.color }">
-            {{ arrowSymbol }}
-          </text>
-        </block>
-      </view>
+    <image
+      class="banner-img phase-banner"
+      src="/static/plan/phase-timeline.png"
+      mode="widthFix"
+    />
+    <view v-if="timelineStartLabel && timelineEndLabel" class="timeline-dates">
+      <text class="date-l">{{ timelineStartLabel }}</text>
+      <text class="date-r">{{ timelineEndLabel }}</text>
     </view>
   </view>
 </template>
@@ -43,15 +42,8 @@ defineProps({
   lossUnit: { type: String, default: '斤' },
   socialProofPercent: { type: Number, required: true },
   sectionTitle: { type: String, default: '减脂是最好的逆袭' },
-  phaseList: {
-    type: Array,
-    default: () => [
-      { phaseName: '启动' },
-      { phaseName: '减脂' },
-      { phaseName: '巩固' },
-    ],
-  },
-  chartHint: { type: String, default: '体重趋势（占位）' },
+  timelineStartLabel: { type: String, default: '' },
+  timelineEndLabel: { type: String, default: '' },
   milestones: {
     type: Array,
     default: () => [
@@ -69,7 +61,7 @@ defineProps({
 .plan-progress-card {
   display: flex;
   flex-direction: column;
-  gap: 28rpx;
+  gap: 24rpx;
   padding: 32rpx;
   background: #ffffff;
   border-radius: 32rpx;
@@ -94,12 +86,6 @@ defineProps({
   color: #666666;
 }
 
-.phase-timeline {
-  display: flex;
-  flex-direction: column;
-  gap: 20rpx;
-}
-
 .section-title-pill {
   align-self: flex-start;
   background: #d9efd4;
@@ -113,67 +99,14 @@ defineProps({
   color: #2e7d32;
 }
 
-.phase-curve-line {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  min-height: 56rpx;
-}
-
-.phase-string-line {
+.banner-img {
   width: 100%;
-  height: 6rpx;
-  background: #f5d76e;
-  border-radius: 4rpx;
+  display: block;
+  border-radius: 16rpx;
 }
 
-.phase-polaroid-row {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  gap: 16rpx;
-  flex-wrap: wrap;
-}
-
-.phase-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8rpx;
-}
-
-.polaroid-inner {
-  width: 160rpx;
-  height: 144rpx;
-  background: #ffffff;
-  border-radius: 8rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.12);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8rpx;
-}
-
-.placeholder-text {
-  font-size: 18rpx;
-  color: #889988;
-}
-
-.phase-name {
-  font-size: 18rpx;
-  color: #666666;
-}
-
-.chart-container {
-  display: flex;
-  flex-direction: column;
-  gap: 20rpx;
-}
-
-.chart-hint {
-  font-size: 20rpx;
-  color: #999999;
+.phase-banner {
+  margin-top: 4rpx;
 }
 
 .weight-range-display {
@@ -183,7 +116,7 @@ defineProps({
   justify-content: center;
   flex-wrap: wrap;
   gap: 8rpx;
-  padding-top: 8rpx;
+  padding: 4rpx 0 8rpx;
 }
 
 .milestone {
@@ -193,5 +126,19 @@ defineProps({
 
 .arrow {
   font-size: 24rpx;
+}
+
+.timeline-dates {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 0 8rpx 4rpx;
+  margin-top: -8rpx;
+}
+
+.date-l,
+.date-r {
+  font-size: 22rpx;
+  color: #888888;
 }
 </style>

@@ -343,7 +343,12 @@ async function onSave() {
 
   try {
     uni.showLoading({ title: '保存中', mask: true })
-    const u = await userStore.updateUserProfile({
+    const info = userStore.userInfo
+    const activityLevel =
+      info?.activityLevel != null && info.activityLevel >= 1 && info.activityLevel <= 5
+        ? Math.floor(Number(info.activityLevel))
+        : undefined
+    const payload: Parameters<typeof userStore.updateUserProfile>[0] = {
       nickname: nick,
       gender,
       age,
@@ -352,16 +357,25 @@ async function onSave() {
       targetWeightKg,
       targetDate,
       avatarBase64,
-    })
+    }
+    if (activityLevel != null) {
+      payload.activityLevel = activityLevel
+    }
+    const u = await userStore.updateUserProfile(payload)
     pendingAvatarPath.value = ''
     store.applyFromApiUser(u)
     uni.hideLoading()
-    uni.showToast({ title: '保存成功', icon: 'success' })
-    if (u.profileCompleted) {
-      setTimeout(() => {
-        uni.reLaunch({ url: '/pages/user/index' })
-      }, 500)
-    }
+    uni.showModal({
+      title: '保存成功',
+      content: '已根据您的个人信息，更新了每日热量预算。',
+      showCancel: false,
+      confirmText: '确定',
+      success: () => {
+        if (u.profileCompleted) {
+          uni.reLaunch({ url: '/pages/user/index' })
+        }
+      },
+    })
   } catch (err: unknown) {
     uni.hideLoading()
     uni.showToast({ title: err instanceof Error ? err.message : '保存失败', icon: 'none' })

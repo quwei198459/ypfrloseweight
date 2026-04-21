@@ -12,6 +12,8 @@ spring:
 
 server:
   port: 8080
+  # 显式监听所有网卡，便于真机通过局域网 IP 访问（模拟器用 127.0.0.1 即可）
+  address: 0.0.0.0
   tomcat:
     max-http-form-post-size: 20MB
     max-swallow-size: 20MB
@@ -28,8 +30,8 @@ mybatis-plus:
 
 wechat:
   miniapp:
-    app-id: wx18b3c99724695bb8
-    app-secret: change-me
+    app-id: wxfd93d8228139adca
+    app-secret: f38959c23bc0b0e52c917b19f422645d
 
 aliyun:
   food:
@@ -44,6 +46,7 @@ app:
     expire-seconds: 604800
   upload:
     avatar-dir: ./uploads/avatars
+    food-image-dir: ./uploads/food-images
 
 logging:
   level:

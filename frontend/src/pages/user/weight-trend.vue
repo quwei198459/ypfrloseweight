@@ -3,20 +3,8 @@
     <view class="wt-content">
       <!-- summaryCard -->
       <view class="wt-summary">
-        <view class="wt-panda-row" aria-hidden="true">
-          <view class="wt-confetti wt-confetti--b" />
-          <view class="wt-confetti wt-confetti--g" />
-          <view class="wt-confetti wt-confetti--o" />
-          <view class="wt-confetti wt-confetti--p" />
-          <view class="wt-panda wt-panda--left">
-            <view class="wt-panda-face" />
-          </view>
-          <view class="wt-panda wt-panda--mid">
-            <view class="wt-panda-face wt-panda-face--mid" />
-          </view>
-          <view class="wt-panda wt-panda--right">
-            <view class="wt-panda-face" />
-          </view>
+        <view class="wt-hero-wrap" aria-hidden="true">
+          <image class="wt-hero-img" :src="wtHeroSrc" mode="aspectFill" />
         </view>
 
         <view class="wt-total-loss">
@@ -81,18 +69,17 @@
               :style="{ bottom: yBottomPercent(y) + '%' }"
             />
             <view
+              v-if="mock.targetWeight > 0 && mock.chart.yMax > mock.chart.yMin"
               class="wt-chart__target"
-              :style="{ bottom: yBottomPercent(154) + '%' }"
+              :style="{ bottom: yBottomPercent(mock.targetWeight) + '%' }"
             />
             <view class="wt-chart__fill" />
 
             <view
+              v-for="(_, segIdx) in mock.chart.points.slice(0, -1)"
+              :key="'seg' + segIdx"
               class="wt-chart__seg"
-              :style="segStyle(0)"
-            />
-            <view
-              class="wt-chart__seg"
-              :style="segStyle(1)"
+              :style="segStyle(segIdx)"
             />
 
             <view
@@ -107,7 +94,7 @@
               class="wt-chart__pt-lbl"
               :style="labelStyle(i, pv)"
             >{{ pv }}</text>
-            <text class="wt-chart__panda-emoji" :style="pandaEmojiStyle">🐼</text>
+            <text v-if="mock.chart.points.length" class="wt-chart__panda-emoji" :style="pandaEmojiStyle">🐼</text>
           </view>
           <view class="wt-chart__x-axis">
             <text
@@ -139,7 +126,7 @@
     <WeightEditModal
       :show="showCurrentWeightModal"
       title="当前体重"
-      default-value=""
+      :default-value="currentWeightModalDefault"
       @update:show="showCurrentWeightModal = $event"
       @confirm="handleCurrentWeightConfirm"
     />
@@ -154,37 +141,44 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import WeightEditModal from '../../components/user/WeightEditModal.vue'
-import { weightTrendMock } from '../../constants/weightTrendMock'
+import { createWeightTrendState } from '../../constants/weightTrendMock'
 import { fetchCurrentUser } from '@/api/loseweight'
 import { updateUserProfile } from '@/api/user'
 import { addWeightRecord, fetchWeightRecords } from '@/api/weight'
-import { apiPath, resolveUserId, STORAGE_TOKEN } from '@/config/api'
-import { httpGetAuth, httpPost, httpPostAuth } from '@/utils/http'
-import type { AppUserDto, UpdateProfilePayload } from '@/api/types'
+import { resolveUserId, STORAGE_TOKEN } from '@/config/api'
+import type { AppUserDto, UpdateProfilePayload, WeightRecordRow } from '@/api/types'
+import wtHero from '@/static/user/weight-trend-hero.png'
 
-const mock = weightTrendMock
+const wtHeroSrc = wtHero
+const mock = reactive(createWeightTrendState())
 
 const showInitialWeightModal = ref(false)
 const showCurrentWeightModal = ref(false)
 const showTargetWeightModal = ref(false)
+/** 底部「+记录体重」打开弹层时不预填；从「当前体重」行编辑时预填 */
+const currentWeightModalEmptyDefault = ref(false)
+const currentWeightModalDefault = computed(() =>
+  currentWeightModalEmptyDefault.value ? '' : String(mock.currentWeight || '')
+)
 
 type ModalKind = 'initial' | 'current' | 'target'
 
-function openModal(kind: ModalKind) {
+function openModal(kind: ModalKind, opts?: { record?: boolean }) {
   showInitialWeightModal.value = false
   showCurrentWeightModal.value = false
   showTargetWeightModal.value = false
   if (kind === 'initial') showInitialWeightModal.value = true
-  else if (kind === 'current') showCurrentWeightModal.value = true
-  else showTargetWeightModal.value = true
+  else if (kind === 'current') {
+    currentWeightModalEmptyDefault.value = Boolean(opts?.record)
+    showCurrentWeightModal.value = true
+  } else showTargetWeightModal.value = true
 }
 
 function onRecordTap() {
-  // 复用“当前体重”弹层逻辑
-  openModal('current')
+  openModal('current', { record: true })
 }
 
 function jinFromKg(kg: number | null | undefined): number {
@@ -197,65 +191,117 @@ function jinFromKg(kg: number | null | undefined): number {
 async function syncFromProfileAndWeights() {
   try {
     const user = await fetchCurrentUser()
-    applyUserToMock(user)
+    applyUserToTrend(user)
 
-    const id = resolveUserId()
     const records = await fetchWeightRecords(90)
-    applyRecordsToMock(records)
+    applyRecordsToTrend(records)
+    if (!records.length) {
+      buildFallbackChartFromProfile()
+    }
   } catch {
-    // 接口失败时保持原有 mock，不影响样式展示
+    /* 未登录或网络失败时保留当前展示 */
   }
 }
 
-function applyUserToMock(user: AppUserDto) {
+function applyUserToTrend(user: AppUserDto) {
   const initJin = jinFromKg(user.initialWeightKg)
   const currJin = jinFromKg(user.currentWeightKg)
   const targetJin = jinFromKg(user.targetWeightKg)
 
-  if (initJin > 0) {
-    mock.initialWeight = initJin
-  }
-  if (currJin > 0) {
-    mock.currentWeight = currJin
-  }
-  if (targetJin > 0) {
-    mock.targetWeight = targetJin
-  }
+  if (initJin > 0) mock.initialWeight = initJin
+  if (currJin > 0) mock.currentWeight = currJin
+  if (targetJin > 0) mock.targetWeight = targetJin
 
-  if (initJin > 0 && currJin > 0) {
-    mock.totalLoss = Math.round((initJin - currJin) * 10) / 10
+  if (mock.initialWeight > 0 && mock.currentWeight > 0) {
+    mock.totalLoss = Math.round((mock.initialWeight - mock.currentWeight) * 10) / 10
   }
 }
 
-function applyRecordsToMock(records: { recordDate: string; weightKg: number }[]) {
-  if (!Array.isArray(records) || records.length === 0) return
+function formatMd(iso: string): string {
+  const t = (iso || '').trim().slice(0, 10)
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(t)
+  if (!m) return t
+  return `${m[2]}/${m[3]}`
+}
+
+function recordSubtext(lastIso: string): string {
+  const t = (lastIso || '').trim().slice(0, 10)
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(t)
+  if (!m) return '—'
+  const d0 = new Date(`${m[1]}-${m[2]}-${m[3]}T12:00:00`)
+  const d1 = new Date()
+  d1.setHours(12, 0, 0, 0)
+  const diff = Math.floor((d1.getTime() - d0.getTime()) / 86400000)
+  if (diff <= 0) return '今日更新'
+  return `${diff}天前记录`
+}
+
+function setChartYRange(values: number[]) {
+  const finite = values.filter((x) => Number.isFinite(x) && x > 0)
+  if (!finite.length) {
+    mock.chart.yMin = 120
+    mock.chart.yMax = 170
+    mock.chart.yAxis = [170, 160, 150, 140, 130, 120]
+    return
+  }
+  const lo = Math.min(...finite)
+  const hi = Math.max(...finite)
+  const pad = 8
+  let yMin = Math.floor((lo - pad) / 5) * 5
+  let yMax = Math.ceil((hi + pad) / 5) * 5
+  if (yMax - yMin < 20) {
+    yMax = yMin + 20
+  }
+  mock.chart.yMin = yMin
+  mock.chart.yMax = yMax
+  const ticks: number[] = []
+  const step = yMax - yMin <= 35 ? 5 : 10
+  for (let y = yMax; y >= yMin - 0.001; y -= step) {
+    ticks.push(Math.round(y))
+  }
+  mock.chart.yAxis = ticks
+}
+
+function applyRecordsToTrend(records: WeightRecordRow[]) {
+  if (!Array.isArray(records) || records.length === 0) {
+    mock.currentWeightRecordText = '—'
+    mock.chart.points = []
+    mock.chart.xAxis = []
+    return
+  }
   const sorted = [...records].sort(
     (a, b) => new Date(a.recordDate).getTime() - new Date(b.recordDate).getTime()
   )
   const last = sorted[sorted.length - 1]
-  const first = sorted[0]
-
   const currJin = jinFromKg(last.weightKg)
-  const initJin = jinFromKg(first.weightKg)
-
   if (currJin > 0) {
     mock.currentWeight = currJin
   }
-  if (initJin > 0) {
-    mock.initialWeight = initJin
+  if (mock.initialWeight > 0 && mock.currentWeight > 0) {
+    mock.totalLoss = Math.round((mock.initialWeight - mock.currentWeight) * 10) / 10
   }
-  if (initJin > 0 && currJin > 0) {
-    mock.totalLoss = Math.round((initJin - currJin) * 10) / 10
-  }
+  mock.currentWeightRecordText = recordSubtext(last.recordDate)
 
-  // 仅用最新 3 条填充折线点，保持现有视觉布局
-  const last3 = sorted.slice(-3)
-  if (last3.length > 0) {
-    const pts = last3.map((r) => jinFromKg(r.weightKg))
-    while (pts.length < mock.chart.points.length) {
-      pts.unshift(mock.chart.points[0])
-    }
-    mock.chart.points = pts.slice(-mock.chart.points.length)
+  const maxPts = 14
+  const slice = sorted.slice(-maxPts)
+  mock.chart.points = slice.map((r) => jinFromKg(r.weightKg))
+  mock.chart.xAxis = slice.map((r) => formatMd(r.recordDate))
+  const vals = [...mock.chart.points]
+  if (mock.targetWeight > 0) vals.push(mock.targetWeight)
+  setChartYRange(vals)
+}
+
+/** 无称重记录时，用资料上的初始/当前体重画一条示意折线 */
+function buildFallbackChartFromProfile() {
+  if (mock.chart.points.length > 0) return
+  const init = mock.initialWeight
+  const curr = mock.currentWeight
+  const tgt = mock.targetWeight
+  if (init > 0 && curr > 0) {
+    mock.chart.points = [init, curr]
+    mock.chart.xAxis = ['起点', '现在']
+    const vals = tgt > 0 ? [init, curr, tgt] : [init, curr]
+    setChartYRange(vals)
   }
 }
 
@@ -263,26 +309,42 @@ onShow(() => {
   void syncFromProfileAndWeights()
 })
 
-/** 体重 v∈[120,170] 在纵轴上的 bottom 百分比（0=底 120，100=顶 170） */
-function yBottomPercent(v: number) {
-  return ((v - 120) / 50) * 100
-}
-
 const plotW = 620
 const plotH = 280
 const dotR = 8
 
-const xs = [62, 310, 558]
+/** 当前图表纵轴：yMin 在底部、yMax 在顶部 */
+function yBottomPercent(v: number) {
+  const span = mock.chart.yMax - mock.chart.yMin
+  if (span <= 0) return 50
+  return ((v - mock.chart.yMin) / span) * 100
+}
+
+function dotXs(n: number): number[] {
+  if (n <= 0) return []
+  if (n === 1) return [Math.round(plotW / 2)]
+  const left = 52
+  const right = plotW - 52
+  return Array.from({ length: n }, (_, i) => Math.round(left + ((right - left) * i) / (n - 1)))
+}
+
+const xsRpx = computed(() => dotXs(mock.chart.points.length))
 
 function valBottom(v: number) {
-  return ((v - 120) / 50) * plotH + dotR
+  const span = mock.chart.yMax - mock.chart.yMin
+  if (span <= 0) return plotH / 2 + dotR
+  return ((v - mock.chart.yMin) / span) * plotH + dotR
 }
 
 function segStyle(i: number) {
-  const x1 = xs[i]
-  const x2 = xs[i + 1]
-  const v1 = mock.chart.points[i]
-  const v2 = mock.chart.points[i + 1]
+  const xs = xsRpx.value
+  if (xs.length < 2 || i < 0 || i >= mock.chart.points.length - 1) {
+    return { display: 'none' }
+  }
+  const x1 = xs[i]!
+  const x2 = xs[i + 1]!
+  const v1 = mock.chart.points[i]!
+  const v2 = mock.chart.points[i + 1]!
   const y1 = valBottom(v1)
   const y2 = valBottom(v2)
   const dx = x2 - x1
@@ -299,15 +361,19 @@ function segStyle(i: number) {
 }
 
 function dotStyle(i: number, v: number) {
+  const xs = xsRpx.value
+  const x = xs[i] ?? plotW / 2
   return {
-    left: xs[i] - dotR + 'rpx',
+    left: x - dotR + 'rpx',
     bottom: valBottom(v) - dotR + 'rpx',
   }
 }
 
 function labelStyle(i: number, v: number) {
+  const xs = xsRpx.value
+  const x = xs[i] ?? plotW / 2
   const bottom = valBottom(v) + 14
-  const left = xs[i] - 18
+  const left = x - 18
   return {
     left: left + 'rpx',
     bottom: bottom + 'rpx',
@@ -315,15 +381,20 @@ function labelStyle(i: number, v: number) {
 }
 
 function xPercent(i: number) {
-  const pct = [12, 50, 88][i] ?? 50
-  return pct
+  const n = mock.chart.xAxis.length
+  if (n <= 1) return 50
+  return 12 + (76 * i) / (n - 1)
 }
 
 const pandaEmojiStyle = computed(() => {
-  const i = 2
-  const v = mock.chart.points[2]
+  const pts = mock.chart.points
+  if (!pts.length) return { display: 'none' }
+  const i = pts.length - 1
+  const xs = xsRpx.value
+  const x = xs[i] ?? plotW / 2
+  const v = pts[i]!
   return {
-    left: xs[i] - 18 + 'rpx',
+    left: x - 18 + 'rpx',
     bottom: valBottom(v) - 8 + 'rpx',
   }
 })
@@ -339,10 +410,14 @@ async function updateProfilePartial(payload: UpdateProfilePayload) {
 
 async function handleInitialWeightConfirm(valJin: number) {
   try {
+    uni.showLoading({ title: '保存中', mask: true })
     const kg = Math.round((valJin / 2) * 100) / 100
     await updateProfilePartial({ initialWeightKg: kg })
     await syncFromProfileAndWeights()
+    uni.hideLoading()
+    uni.showToast({ title: '已保存', icon: 'success' })
   } catch (e: unknown) {
+    uni.hideLoading()
     const msg = e instanceof Error ? e.message : '保存失败'
     uni.showToast({ title: msg, icon: 'none' })
   }
@@ -350,10 +425,14 @@ async function handleInitialWeightConfirm(valJin: number) {
 
 async function handleTargetWeightConfirm(valJin: number) {
   try {
+    uni.showLoading({ title: '保存中', mask: true })
     const kg = Math.round((valJin / 2) * 100) / 100
     await updateProfilePartial({ targetWeightKg: kg })
     await syncFromProfileAndWeights()
+    uni.hideLoading()
+    uni.showToast({ title: '已保存', icon: 'success' })
   } catch (e: unknown) {
+    uni.hideLoading()
     const msg = e instanceof Error ? e.message : '保存失败'
     uni.showToast({ title: msg, icon: 'none' })
   }
@@ -361,6 +440,7 @@ async function handleTargetWeightConfirm(valJin: number) {
 
 async function handleCurrentWeightConfirm(valJin: number) {
   try {
+    uni.showLoading({ title: '保存中', mask: true })
     const kg = Math.round((valJin / 2) * 100) / 100
     const id = resolveUserId()
     await addWeightRecord(id, {
@@ -368,7 +448,10 @@ async function handleCurrentWeightConfirm(valJin: number) {
       weightKg: kg,
     })
     await syncFromProfileAndWeights()
+    uni.hideLoading()
+    uni.showToast({ title: '已记录', icon: 'success' })
   } catch (e: unknown) {
+    uni.hideLoading()
     const msg = e instanceof Error ? e.message : '记录失败'
     uni.showToast({ title: msg, icon: 'none' })
   }
@@ -401,108 +484,19 @@ $wt-fill: rgba(197, 217, 155, 0.35);
   box-sizing: border-box;
 }
 
-.wt-panda-row {
-  position: relative;
-  height: 88rpx;
-  margin-bottom: 8rpx;
+.wt-hero-wrap {
+  width: 100%;
+  height: 160rpx;
+  border-radius: 28rpx;
+  overflow: hidden;
+  margin-bottom: 12rpx;
+  background: #f3f7ed;
 }
 
-.wt-confetti {
-  position: absolute;
-  border-radius: 2rpx;
-}
-
-.wt-confetti--b {
-  width: 10rpx;
-  height: 14rpx;
-  background: #6bb3ff;
-  left: 36rpx;
-  top: 16rpx;
-}
-
-.wt-confetti--g {
-  width: 8rpx;
-  height: 12rpx;
-  background: #9fd89f;
-  left: 52rpx;
-  top: 12rpx;
-}
-
-.wt-confetti--o {
-  width: 12rpx;
-  height: 8rpx;
-  background: #ffb347;
-  right: 48rpx;
-  top: 18rpx;
-}
-
-.wt-confetti--p {
-  width: 8rpx;
-  height: 12rpx;
-  background: #e878d0;
-  right: 28rpx;
-  top: 10rpx;
-}
-
-.wt-panda {
-  position: absolute;
-  bottom: 0;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-}
-
-.wt-panda--left {
-  left: 64rpx;
-  width: 72rpx;
-  height: 72rpx;
-}
-
-.wt-panda--mid {
-  left: 50%;
-  margin-left: -42rpx;
-  width: 84rpx;
-  height: 84rpx;
-}
-
-.wt-panda--right {
-  right: 64rpx;
-  left: auto;
-  width: 72rpx;
-  height: 72rpx;
-}
-
-.wt-panda-face {
-  width: 64rpx;
-  height: 54rpx;
-  border-radius: 50%;
-  background: #ffffff;
-  border: 3rpx solid #9e9e9e;
-  position: relative;
-}
-
-.wt-panda-face--mid {
-  width: 72rpx;
-  height: 60rpx;
-}
-
-.wt-panda-face::before,
-.wt-panda-face::after {
-  content: '';
-  position: absolute;
-  width: 20rpx;
-  height: 22rpx;
-  background: #1a1a1a;
-  border-radius: 50%;
-  top: -6rpx;
-}
-
-.wt-panda-face::before {
-  left: -4rpx;
-}
-
-.wt-panda-face::after {
-  right: -4rpx;
+.wt-hero-img {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 .wt-total-loss {

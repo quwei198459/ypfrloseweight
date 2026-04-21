@@ -27,5 +27,15 @@ export function mapAppUserDto(raw: AppUserDto): AppUserDto {
       const v = (raw as { profileCompleted?: unknown }).profileCompleted
       return v === true || v === 1 || v === '1'
     })(),
+    bmiInterpretation: (() => {
+      const v = (raw as { bmiInterpretation?: unknown }).bmiInterpretation
+      if (v == null) return null
+      const s = String(v).trim()
+      return s === '' ? null : s
+    })(),
+    mealRecordCount: num((raw as { mealRecordCount?: unknown }).mealRecordCount),
+    healthyDietDays: num((raw as { healthyDietDays?: unknown }).healthyDietDays),
+    joinedDays: num((raw as { joinedDays?: unknown }).joinedDays),
+    weightRecordedDaysAgo: num((raw as { weightRecordedDaysAgo?: unknown }).weightRecordedDaysAgo),
   }
 }

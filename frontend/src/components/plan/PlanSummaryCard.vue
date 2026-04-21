@@ -1,19 +1,21 @@
 <template>
   <view class="plan-summary-card">
     <view class="metrics-row">
-      <view class="metric plan-duration">
+      <view class="metric">
         <text class="metric-label">计划周期</text>
         <text class="metric-value">{{ duration }}{{ durationUnit }}</text>
       </view>
-      <view class="metric plan-weight-range">
+      <view class="metric">
         <text class="metric-label">减重目标</text>
         <text class="metric-value">{{ startWeight }}-{{ targetWeight }}{{ unit }}</text>
       </view>
-    </view>
-    <view class="weekly-weight-loss">
-      <view class="illus-placeholder image-placeholder">
-        <text class="placeholder-text">image-placeholder</text>
+      <view class="metric">
+        <text class="metric-label">每周减重</text>
+        <text class="metric-value">{{ weeklyLoss }}{{ unit }}</text>
       </view>
+    </view>
+    <view class="weekly-highlight-row">
+      <image class="weekly-boy" src="/static/plan/weekly-boy.png" mode="aspectFill" />
       <view class="weekly-bubble">
         <view class="weekly-text-row">
           <text class="weekly-prefix">每周减重 </text>
@@ -46,52 +48,46 @@ defineProps({
 .metrics-row {
   display: flex;
   flex-direction: row;
-  gap: 20rpx;
+  gap: 12rpx;
 }
 
 .metric {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 12rpx;
-  padding: 28rpx 24rpx;
+  gap: 10rpx;
+  padding: 22rpx 12rpx;
   background: #ffffff;
-  border-radius: 28rpx;
+  border-radius: 24rpx;
   box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
 }
 
 .metric-label {
-  font-size: 24rpx;
+  font-size: 22rpx;
   color: #888888;
 }
 
 .metric-value {
-  font-size: 40rpx;
+  font-size: 30rpx;
   font-weight: 700;
   color: #1a1a1a;
+  word-break: break-all;
 }
 
-.weekly-weight-loss {
+.weekly-highlight-row {
   display: flex;
   flex-direction: row;
   align-items: center;
   gap: 20rpx;
 }
 
-.image-placeholder {
-  width: 112rpx;
-  height: 96rpx;
+.weekly-boy {
+  width: 120rpx;
+  height: 120rpx;
   border-radius: 24rpx;
+  flex-shrink: 0;
   background: #eef3ee;
-  border: 1rpx solid #c8d8c8;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.placeholder-text {
-  font-size: 20rpx;
-  color: #7a8f7a;
 }
 
 .weekly-bubble {
@@ -116,7 +112,7 @@ defineProps({
 }
 
 .weekly-num {
-  font-size: 32rpx;
+  font-size: 36rpx;
   font-weight: 700;
   color: #2e7d32;
 }

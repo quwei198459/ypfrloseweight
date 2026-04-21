@@ -17,7 +17,20 @@
         <text class="main-text">{{ mealTitle }}</text>
         <text class="calories">{{ mealCalories }}</text>
       </view>
-      <view class="food-row">
+      <view
+        v-for="(f, i) in mealFoodsSafe"
+        :key="`${f.name}_${f.amount}_${f.calories}_${i}`"
+        class="food-row"
+        :class="{ 'food-row--sep': i > 0 }"
+      >
+        <view class="thumb meal" />
+        <view class="text-col food-text-col">
+          <text class="main-text">{{ f.name }}</text>
+          <text class="sub-text">{{ f.amount }}</text>
+        </view>
+        <text class="food-calories">{{ f.calories }}</text>
+      </view>
+      <view v-if="mealFoodsSafe.length === 0" class="food-row">
         <view class="thumb meal" />
         <view class="text-col">
           <text class="main-text">{{ foodName }}</text>
@@ -40,6 +53,11 @@ const props = defineProps<{
   sportDetail?: string
   mealTitle?: string
   mealCalories?: string
+  mealFoods?: Array<{
+    name?: string
+    amount?: string
+    calories?: string
+  }>
   foodName?: string
   foodAmount?: string
   foodCalories?: string
@@ -48,6 +66,15 @@ const props = defineProps<{
 const iconClass = computed(() =>
   props.type === 'sport' ? 'icon-sport' : 'icon-meal'
 )
+
+const mealFoodsSafe = computed(() => {
+  if (!Array.isArray(props.mealFoods)) return []
+  return props.mealFoods.map((x) => ({
+    name: x?.name || '',
+    amount: x?.amount || '',
+    calories: x?.calories || '',
+  }))
+})
 </script>
 
 <style scoped lang="scss">
@@ -147,5 +174,22 @@ const iconClass = computed(() =>
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.food-row--sep {
+  border-top: 1px solid #f1f3ec;
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
+.food-text-col {
+  flex: 1;
+  min-width: 0;
+}
+
+.food-calories {
+  font-size: 11px;
+  color: #4b7a2d;
+  flex-shrink: 0;
 }
 </style>

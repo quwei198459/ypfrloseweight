@@ -23,20 +23,21 @@
           :total-loss="planData.totalLoss"
           :social-proof-percent="planData.socialProofPercent"
           :section-title="planData.progressSectionTitle"
-          :phase-list="planData.phaseList"
           :milestones="planData.weightMilestones"
+          :timeline-start-label="planData.timelineStartLabel"
+          :timeline-end-label="planData.timelineEndLabel"
         />
         <PlanStrategyCard
+          :calorie-label="planData.calorieLabel"
           :calorie-value="planData.calorieValue"
+          :exercise-label="planData.exerciseLabel"
           :exercise-value="planData.exerciseValue"
+          :diet-pattern-label="planData.dietPatternLabel"
           :diet-pattern-value="planData.dietPatternValue"
+          :diet-recommend-label="planData.dietRecommendLabel"
           :diet-recommend-value="planData.dietRecommendValue"
         />
-        <PlanUserCaseCard
-          :loss-value="planData.userCaseLoss"
-          :achieved-date="planData.userCaseDate"
-          :achievement-prefix="planData.userCaseAchievementPrefix"
-        />
+        <PlanUserCaseCard />
       </view>
     </scroll-view>
 

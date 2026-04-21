@@ -19,7 +19,7 @@
           "x": 0,
           "y": 0,
           "name": "logo-c-dark",
-          "context": "导出 logo-c-dark.png · 512",
+          "context": "登录顶区 #F7FBF7 · 莲花+断续双环线稿 · 暖金棕线 #A67C4A · 光栅 designs/build_brand_logos.py → logo-c-dark.png（768×768 透明底，正方形铺满避免 aspectFit 显小）",
           "clip": true,
           "width": 512,
           "height": 512,
@@ -28,37 +28,16 @@
           "children": [
             {
               "type": "rectangle",
-              "cornerRadius": 76,
-              "id": "poiVg",
-              "x": 118,
-              "y": 118,
-              "name": "C_D_Outer",
+              "id": "rstrDk",
+              "x": 0,
+              "y": 0,
+              "name": "logo-c-dark-raster",
+              "width": 512,
+              "height": 512,
               "fill": {
-                "type": "color",
-                "color": "#000000",
-                "enabled": false
-              },
-              "width": 276,
-              "height": 276,
-              "stroke": {
-                "align": "center",
-                "thickness": 20,
-                "fill": "#3D5C36"
-              }
-            },
-            {
-              "type": "ellipse",
-              "id": "OhbVr",
-              "x": 192,
-              "y": 192,
-              "name": "C_D_Core",
-              "fill": "#5E8F52",
-              "width": 128,
-              "height": 128,
-              "stroke": {
-                "align": "center",
-                "thickness": 6,
-                "fill": "#4E7C45"
+                "type": "image",
+                "url": "../frontend/src/static/logo/logo-c-dark.png",
+                "mode": "fill"
               }
             }
           ]
@@ -69,7 +48,7 @@
           "x": 560,
           "y": 0,
           "name": "logo-c-contrast",
-          "context": "导出 logo-c-contrast.png · 512",
+          "context": "首页顶栏 #BFD9A3 · 莲花+断续双环线稿 · 深绿线 #1F2A1F · 光栅 designs/build_brand_logos.py → logo-c-contrast.png（768×768 透明底）",
           "clip": true,
           "width": 512,
           "height": 512,
@@ -78,29 +57,16 @@
           "children": [
             {
               "type": "rectangle",
-              "cornerRadius": 68,
-              "id": "LBcbf",
-              "x": 126,
-              "y": 126,
-              "name": "C_C_Block",
-              "fill": "#2A3F26",
-              "width": 260,
-              "height": 260
-            },
-            {
-              "type": "ellipse",
-              "id": "JmTPS",
-              "x": 146,
-              "y": 146,
-              "name": "C_C_Ring",
-              "innerRadius": 0.42,
-              "fill": "#6FA05E",
-              "width": 220,
-              "height": 220,
-              "stroke": {
-                "align": "center",
-                "thickness": 8,
-                "fill": "#B8E070"
+              "id": "rstrCt",
+              "x": 0,
+              "y": 0,
+              "name": "logo-c-contrast-raster",
+              "width": 512,
+              "height": 512,
+              "fill": {
+                "type": "image",
+                "url": "../frontend/src/static/logo/logo-c-contrast.png",
+                "mode": "fill"
               }
             }
           ]

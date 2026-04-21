@@ -2,30 +2,8 @@
   <view class="member-page">
     <scroll-view class="scroll-container" scroll-y :show-scrollbar="false" :enable-back-to-top="true">
       <view class="scroll-container__inner">
-        <view class="member-top-intro">
-          <view class="member-top-intro__row">
-            <view class="member-top-intro__text-block">
-              <text class="member-top-intro__line1">你的减脂计划制作已完成</text>
-              <text class="member-top-intro__line2">推荐开通永久会员，解锁全部能力</text>
-            </view>
-            <view class="member-top-intro__image-placeholder" />
-          </view>
-        </view>
-
-        <view class="member-highlight-data">
-          <view class="member-highlight-data__row">
-            <view class="member-highlight-data__tag">
-              <text class="member-highlight-data__tag-text">4周内减重15斤</text>
-            </view>
-            <view class="member-highlight-data__tag">
-              <text class="member-highlight-data__tag-text">热量预算 1500 大卡</text>
-            </view>
-          </view>
-          <view class="member-highlight-data__row">
-            <view class="member-highlight-data__tag">
-              <text class="member-highlight-data__tag-text">8+16 轻断食</text>
-            </view>
-          </view>
+        <view class="member-hero-wrap">
+          <image class="member-hero-img" :src="vipHeroSrc" mode="widthFix" />
         </view>
 
         <view class="member-plan-block">
@@ -33,7 +11,7 @@
           <text class="member-tip-text">不会自动续费，请放心购买~</text>
         </view>
 
-        <MemberNoticeBar :text="noticeText" />
+        <MemberNoticeBar :lines="noticeLines" />
 
         <view class="member-benefits-section">
           <view class="member-benefits-section__header">
@@ -51,12 +29,8 @@
             />
           </view>
         </view>
-
-        <text class="support-contact-text">如遇到问题，请通过kf@small-circle.cn联系客服</text>
       </view>
     </scroll-view>
-
-    <PaymentLoadingMask :visible="isPaying" />
 
     <MemberFixedBottomBar
       :agreement-checked="agreementChecked"
@@ -66,15 +40,19 @@
   </view>
 </template>
 
-<script setup>
-import { ref, onUnmounted } from 'vue'
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'
 import MemberPlanSelector from '@/components/member/MemberPlanSelector.vue'
 import MemberNoticeBar from '@/components/member/MemberNoticeBar.vue'
 import MemberBenefitItem from '@/components/member/MemberBenefitItem.vue'
-import PaymentLoadingMask from '@/components/member/PaymentLoadingMask.vue'
 import MemberFixedBottomBar from '@/components/member/MemberFixedBottomBar.vue'
+import { fetchVipProducts, type VipProductDto } from '@/api/vip'
+import { buildMemberPurchaseNotices } from '@/constants/memberPurchaseNotices'
+import vipHero from '@/static/member/vip-hero.png'
 
-const planList = ref([
+const vipHeroSrc = vipHero
+
+const DEFAULT_PLANS = [
   {
     id: 'lifetime',
     title: '永久会员',
@@ -102,7 +80,37 @@ const planList = ref([
     selected: false,
     tag: '',
   },
-])
+]
+
+const planList = ref([...DEFAULT_PLANS])
+
+type PlanRow = (typeof DEFAULT_PLANS)[number]
+
+function mergePlansFromApi(dtos: VipProductDto[]): PlanRow[] {
+  const sel = planList.value.find((p) => p.selected)?.id ?? 'lifetime'
+  const map = new Map(dtos.map((d) => [d.code, d]))
+  const codes = ['lifetime', 'quarter', 'year'] as const
+  const out: PlanRow[] = []
+  for (const code of codes) {
+    const d = map.get(code)
+    const base = DEFAULT_PLANS.find((p) => p.id === code)
+    if (!base) continue
+    if (!d) {
+      out.push({ ...base, selected: code === sel })
+      continue
+    }
+    out.push({
+      id: d.code,
+      title: d.title,
+      desc: d.subtitle ?? '',
+      price: d.priceYuan,
+      originPrice: d.originPriceYuan,
+      selected: code === sel,
+      tag: d.cornerTag ?? '',
+    })
+  }
+  return out
+}
 
 const benefitList = ref([
   {
@@ -137,14 +145,23 @@ const benefitList = ref([
   },
 ])
 
-const noticeText = ref('旋***成为了年费会员')
+const noticeLines = ref(buildMemberPurchaseNotices(50))
 
-const isPaying = ref(false)
 const agreementChecked = ref(false)
 
-let payTimer = null
+onMounted(() => {
+  void fetchVipProducts()
+    .then((list) => {
+      if (list.length > 0) {
+        planList.value = mergePlansFromApi(list)
+      }
+    })
+    .catch(() => {
+      /* 保持 DEFAULT */
+    })
+})
 
-function onSelectPlan(id) {
+function onSelectPlan(id: string) {
   planList.value = planList.value.map((p) => ({
     ...p,
     selected: p.id === id,
@@ -163,22 +180,11 @@ function onOpenVip() {
     })
     return
   }
-  isPaying.value = true
-  if (payTimer) {
-    clearTimeout(payTimer)
-  }
-  payTimer = setTimeout(() => {
-    isPaying.value = false
-    payTimer = null
-  }, 2000)
+  uni.showToast({
+    title: '暂未开通',
+    icon: 'none',
+  })
 }
-
-onUnmounted(() => {
-  if (payTimer) {
-    clearTimeout(payTimer)
-    payTimer = null
-  }
-})
 </script>
 
 <style lang="scss" scoped>
@@ -200,80 +206,23 @@ onUnmounted(() => {
 .scroll-container__inner {
   display: flex;
   flex-direction: column;
-  gap: 24rpx;
+  gap: 20rpx;
   padding: 24rpx 32rpx;
-  padding-bottom: calc(280rpx + env(safe-area-inset-bottom));
+  padding-bottom: calc(200rpx + env(safe-area-inset-bottom));
   box-sizing: border-box;
 }
 
-.member-top-intro {
-  background: #ffffff;
-  border-radius: 40rpx;
-  padding: 32rpx;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
-  box-sizing: border-box;
-}
-
-.member-top-intro__row {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 24rpx;
-}
-
-.member-top-intro__text-block {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 12rpx;
-}
-
-.member-top-intro__line1 {
-  font-size: 30rpx;
-  font-weight: 600;
-  color: #333333;
-  line-height: 1.4;
-}
-
-.member-top-intro__line2 {
-  font-size: 24rpx;
-  color: #888888;
-  line-height: 1.45;
-}
-
-.member-top-intro__image-placeholder {
-  flex-shrink: 0;
-  width: 200rpx;
-  height: 200rpx;
-  border-radius: 32rpx;
-  background: #fff3e0;
-  border: 2rpx solid #e8dcc8;
-}
-
-.member-highlight-data {
-  display: flex;
-  flex-direction: column;
-  gap: 24rpx;
+.member-hero-wrap {
   width: 100%;
+  border-radius: 32rpx;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
 }
 
-.member-highlight-data__row {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: 24rpx;
-}
-
-.member-highlight-data__tag {
-  padding: 20rpx 40rpx;
-  background: #fff3d5;
-  border-radius: 80rpx;
-}
-
-.member-highlight-data__tag-text {
-  font-size: 24rpx;
-  color: #5d4037;
+.member-hero-img {
+  width: 100%;
+  display: block;
 }
 
 .member-plan-block {
@@ -298,7 +247,7 @@ onUnmounted(() => {
 .member-benefits-section {
   display: flex;
   flex-direction: column;
-  gap: 32rpx;
+  gap: 20rpx;
   width: 100%;
 }
 
@@ -324,16 +273,6 @@ onUnmounted(() => {
 .member-benefits-section__list {
   display: flex;
   flex-direction: column;
-  gap: 32rpx;
-}
-
-.support-contact-text {
-  display: block;
-  width: 100%;
-  font-size: 22rpx;
-  color: #aaaaaa;
-  text-align: center;
-  line-height: 1.5;
-  padding: 8rpx 0 32rpx;
+  gap: 20rpx;
 }
 </style>

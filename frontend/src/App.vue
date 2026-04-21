@@ -10,9 +10,12 @@
 <script setup lang="ts">
 import { onLaunch, onShow, onHide } from "@dcloudio/uni-app";
 import PageTopHeader from "@/components/PageTopHeader.vue";
+import { API_BASE_URL } from "@/config/api";
 
 onLaunch(() => {
   console.log("App Launch");
+  // 真机调试时请在 vConsole 核对：若不是电脑局域网 IP，说明未用到最新编译产物或未打开 dist/dev/mp-weixin
+  console.log("[loseweight] API_BASE_URL =", API_BASE_URL);
 });
 
 onShow(() => {

@@ -116,12 +116,15 @@ import { fetchCurrentUser, fetchDashboard } from '@/api/loseweight'
 import HomeCalorieGauge from '@/components/home/HomeCalorieGauge.vue'
 import CustomBmrDialog from '@/components/home/CustomBmrDialog.vue'
 import { formatLocalDate } from '@/utils/date'
+import { useUserStore } from '@/stores/user'
 
 const intakeCalories = ref(0)
 const sportCalories = ref(0)
 const dailyBudget = ref(0)
 const remainingCalories = ref(0)
 const bmr = ref<number | null>(null)
+const userStore = useUserStore()
+const dialogSubmitting = ref(false)
 
 const deficitCalories = computed(() => {
   const b = bmr.value
@@ -131,7 +134,7 @@ const deficitCalories = computed(() => {
 })
 
 const dialogVisible = ref(false)
-const dialogDefaultBmr = ref(2240)
+const dialogDefaultBmr = ref(0)
 
 function loadData() {
   const date = formatLocalDate(new Date())
@@ -163,15 +166,63 @@ onShow(() => {
 })
 
 function openDialog() {
+  dialogDefaultBmr.value = bmr.value != null && bmr.value > 0 ? bmr.value : 0
   dialogVisible.value = true
 }
 
-function onDialogRestore() {
-  uni.showToast({ title: '已记录恢复操作（占位）', icon: 'none' })
+async function onDialogRestore() {
+  if (!userStore.token) {
+    uni.showToast({ title: '请先登录', icon: 'none' })
+    return
+  }
+  if (dialogSubmitting.value) return
+  dialogSubmitting.value = true
+  try {
+    uni.showLoading({ title: '恢复中', mask: true })
+    await userStore.updateUserProfile({
+      useCustomBmr: 0,
+    })
+    uni.hideLoading()
+    uni.showToast({ title: '已恢复系统计算', icon: 'success' })
+    dialogVisible.value = false
+    loadData()
+  } catch (e: unknown) {
+    uni.hideLoading()
+    const msg = e instanceof Error ? e.message : '恢复失败'
+    uni.showToast({ title: msg, icon: 'none' })
+  } finally {
+    dialogSubmitting.value = false
+  }
 }
 
-function onDialogConfirm(_bmr: number) {
-  uni.showToast({ title: '已保存（占位，未接接口）', icon: 'none' })
+async function onDialogConfirm(nextBmr: number) {
+  if (!userStore.token) {
+    uni.showToast({ title: '请先登录', icon: 'none' })
+    return
+  }
+  if (!Number.isFinite(nextBmr) || nextBmr <= 0) {
+    uni.showToast({ title: '请输入有效基础代谢', icon: 'none' })
+    return
+  }
+  if (dialogSubmitting.value) return
+  dialogSubmitting.value = true
+  try {
+    uni.showLoading({ title: '保存中', mask: true })
+    await userStore.updateUserProfile({
+      useCustomBmr: 1,
+      customBmr: Math.round(nextBmr),
+    })
+    uni.hideLoading()
+    uni.showToast({ title: '已保存', icon: 'success' })
+    dialogVisible.value = false
+    loadData()
+  } catch (e: unknown) {
+    uni.hideLoading()
+    const msg = e instanceof Error ? e.message : '保存失败'
+    uni.showToast({ title: msg, icon: 'none' })
+  } finally {
+    dialogSubmitting.value = false
+  }
 }
 
 function goAccountEdit() {

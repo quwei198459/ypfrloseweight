@@ -1,0 +1,93 @@
+{
+  "version": "2.11",
+  "children": [
+    {
+      "type": "frame",
+      "id": "AGe9E",
+      "x": 0,
+      "y": 0,
+      "name": "home-plan-banner",
+      "clip": true,
+      "width": 606,
+      "height": 440,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "./images/generated-1776613957958.png",
+        "mode": "fill"
+      },
+      "cornerRadius": 20,
+      "layout": "none"
+    },
+    {
+      "type": "frame",
+      "id": "uhDIw",
+      "x": 620,
+      "y": 60,
+      "name": "weekly-boy",
+      "clip": true,
+      "width": 200,
+      "height": 200,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "./images/generated-1776615040557.png",
+        "mode": "fill"
+      },
+      "cornerRadius": 20,
+      "layout": "none"
+    },
+    {
+      "type": "frame",
+      "id": "Irrjc",
+      "x": 0,
+      "y": 480,
+      "name": "phase-timeline",
+      "clip": true,
+      "width": 702,
+      "height": 360,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "./images/generated-1776615039552.png",
+        "mode": "fill"
+      },
+      "cornerRadius": 24,
+      "layout": "none"
+    },
+    {
+      "type": "frame",
+      "id": "6Uwwd",
+      "x": 0,
+      "y": 860,
+      "name": "plan-transformation",
+      "clip": true,
+      "width": 702,
+      "height": 280,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "./images/generated-1776615039828.png",
+        "mode": "fill"
+      },
+      "cornerRadius": 20,
+      "layout": "none"
+    },
+    {
+      "type": "frame",
+      "id": "OVHq9",
+      "x": 2200,
+      "y": 0,
+      "name": "weight-trend-hero",
+      "width": 686,
+      "height": 176,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "./images/generated-1776682479618.png",
+        "mode": "fill"
+      },
+      "cornerRadius": 20
+    }
+  ]
+}

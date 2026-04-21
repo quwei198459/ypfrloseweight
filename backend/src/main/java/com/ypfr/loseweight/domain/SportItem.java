@@ -1,6 +1,7 @@
 package com.ypfr.loseweight.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -18,6 +19,9 @@ public class SportItem {
   private Long creatorUserId;
   private String name;
   private String icon;
+
+  /** 库列 calories_per_60min；含数字段名时 MP 默认驼峰易误生成 calories_per60min */
+  @TableField("calories_per_60min")
   private BigDecimal caloriesPer60min;
   private String category;
   private Integer isCustom;

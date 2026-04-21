@@ -3,13 +3,27 @@
     <view class="preview-card__inner">
       <!-- 媒体区：图片 + 各态叠加 -->
       <view class="preview-card__media">
+        <!-- #ifdef MP-WEIXIN -->
+        <camera
+          v-if="showEmbeddedCamera"
+          id="lwCamera"
+          class="preview-live-camera"
+          device-position="back"
+          flash="off"
+          @error="onLiveCameraError"
+          @initdone="onCameraInitDone"
+        />
+        <!-- #endif -->
         <image
           v-if="previewSrc"
-          class="preview-image"
+          class="preview-image preview-image--layer"
           :src="previewSrc"
           mode="aspectFill"
         />
-        <view v-else class="preview-image preview-image--placeholder" />
+        <view
+          v-else-if="showPlaceholder"
+          class="preview-image preview-image--placeholder"
+        />
 
         <view
           v-if="showIdleTip"
@@ -58,7 +72,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, getCurrentInstance, nextTick, onMounted, ref, watch } from 'vue'
 import HeatSummaryModule from './HeatSummaryModule.vue'
 import RecognitionFoodCard from './RecognitionFoodCard.vue'
 
@@ -103,6 +117,37 @@ const emit = defineEmits<{
   (e: 'delete-food'): void
 }>()
 
+const showEmbeddedCamera = computed(() => {
+  let ok = false
+  // #ifdef MP-WEIXIN
+  ok = props.pageState === 'idle' && !props.previewSrc
+  // #endif
+  return ok
+})
+
+/** 微信 camera 在 init 完成前 takePhoto 会失败（如 operateCamera:fail camera has not been initialized） */
+const cameraInitDone = ref(false)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let componentOwner: any
+
+onMounted(() => {
+  componentOwner = getCurrentInstance()?.proxy
+})
+
+watch(showEmbeddedCamera, (on) => {
+  if (on) {
+    cameraInitDone.value = false
+  }
+})
+
+function onCameraInitDone() {
+  cameraInitDone.value = true
+}
+
+const showPlaceholder = computed(
+  () => !props.previewSrc && !showEmbeddedCamera.value,
+)
+
 const showIdleTip = computed(() => {
   return (
     props.pageState === 'idle' &&
@@ -126,16 +171,87 @@ const showSuccessOverlay = computed(() => {
     props.pageState === 'adjusting_ratio'
   )
 })
+
+function onLiveCameraError() {
+  uni.showToast({ title: '相机启动失败，可改用系统相机', icon: 'none', duration: 2000 })
+}
+
+async function waitCameraReady(maxMs: number): Promise<void> {
+  const t0 = Date.now()
+  while (Date.now() - t0 < maxMs) {
+    if (cameraInitDone.value) return
+    await new Promise<void>((r) => setTimeout(r, 40))
+  }
+}
+
+function createWxCameraContext() {
+  const owner = componentOwner
+  // 自定义组件内 camera：必须带组件实例；仅 id 在部分基础库/模拟器上 takePhoto 会失败
+  if (owner) {
+    return uni.createCameraContext('lwCamera', owner)
+  }
+  return uni.createCameraContext('lwCamera')
+}
+
+/** 微信小程序内嵌相机拍照；失败返回 undefined，由页面降级 chooseImage（模拟器常无真机相机） */
+async function takeLivePhoto(): Promise<string | undefined> {
+  // #ifdef MP-WEIXIN
+  if (!showEmbeddedCamera.value) {
+    return undefined
+  }
+  await nextTick()
+  await waitCameraReady(2800)
+
+  if (!showEmbeddedCamera.value) {
+    return undefined
+  }
+
+  const shootOnce = () =>
+    new Promise<string | undefined>((resolve) => {
+      try {
+        const ctx = createWxCameraContext()
+        ctx.takePhoto({
+          quality: 'normal',
+          success: (res) => resolve(res.tempImagePath || undefined),
+          fail: () => resolve(undefined),
+        })
+      } catch {
+        resolve(undefined)
+      }
+    })
+
+  let path = await shootOnce()
+  if (!path) {
+    await new Promise<void>((r) => setTimeout(r, 160))
+    path = await shootOnce()
+  }
+  return path || undefined
+  // #endif
+  // #ifndef MP-WEIXIN
+  return undefined
+  // #endif
+}
+
+defineExpose({ takeLivePhoto })
 </script>
 
 <style lang="scss" scoped>
 .preview-card {
   width: 100%;
+  height: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .preview-card__inner {
   position: relative;
   width: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   border-radius: 24rpx;
   overflow: hidden;
   background: #d8d8d8;
@@ -146,14 +262,35 @@ const showSuccessOverlay = computed(() => {
 .preview-card__media {
   position: relative;
   width: 100%;
-  min-height: 720rpx;
+  flex: 1;
+  /* 尽量占满导航与快门之间的区域，减少预览下方留白 */
+  min-height: 72vh;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-live-camera {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
 }
 
 .preview-image {
+  flex: 1;
   width: 100%;
-  height: 720rpx;
+  min-height: 72vh;
   display: block;
+}
+
+.preview-image--layer {
+  position: relative;
+  z-index: 2;
 }
 
 .preview-image--placeholder {
@@ -244,7 +381,7 @@ const showSuccessOverlay = computed(() => {
 .success-stack__card {
   position: absolute;
   left: 50%;
-  top: 200rpx;
+  top: 230rpx;
   transform: translateX(-50%);
   pointer-events: auto;
 }
@@ -258,6 +395,7 @@ const showSuccessOverlay = computed(() => {
 }
 
 .preview-card__process {
+  flex-shrink: 0;
   padding: 20rpx 8rpx 24rpx;
   background: #d8d8d8;
   border-top: 1rpx solid #c8c8c8;

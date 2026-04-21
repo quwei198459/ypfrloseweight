@@ -6,8 +6,11 @@ export interface SearchFoodItem {
   name: string
   calorie: number
   unit: string
-  giLevel: GiLevel
+  /** 无 GI 数据时不展示列表标签 */
+  giLevel?: GiLevel
   image: string
+  /** 按份记录时传给后端的单位文案，如 个、大份、碗；仅每百克时多为「份」 */
+  portionUnitLabel: string
   /** 弹层顶部摘要，如「864.0 千卡/12个」 */
   calorieSummary?: string
   carbsG?: number

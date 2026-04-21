@@ -72,6 +72,7 @@
               :sport-detail="it.sportDetail"
               :meal-title="it.mealTitle"
               :meal-calories="it.mealCalories"
+              :meal-foods="it.mealFoods"
               :food-name="it.foodName"
               :food-amount="it.foodAmount"
               :food-calories="it.foodCalories"
@@ -129,10 +130,16 @@ type TimelineItem = {
   id: number
   headerTitle: string
   timeText: string
+  recordedAtRaw?: string
   sportName?: string
   sportDetail?: string
   mealTitle?: string
   mealCalories?: string
+  mealFoods?: Array<{
+    name: string
+    amount: string
+    calories: string
+  }>
   foodName?: string
   foodAmount?: string
   foodCalories?: string
@@ -226,13 +233,15 @@ function timeTextFromRecordedAt(iso: string | null | undefined): string {
 }
 
 function mapTimelineItem(it: any): TimelineItem {
+  const recordedAtRaw = typeof it?.recordedAt === 'string' ? it.recordedAt : ''
   if (it?.kind === 'sport') {
     const sportName = typeof it.title === 'string' ? it.title.split(' · ')[1] : ''
     return {
       kind: 'sport',
       id: Number(it.id ?? 0),
       headerTitle: '记录运动',
-      timeText: timeTextFromRecordedAt(it.recordedAt),
+      timeText: timeTextFromRecordedAt(recordedAtRaw),
+      recordedAtRaw,
       sportName: sportName || '',
       sportDetail: it.subtitle || '',
     }
@@ -254,13 +263,68 @@ function mapTimelineItem(it: any): TimelineItem {
     kind: 'meal',
     id: Number(it.id ?? 0),
     headerTitle: `记录${mealKind}`,
-    timeText: timeTextFromRecordedAt(it.recordedAt),
-    mealTitle: mealTitle,
+    timeText: timeTextFromRecordedAt(recordedAtRaw),
+    recordedAtRaw,
+    mealTitle: mealKind,
     mealCalories: mealCalories,
+    mealFoods: [
+      {
+        name: foodName,
+        amount: foodAmount,
+        calories: foodCalories,
+      },
+    ],
     foodName: foodName,
     foodAmount: foodAmount,
     foodCalories: foodCalories,
   }
+}
+
+/** 同一时刻（到分钟）同一餐次的 meal 记录合并展示，并按时间倒序 */
+function groupAndSortTimeline(items: TimelineItem[]): TimelineItem[] {
+  const sorted = [...items].sort((a, b) => {
+    const av = a.recordedAtRaw || ''
+    const bv = b.recordedAtRaw || ''
+    if (av !== bv) return av < bv ? 1 : -1
+    return (b.id || 0) - (a.id || 0)
+  })
+  const out: TimelineItem[] = []
+  for (const it of sorted) {
+    if (it.kind !== 'meal') {
+      out.push(it)
+      continue
+    }
+    const last = out[out.length - 1]
+    const canMerge =
+      last &&
+      last.kind === 'meal' &&
+      (last.recordedAtRaw || '') === (it.recordedAtRaw || '') &&
+      (last.headerTitle || '') === (it.headerTitle || '')
+    if (!canMerge) {
+      out.push({
+        ...it,
+        mealFoods: Array.isArray(it.mealFoods) ? [...it.mealFoods] : [],
+      })
+      continue
+    }
+    const nextFoods = Array.isArray(last.mealFoods) ? [...last.mealFoods] : []
+    if (Array.isArray(it.mealFoods) && it.mealFoods.length) {
+      nextFoods.push(...it.mealFoods)
+    } else {
+      nextFoods.push({
+        name: it.foodName || '',
+        amount: it.foodAmount || '',
+        calories: it.foodCalories || '',
+      })
+    }
+    const caloriesSum = nextFoods.reduce((s, f) => {
+      const m = /(-?\d+)/.exec(f.calories || '')
+      return s + (m ? Number(m[1]) : 0)
+    }, 0)
+    last.mealFoods = nextFoods
+    last.mealCalories = `${Math.round(caloriesSum)} 千卡`
+  }
+  return out
 }
 
 /**
@@ -309,7 +373,7 @@ async function refreshDailyDietPage(date: string) {
     }
 
     const timeline = Array.isArray(daily?.timeline) ? daily.timeline : []
-    timelineItems.value = timeline.map((x) => mapTimelineItem(x))
+    timelineItems.value = groupAndSortTimeline(timeline.map((x) => mapTimelineItem(x)))
   } catch (e: unknown) {
     if (seq !== dietLoadSeq) return
     const msg = e instanceof Error ? e.message : '加载失败，请稍后重试'
@@ -345,7 +409,7 @@ onReady(() => {
   // 避免“首次页面切换尚未完成就再次 navigateTo”导致超时
   setTimeout(() => {
     uni.navigateTo({
-      url: `/pages/food-search/index?mealType=${encodeURIComponent(pendingMealType.value as string)}`,
+      url: `/pages/food-search/index?mealType=${encodeURIComponent(pendingMealType.value as string)}&date=${encodeURIComponent(selectedDateYmd.value)}`,
     })
   }, 100)
 })
@@ -363,7 +427,9 @@ const onQuickClick = (key: string) => {
   if (key === 'sport') {
     uni.navigateTo({ url: '/pages/sport-search/index' })
   } else {
-    uni.navigateTo({ url: `/pages/food-search/index?mealType=${key}` })
+    uni.navigateTo({
+      url: `/pages/food-search/index?mealType=${encodeURIComponent(key)}&date=${encodeURIComponent(selectedDateYmd.value)}`,
+    })
   }
 }
 </script>

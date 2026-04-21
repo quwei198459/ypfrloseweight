@@ -14,6 +14,14 @@ export interface PlanPageData {
   progressSectionTitle: string
   phaseList: { phaseName: string }[]
   weightMilestones: { value: number; color: string; arrowColor?: string }[]
+  /** 四阶段曲线图下方左侧日期（如 4月19日） */
+  timelineStartLabel: string
+  /** 四阶段曲线图下方右侧日期 */
+  timelineEndLabel: string
+  calorieLabel: string
+  exerciseLabel: string
+  dietPatternLabel: string
+  dietRecommendLabel: string
   calorieValue: string
   exerciseValue: string
   dietPatternValue: string
@@ -46,8 +54,14 @@ export const PLAN_PAGE_FALLBACK: PlanPageData = {
     { value: 150, color: '#fb8c00', arrowColor: '#43a047' },
     { value: 120, color: '#2e7d32' },
   ],
-  calorieValue: '约 1500 大卡/日',
-  exerciseValue: '每周 4 次',
+  timelineStartLabel: '4月19日',
+  timelineEndLabel: '7月12日',
+  calorieLabel: '热量缺口',
+  exerciseLabel: '运动',
+  dietPatternLabel: '饮食节奏',
+  dietRecommendLabel: '饮食推荐',
+  calorieValue: '418千卡/天',
+  exerciseValue: '2-3次/周',
   dietPatternValue: '8+16 轻断食',
   dietRecommendValue: '减少糖、盐、油脂',
   userCaseAchievementPrefix: '18 周减重 ',
@@ -56,6 +70,18 @@ export const PLAN_PAGE_FALLBACK: PlanPageData = {
   bottomSlogan: '改变，从这里开始！遇见更好的自己吧！',
   primaryButtonText: '开始使用专属计划',
   showVipBadge: true,
+}
+
+function formatCnMonthDayFromYmd(ymd: string | null | undefined): string | null {
+  if (!ymd || !/^\d{4}-\d{2}-\d{2}$/.test(ymd.trim())) return null
+  const d = new Date(ymd.trim() + 'T12:00:00')
+  if (Number.isNaN(d.getTime())) return null
+  return `${d.getMonth() + 1}月${d.getDate()}日`
+}
+
+function todayCnLabel(): string {
+  const d = new Date()
+  return `${d.getMonth() + 1}月${d.getDate()}日`
 }
 
 function daysUntil(ymd: string | null | undefined): number | null {
@@ -112,6 +138,11 @@ const STATIC: Pick<
   | 'socialProofPercent'
   | 'progressSectionTitle'
   | 'phaseList'
+  | 'calorieLabel'
+  | 'exerciseLabel'
+  | 'dietPatternLabel'
+  | 'dietRecommendLabel'
+  | 'calorieValue'
   | 'exerciseValue'
   | 'dietPatternValue'
   | 'dietRecommendValue'
@@ -124,8 +155,18 @@ const STATIC: Pick<
 > = {
   socialProofPercent: 92,
   progressSectionTitle: '减脂是最好的逆袭',
-  phaseList: [{ phaseName: '启动' }, { phaseName: '减脂' }, { phaseName: '巩固' }],
-  exerciseValue: '每周 4 次',
+  phaseList: [
+    { phaseName: '适应期' },
+    { phaseName: '减重期' },
+    { phaseName: '塑形期' },
+    { phaseName: '巩固期' },
+  ],
+  calorieLabel: '热量缺口',
+  exerciseLabel: '运动',
+  dietPatternLabel: '饮食节奏',
+  dietRecommendLabel: '饮食推荐',
+  calorieValue: '418千卡/天',
+  exerciseValue: '2-3次/周',
   dietPatternValue: '8+16 轻断食',
   dietRecommendValue: '减少糖、盐、油脂',
   userCaseAchievementPrefix: '18 周减重 ',
@@ -157,7 +198,12 @@ export function buildPlanPageDataFromProfile(user: AppUserDto): PlanPageData {
   const weeklyLoss = Math.max(0.1, Math.round((totalLoss / planWeeks) * 10) / 10)
 
   const bmi = bmiFromProfile(user)
-  const { level, desc } = bmiCopy(bmi)
+  const { level, desc: fallbackDesc } = bmiCopy(bmi)
+  const serverDesc =
+    user.bmiInterpretation != null && String(user.bmiInterpretation).trim() !== ''
+      ? String(user.bmiInterpretation).trim()
+      : null
+  const desc = serverDesc ?? fallbackDesc
   const bmiDisplay = bmi > 0 ? bmi : 24
 
   const midJin = Math.round(((startJin + targetJin) / 2) * 10) / 10
@@ -167,10 +213,9 @@ export function buildPlanPageDataFromProfile(user: AppUserDto): PlanPageData {
     { value: Math.round(targetJin), color: '#2e7d32' },
   ]
 
-  const kcal =
-    user.dailyCalorieGoal != null && Number(user.dailyCalorieGoal) > 0
-      ? Math.round(Number(user.dailyCalorieGoal))
-      : 1500
+  const endCn = formatCnMonthDayFromYmd(user.targetDate)
+  const timelineStartLabel = todayCnLabel()
+  const timelineEndLabel = endCn ?? `${planWeeks}周后`
 
   return {
     ...STATIC,
@@ -184,6 +229,7 @@ export function buildPlanPageDataFromProfile(user: AppUserDto): PlanPageData {
     planWeeks,
     totalLoss,
     weightMilestones: milestones,
-    calorieValue: `约 ${kcal} 大卡/日`,
+    timelineStartLabel,
+    timelineEndLabel,
   }
 }
