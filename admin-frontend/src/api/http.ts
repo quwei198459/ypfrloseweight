@@ -1,7 +1,8 @@
 import axios from 'axios'
 import { useAuthStore } from '../stores/auth'
 
-const baseURL = (import.meta.env.VITE_API_BASE_URL as string | undefined) || 'http://127.0.0.1:8081/api/v1'
+/** 与页面同源；完整路径形如 /api/v1/admin/login，由 Nginx 反代到后端 */
+const baseURL = '/api/v1'
 
 export const http = axios.create({
   baseURL,
