@@ -1,7 +1,7 @@
 /** 后端根地址（微信小程序真机请改为电脑局域网 IP + 端口，并勾选开发环境不校验域名） */
 export const API_BASE_URL = (
   import.meta.env.VITE_API_BASE_URL as string | undefined
-)?.replace(/\/$/, '') || 'http://127.0.0.1:8080'
+)?.replace(/\/$/, '') || 'https://api.baohukeji.com'
 
 /**
  * REST 路径前缀。与后端 Controller 一致；若迁移 PRD 仅 `/api` 时改环境变量或此处默认值即可。
