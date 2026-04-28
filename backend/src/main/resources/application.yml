@@ -26,23 +26,23 @@ mybatis-plus:
     db-config:
       id-type: auto
 
-# 密码、AppSecret、AppCode 请在 application-local.yml 中覆盖（该文件已加入 .gitignore）
+# 密码、AppSecret、AppCode 请在 application-local.yml 或环境变量中覆盖（application-local.yml 已加入 .gitignore）
 
 wechat:
   miniapp:
-    app-id: wxfd93d8228139adca
-    app-secret: f38959c23bc0b0e52c917b19f422645d
+    app-id: ${WECHAT_MINIAPP_APP_ID:wxfd93d8228139adca}
+    app-secret: ${WECHAT_MINIAPP_APP_SECRET:change-me}
 
 aliyun:
   food:
     host: https://jmfdcl.market.alicloudapi.com
     path: /food/calories/query
-    appcode: change-me
+    appcode: ${ALIYUN_FOOD_APPCODE:change-me}
 
-# JWT 签发（secret 必须在 application-local.yml 覆盖为≥32字节的随机串）
+# JWT 签发（secret 必须在 application-local.yml 或环境变量中覆盖为≥32字节的随机串）
 app:
   jwt:
-    secret: dev-only-change-in-application-local-yml-min-32-chars!!
+    secret: ${APP_JWT_SECRET:dev-only-change-in-application-local-yml-min-32-chars!!}
     expire-seconds: 604800
   upload:
     avatar-dir: ./uploads/avatars
