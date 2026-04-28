@@ -191,6 +191,7 @@ function onOpenVip() {
 .member-page {
   display: flex;
   flex-direction: column;
+  height: 100vh;
   min-height: 100vh;
   background: #f5f7fa;
   box-sizing: border-box;

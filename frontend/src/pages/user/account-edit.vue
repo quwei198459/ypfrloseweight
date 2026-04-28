@@ -387,6 +387,7 @@ async function onSave() {
 @use '../../components/user/user-variables.scss' as *;
 
 .profile-page {
+  height: 100vh;
   min-height: 100vh;
   background: $user-page-bg;
   box-sizing: border-box;

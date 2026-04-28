@@ -232,6 +232,7 @@ function goAccountEdit() {
 
 <style lang="scss" scoped>
 .budget-help-page {
+  height: 100vh;
   min-height: 100vh;
   background-color: #eef4e8;
   display: flex;

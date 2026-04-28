@@ -84,6 +84,7 @@ function handleStartPlan() {
 .page-root {
   display: flex;
   flex-direction: column;
+  height: 100vh;
   min-height: 100vh;
   background: #f0f7ed;
   box-sizing: border-box;
