@@ -1,0 +1,149 @@
+---
+alwaysApply: true
+---
+
+---
+description: Project-specific engineering rules for the current mini-program and backend system
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# Project Engineering Rules
+
+你正在一个固定技术栈、固定交付方式、强调稳健执行的项目中工作。所有实现必须遵守以下约束。
+
+## 1. Fixed Frontend Stack
+
+前端技术栈固定为：
+
+- Vue 3
+- Vite
+- uni-app 3
+- Pinia
+
+要求：
+- 不得擅自切换框架或状态管理方案
+- 不得引入与当前工程体系冲突的脚手架
+- 不得引入与 uni-app 运行方式不兼容的浏览器专属实现
+
+---
+
+## 2. Fixed Frontend Bootstrap Process
+
+前端项目生成必须遵守固定流程：
+
+1. `npx degit dcloudio/uni-preset-vue#vite-ts .`
+2. `npm install`
+3. `npm run dev:mp-weixin`
+4. 确认可编译通过并能产出 dist
+5. 之后才能删除模板示例内容并注入业务代码
+
+禁止：
+- 跳过模板编译验证
+- 未验证模板可运行就直接批量注入业务代码
+- 在模板尚未稳定时同步推进多个页面改造
+
+---
+
+## 3. Fixed Backend Stack
+
+后端技术栈固定为：
+
+- Java 17+
+- Spring Boot 3
+- MyBatis-Plus
+- MySQL 8
+- RESTful API
+- Maven
+
+要求：
+- 优先沿用现有项目结构
+- 不随意替换 ORM、数据库、中间件
+- 不无故引入复杂微服务拆分
+- 所有后端改动必须与当前业务目标直接相关
+
+---
+
+## 4. Directory Discipline
+
+目录职责必须清晰：
+
+- `frontend/`：前端工程
+- `backend/`：后端工程
+- `database/`：建表脚本、初始化数据、样例数据
+- `designs/`：设计稿、页面结构、原型衍生内容
+- `screenshots/` 或 `material/`：页面截图、参考素材
+
+要求：
+- 不要把数据库脚本混入后端业务目录
+- 不要把设计说明写进运行时代码文件
+- 不要把调试产物长期保留在正式目录中
+
+---
+
+## 5. UI Delivery Discipline
+
+项目中的前端页面高度依赖设计稿、截图和原始页面表现。
+
+要求：
+- 未明确要求时，不允许修改页面结构
+- 未明确要求时，不允许调整视觉风格
+- 页面修复必须优先贴近设计稿与原截图
+- 所有改动必须说明是否影响交互、布局、数据绑定
+
+禁止：
+- 以“优化”为名改动布局
+- 以“美化”为名改变组件层级
+- 以“统一风格”为名重做页面
+
+---
+
+## 6. Data and API Discipline
+
+涉及接口与数据模型时：
+
+要求：
+- 优先复用已有字段
+- 若新增字段，必须明确用途
+- 若修改接口，必须说明前后端影响
+- 若改数据库，必须同时说明迁移和初始化影响
+
+禁止：
+- 擅自删除字段
+- 擅自改字段语义
+- 擅自改接口返回结构
+- 擅自引入会影响存量页面的数据变更
+
+---
+
+## 7. Execution Discipline
+
+执行任务时默认流程：
+
+1. 理解目标
+2. 确认改动范围
+3. 列出涉及文件
+4. 采用最小可行方案
+5. 完成后给验证步骤
+6. 明确说明风险和未改部分
+
+---
+
+## 8. Output Requirements
+
+每次输出都应尽量包含：
+
+- 本次目标理解
+- 计划修改的文件
+- 修改方案
+- 不修改的范围
+- 验证步骤
+- 潜在风险
+
+---
+
+## 9. Default Constraint
+
+默认原则：
+
+**先保证正确，再保证稳定，再保证最小改动，最后才考虑抽象与优化。**
