@@ -1,19 +1,20 @@
 <template>
   <view class="cem-root" @click="emit('cancel')">
     <view class="cem-panel" @click.stop>
-      <text class="cem-title">修改热量</text>
+      <text class="cem-title">修改数量</text>
       <view class="cem-row">
         <view class="cem-input-wrap">
           <input
             class="cem-input"
             type="digit"
             :value="modelValue"
-            placeholder="0"
+            placeholder="100"
             @input="onInput"
           />
         </view>
-        <text class="cem-unit">千卡</text>
+        <text class="cem-unit">{{ unitLabel }}</text>
       </view>
+      <text class="cem-estimate">预计摄入 {{ estimatedCalories }} 千卡</text>
       <view class="cem-actions">
         <view class="cem-btn cem-btn--ghost" @click="emit('cancel')">
           <text class="cem-btn-text cem-btn-text--ghost">取消</text>
@@ -29,6 +30,8 @@
 <script setup lang="ts">
 const props = defineProps<{
   modelValue: string
+  unitLabel: string
+  estimatedCalories: number
 }>()
 
 const emit = defineEmits<{
@@ -109,6 +112,12 @@ function onInput(e: { detail: { value: string } }) {
 .cem-unit {
   font-size: 30rpx;
   color: #444444;
+}
+
+.cem-estimate {
+  font-size: 26rpx;
+  color: #666666;
+  line-height: 1.35;
 }
 
 .cem-actions {

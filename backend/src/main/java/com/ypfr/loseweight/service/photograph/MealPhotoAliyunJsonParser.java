@@ -3,6 +3,8 @@ package com.ypfr.loseweight.service.photograph;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ypfr.loseweight.web.dto.photograph.MealPhotoFoodItemVo;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -17,6 +19,8 @@ import org.springframework.util.StringUtils;
 public class MealPhotoAliyunJsonParser {
 
   private static final Pattern KCAL_PATTERN = Pattern.compile("(\\d+)(\\.\\d+)?\\s*千?卡");
+  private static final BigDecimal DEFAULT_QUANTITY = BigDecimal.valueOf(100);
+  private static final String DEFAULT_QUANTITY_UNIT = "g/ml";
 
   private final ObjectMapper objectMapper;
 
@@ -162,9 +166,13 @@ public class MealPhotoAliyunJsonParser {
     if (n == null || !n.isObject()) {
       return null;
     }
+    Integer type = firstInteger(n, "type");
+    if (type != null && type == 2) {
+      return null;
+    }
     String name = firstText(n, "name", "foodName", "food_name", "food", "dishName", "title");
-    int cal =
-        firstInt(
+    BigDecimal caloriesPer100 =
+        firstDecimal(
             n,
             "calory",
             "calorie",
@@ -173,7 +181,7 @@ public class MealPhotoAliyunJsonParser {
             "energy",
             "kcal",
             "cal");
-    if (!StringUtils.hasText(name) && cal <= 0) {
+    if (!StringUtils.hasText(name) && caloriesPer100.compareTo(BigDecimal.ZERO) <= 0) {
       return null;
     }
     if (!StringUtils.hasText(name)) {
@@ -182,7 +190,17 @@ public class MealPhotoAliyunJsonParser {
     MealPhotoFoodItemVo vo = new MealPhotoFoodItemVo();
     vo.setLineId(String.valueOf(index + 1));
     vo.setFoodName(name.length() > 128 ? name.substring(0, 128) : name);
-    vo.setCalories(Math.max(0, cal));
+    vo.setType(type);
+    vo.setCaloriesPer100(caloriesPer100.setScale(2, RoundingMode.HALF_UP));
+    vo.setQuantity(DEFAULT_QUANTITY);
+    vo.setQuantityUnit(DEFAULT_QUANTITY_UNIT);
+    vo.setCalories(
+        caloriesPer100
+            .multiply(DEFAULT_QUANTITY)
+            .divide(BigDecimal.valueOf(100), 0, RoundingMode.HALF_UP)
+            .max(BigDecimal.ZERO)
+            .setScale(0, RoundingMode.HALF_UP)
+            .intValue());
     vo.setGiLabel("低 GI");
     return vo;
   }
@@ -199,16 +217,16 @@ public class MealPhotoAliyunJsonParser {
     return null;
   }
 
-  private static int firstInt(JsonNode n, String... keys) {
+  private static Integer firstInteger(JsonNode n, String... keys) {
     for (String k : keys) {
       if (!n.has(k)) {
         continue;
       }
       JsonNode v = n.get(k);
-      if (v.isInt()) {
+      if (v.isIntegralNumber()) {
         return v.intValue();
       }
-      if (v.isDouble()) {
+      if (v.isFloatingPointNumber()) {
         return (int) Math.round(v.doubleValue());
       }
       if (v.isTextual()) {
@@ -218,14 +236,38 @@ public class MealPhotoAliyunJsonParser {
         }
       }
     }
-    return 0;
+    return null;
+  }
+
+  private static BigDecimal firstDecimal(JsonNode n, String... keys) {
+    for (String k : keys) {
+      if (!n.has(k)) {
+        continue;
+      }
+      JsonNode v = n.get(k);
+      if (v.isNumber()) {
+        return BigDecimal.valueOf(v.asDouble()).max(BigDecimal.ZERO);
+      }
+      if (v.isTextual()) {
+        try {
+          return new BigDecimal(v.asText().trim()).max(BigDecimal.ZERO);
+        } catch (NumberFormatException ignored) {
+        }
+      }
+    }
+    return BigDecimal.ZERO;
   }
 
   private static List<MealPhotoFoodItemVo> defaultList(int calories) {
     MealPhotoFoodItemVo vo = new MealPhotoFoodItemVo();
+    BigDecimal caloriesPer100 = BigDecimal.valueOf(Math.max(0, calories));
     vo.setLineId("1");
     vo.setFoodName("识别食物");
-    vo.setCalories(Math.max(0, calories));
+    vo.setType(1);
+    vo.setCaloriesPer100(caloriesPer100.setScale(2, RoundingMode.HALF_UP));
+    vo.setQuantity(DEFAULT_QUANTITY);
+    vo.setQuantityUnit(DEFAULT_QUANTITY_UNIT);
+    vo.setCalories(caloriesPer100.intValue());
     vo.setGiLabel("低 GI");
     return List.of(vo);
   }

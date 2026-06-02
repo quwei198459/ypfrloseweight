@@ -7,7 +7,11 @@
         :meal-label="mealLabel"
       />
 
-      <view v-if="showMealRow" class="meal-anchor">
+      <view
+        v-if="showMealRow"
+        class="meal-anchor"
+        :class="{ 'meal-anchor--compact': isSuccessMealCompact }"
+      >
         <MealTypeTrigger
           :meal-label="mealLabel"
           :open="phase === 'mealtype_dropdown_open'"
@@ -24,20 +28,54 @@
         </view>
       </view>
 
-      <view class="photograph-page__preview-wrap">
+      <scroll-view
+        v-if="phase === 'success' || phase === 'mealtype_dropdown_open'"
+        scroll-y
+        class="success-scroll"
+      >
+        <view class="success-scroll__inner">
+          <view class="success-photo">
+            <image
+              v-if="previewSrc"
+              class="success-photo__image"
+              :src="previewSrc"
+              mode="aspectFill"
+            />
+            <view v-else class="success-photo__placeholder" />
+            <HeatSummaryModule
+              class="success-photo__heat"
+              :badge-percent-label="recommendedPercentLabel"
+              :strip-text="totalStripText"
+            />
+          </view>
+
+          <view class="food-list">
+            <RecognitionFoodListItem
+              v-for="food in mockResult.foods"
+              :key="food.lineId"
+              :food-name="food.foodName"
+              :gi-label="food.giLabel"
+              :calories="getFoodDisplayedCalories(food)"
+              :quantity-label="getFoodQuantityLabel(food)"
+              @edit="openCalorieEdit(food.lineId)"
+              @delete="deleteFood(food.lineId)"
+            />
+            <view v-if="mockResult.foods.length === 0" class="food-list__empty">
+              <text class="food-list__empty-text">暂无食物，请重新拍照或取消本次识别</text>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+
+      <view v-else class="photograph-page__preview-wrap">
         <CameraPreviewCard
           ref="cameraPreviewRef"
           :page-state="phase"
           :preview-src="previewSrc"
           :processing-label="processingLabel"
           :processing-fill-percent="processingFillPercent"
-          :food-name="primaryFood.foodName"
-          :gi-label="primaryFood.giLabel"
-          :calories="displayCalories"
           :badge-percent-label="recommendedPercentLabel"
           :strip-text="totalStripText"
-          @edit-food="openCalorieEdit"
-          @delete-food="onDeleteFoodPlaceholder"
         />
         <!-- 必须被页面引用，否则 mp 增量编译可能缺少该组件 wxss；覆盖「正在上传」阶段 -->
         <UploadLoadingMask v-if="phase === 'uploading'" />
@@ -90,6 +128,35 @@
         @continue="onContinuePhoto"
       />
 
+      <view v-if="accessPanelVisible" class="service-panel" @click="hideContactPanel">
+        <view class="service-panel__card" @click.stop>
+          <view class="service-panel__title">
+            {{ accessInfo?.reason === 'quota_exhausted' ? '拍照识别次数已用完' : '暂未开通拍照识别' }}
+          </view>
+          <view class="service-panel__desc">
+            {{ accessInfo?.message || '当前手机号暂未开通拍照识别，请联系客服开通。其它功能不受影响。' }}
+          </view>
+          <view class="service-panel__qr">
+            <image
+              v-if="accessInfo && makeQrSrc(accessInfo)"
+              :src="makeQrSrc(accessInfo)"
+              mode="aspectFit"
+              class="service-panel__qr-img"
+            />
+            <view v-else class="service-panel__qr-empty">暂无二维码</view>
+          </view>
+          <view class="service-panel__meta">
+            <view>客服电话：{{ accessInfo?.servicePhone || '400-000-0000' }}</view>
+            <view>客服微信：{{ accessInfo?.serviceWechat || 'baohu-service' }}</view>
+          </view>
+          <view class="service-panel__actions">
+            <view class="service-panel__btn service-panel__btn--ghost" @click="onAccessAction('phone')">拨打客服电话</view>
+            <view class="service-panel__btn service-panel__btn--solid" @click="onAccessAction('wechat')">复制微信号</view>
+          </view>
+          <view class="service-panel__close" @click="hideContactPanel">关闭</view>
+        </view>
+      </view>
+
     </view>
 
     <view
@@ -100,29 +167,31 @@
 
     <CalorieEditModal
       v-if="phase === 'editing_calorie'"
-      v-model="calorieDraft"
+      v-model="quantityDraft"
+      :unit-label="editingFood?.quantityUnit || 'g/ml'"
+      :estimated-calories="editingFoodEstimatedCalories"
       @confirm="confirmCalorieEdit"
       @cancel="cancelCalorieEdit"
     />
 
     <RatioAdjustSheet
       v-if="phase === 'adjusting_ratio'"
-      :food-name="primaryFood.foodName"
-      :gi-label="primaryFood.giLabel"
-      :displayed-calories="sheetDisplayedCalories"
-      :kcal-pair-text="ratioKcalText"
+      :foods="mockResult.foods"
+      :ratio-percent-map="ratioPercentMap"
+      :summary-text="ratioSummaryText"
       :meal-short-label="mealLabel"
-      :ratio-percent="ratioPercent"
-      :intake-today="mockResult.intakeCaloriesToday"
-      :daily-budget="mockResult.dailyBudgetCalories"
-      @update:ratio-percent="setRatioPercent"
+      :get-displayed-calories="getDisplayedCaloriesByLineId"
+      @update-food-ratio="setFoodRatioPercent"
       @close="closeRatioSheet"
       @add="onAddFromSheet"
     />
 
     <PhotographSavedOverlay v-if="phase === 'saved'" />
 
-    <view class="photograph-page__safe" />
+    <view
+      v-if="phase === 'failed'"
+      class="photograph-page__safe"
+    />
   </view>
 </template>
 
@@ -138,12 +207,20 @@ import CalorieEditModal from '@/components/photograph/CalorieEditModal.vue'
 import RatioAdjustSheet from '@/components/photograph/RatioAdjustSheet.vue'
 import PhotographSavedOverlay from '@/components/photograph/PhotographSavedOverlay.vue'
 import UploadLoadingMask from '@/components/photograph/UploadLoadingMask.vue'
+import RecognitionFoodListItem from '@/components/photograph/RecognitionFoodListItem.vue'
+import HeatSummaryModule from '@/components/photograph/HeatSummaryModule.vue'
 import { usePhotographFlow } from '@/composables/usePhotographFlow'
+import { API_BASE_URL } from '@/config/api'
+import { checkMealPhotoAccess, type PhotoRecognitionAccessVo } from '@/api/recognize'
 import type { MealTypeKey } from '@/types/photograph'
 
 const cameraPreviewRef = ref<{
   takeLivePhoto: () => Promise<string | undefined>
 } | null>(null)
+
+const accessChecking = ref(false)
+const accessPanelVisible = ref(false)
+const accessInfo = ref<PhotoRecognitionAccessVo | null>(null)
 
 onShow(() => {
   // #ifdef MP-WEIXIN
@@ -161,17 +238,19 @@ const {
   previewSrc,
   selectedMealType,
   mockResult,
-  displayCalories,
-  calorieDraft,
-  ratioPercent,
+  quantityDraft,
+  editingFood,
+  editingFoodEstimatedCalories,
+  ratioPercentMap,
   mealLabel,
   processingFillPercent,
   processingLabel,
   recommendedPercentLabel,
   totalStripText,
-  ratioKcalText,
-  sheetDisplayedCalories,
+  ratioSummaryText,
   isProcessing,
+  getFoodDisplayedCalories,
+  getFoodQuantityLabel,
   handleImagePicked,
   openMealDropdown,
   closeMealDropdown,
@@ -179,6 +258,8 @@ const {
   openCalorieEdit,
   confirmCalorieEdit,
   cancelCalorieEdit,
+  deleteFood,
+  setFoodRatioPercent,
   openRatioSheet,
   closeRatioSheet,
   onConfirmMain,
@@ -188,18 +269,8 @@ const {
   resetToIdle,
 } = usePhotographFlow()
 
-const primaryFood = computed(() => {
-  const f = mockResult.value.foods[0]
-  return f ?? { foodName: '', giLabel: '低 GI', calories: 0, lineId: '0' }
-})
-
 const showHeaderSubtitle = computed(() => {
-  return (
-    phase.value === 'success' ||
-    phase.value === 'mealtype_dropdown_open' ||
-    phase.value === 'editing_calorie' ||
-    phase.value === 'adjusting_ratio'
-  )
+  return phase.value === 'editing_calorie' || phase.value === 'adjusting_ratio'
 })
 
 const showMealRow = computed(() => {
@@ -207,6 +278,10 @@ const showMealRow = computed(() => {
     return false
   }
   return true
+})
+
+const isSuccessMealCompact = computed(() => {
+  return phase.value === 'success' || phase.value === 'mealtype_dropdown_open'
 })
 
 function onMealTriggerClick() {
@@ -219,8 +294,89 @@ function onSelectMeal(key: MealTypeKey) {
   selectMealType(key)
 }
 
-function onDeleteFoodPlaceholder() {
-  uni.showToast({ title: '敬请期待', icon: 'none' })
+function getDisplayedCaloriesByLineId(lineId: string) {
+  const food = mockResult.value.foods.find((f) => f.lineId === lineId)
+  return food ? getFoodDisplayedCalories(food) : 0
+}
+
+function showPhoneBindGuide() {
+  uni.showModal({
+    title: '请先绑定手机号',
+    content: '使用拍照识别热量前，需要先绑定手机号，其它功能可继续正常使用。',
+    confirmText: '去绑定',
+    cancelText: '暂不用',
+    success: (res) => {
+      if (!res.confirm) return
+      uni.navigateTo({
+        url: '/pages/user/account-edit',
+      })
+    },
+  })
+}
+
+function showContactPanel(access: PhotoRecognitionAccessVo) {
+  accessInfo.value = access
+  accessPanelVisible.value = true
+}
+
+function hideContactPanel() {
+  accessPanelVisible.value = false
+}
+
+function makeQrSrc(access: PhotoRecognitionAccessVo) {
+  const raw = access.serviceQrImageUrl || access.serviceQrImagePath || ''
+  if (!raw) return ''
+  if (/^https?:\/\//i.test(raw)) return raw
+  if (raw.startsWith('/')) return `${API_BASE_URL}${raw}`
+  return `${API_BASE_URL}/${raw}`
+}
+
+function dialServicePhone() {
+  const phone = accessInfo.value?.servicePhone || '400-000-0000'
+  uni.makePhoneCall({ phoneNumber: phone })
+}
+
+function copyServiceWechat() {
+  const wechat = accessInfo.value?.serviceWechat || 'baohu-service'
+  uni.setClipboardData({
+    data: wechat,
+    success: () => {
+      uni.showToast({ title: '微信号已复制', icon: 'none' })
+    },
+  })
+}
+
+function onAccessAction(action: 'phone' | 'wechat') {
+  if (action === 'phone') dialServicePhone()
+  else copyServiceWechat()
+}
+
+function showContactGuide(access: PhotoRecognitionAccessVo) {
+  showContactPanel(access)
+}
+
+async function ensurePhotoRecognitionAccess(): Promise<boolean> {
+  if (accessChecking.value) return false
+  accessChecking.value = true
+  try {
+    const access = await checkMealPhotoAccess()
+    if (access.allowed) {
+      accessPanelVisible.value = false
+      return true
+    }
+    if (access.reason === 'phone_required' || !access.phoneBound) {
+      showPhoneBindGuide()
+      return false
+    }
+    showContactGuide(access)
+    return false
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : '权限校验失败'
+    uni.showToast({ title: msg, icon: 'none' })
+    return false
+  } finally {
+    accessChecking.value = false
+  }
 }
 
 /** 放弃当前识图结果，回到拍照界面 */
@@ -229,8 +385,9 @@ function onCancelRecognizeResult() {
   resetToIdle()
 }
 
-function openAlbum() {
+async function openAlbum() {
   if (isProcessing.value) return
+  if (!(await ensurePhotoRecognitionAccess())) return
   uni.chooseImage({
     count: 1,
     sourceType: ['album'],
@@ -241,8 +398,9 @@ function openAlbum() {
   })
 }
 
-function openCamera() {
+async function openCamera() {
   if (isProcessing.value) return
+  if (!(await ensurePhotoRecognitionAccess())) return
   void takePhotoOrChooseCamera()
 }
 
@@ -284,9 +442,6 @@ async function takePhotoOrChooseCamera() {
   }
 }
 
-function setRatioPercent(v: number) {
-  ratioPercent.value = v
-}
 </script>
 
 <style lang="scss" scoped>
@@ -319,11 +474,93 @@ function setRatioPercent(v: number) {
   flex-direction: column;
 }
 
+.success-scroll {
+  flex: 1;
+  min-height: 0;
+  height: 0;
+}
+
+.success-scroll__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+  padding-bottom: 12rpx;
+  box-sizing: border-box;
+}
+
+.success-photo {
+  position: relative;
+  width: 100%;
+  height: 500rpx;
+  flex-shrink: 0;
+  border-radius: 24rpx;
+  overflow: hidden;
+  background: #eeeeee;
+  border: 1rpx solid #dddddd;
+  box-sizing: border-box;
+}
+
+.success-photo__image,
+.success-photo__placeholder {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.success-photo__placeholder {
+  background: #eeeeee;
+}
+
+.success-photo__heat {
+  position: absolute;
+  left: 16rpx;
+  right: 16rpx;
+  bottom: 24rpx;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.food-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+  padding-bottom: 8rpx;
+}
+
+.food-list__empty {
+  min-height: 160rpx;
+  border-radius: 28rpx;
+  border: 1rpx dashed #d0d8ca;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24rpx;
+  box-sizing: border-box;
+}
+
+.food-list__empty-text {
+  font-size: 26rpx;
+  color: #888888;
+  line-height: 1.45;
+  text-align: center;
+}
+
 .meal-anchor {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
+  z-index: 120;
+}
+
+.meal-anchor--compact {
+  position: relative;
+  left: auto;
+  top: auto;
+  transform: none;
+  margin-top: 4rpx;
+  margin-bottom: 8rpx;
   z-index: 120;
 }
 
@@ -353,8 +590,8 @@ function setRatioPercent(v: number) {
   justify-content: space-between;
   flex-shrink: 0;
   gap: 12rpx;
-  margin-top: 24rpx;
-  padding: 0 8rpx 24rpx;
+  margin-top: 12rpx;
+  padding: 0 8rpx 10rpx;
   box-sizing: border-box;
 }
 
@@ -511,6 +748,102 @@ function setRatioPercent(v: number) {
   text-align: center;
   /* emoji 字形偏上，略压底边距后视觉更居中 */
   margin-bottom: 25rpx;
+}
+
+.service-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(15, 45, 40, 0.46);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28rpx;
+  box-sizing: border-box;
+}
+
+.service-panel__card {
+  width: 100%;
+  max-width: 620rpx;
+  background: #fff;
+  border-radius: 32rpx;
+  padding: 28rpx;
+  box-sizing: border-box;
+}
+
+.service-panel__title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #15302b;
+}
+
+.service-panel__desc {
+  margin-top: 12rpx;
+  font-size: 26rpx;
+  line-height: 1.7;
+  color: #5f6f67;
+}
+
+.service-panel__qr {
+  margin-top: 22rpx;
+  min-height: 360rpx;
+  border-radius: 24rpx;
+  background: #f8faf8;
+  border: 1rpx solid #e2ebe5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.service-panel__qr-img {
+  width: 100%;
+  height: 360rpx;
+}
+
+.service-panel__qr-empty {
+  font-size: 24rpx;
+  color: #94a39a;
+}
+
+.service-panel__meta {
+  margin-top: 18rpx;
+  font-size: 24rpx;
+  color: #6a7c73;
+  line-height: 1.8;
+}
+
+.service-panel__actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 20rpx;
+}
+
+.service-panel__btn {
+  flex: 1;
+  text-align: center;
+  border-radius: 999rpx;
+  height: 80rpx;
+  line-height: 80rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.service-panel__btn--ghost {
+  background: #eef4ef;
+  color: #325a4f;
+}
+
+.service-panel__btn--solid {
+  background: linear-gradient(135deg, #79c791 0%, #5fa854 100%);
+  color: #fff;
+}
+
+.service-panel__close {
+  margin-top: 18rpx;
+  text-align: center;
+  font-size: 24rpx;
+  color: #8a998f;
 }
 
 .photograph-page__safe {

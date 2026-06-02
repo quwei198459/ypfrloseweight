@@ -109,6 +109,24 @@ function handleLogout() {
         <el-menu-item index="/sports">
           <span>运动管理</span>
         </el-menu-item>
+        <el-menu-item index="/photo-recognition-service-config">
+          <span>识图客服配置</span>
+        </el-menu-item>
+        <el-menu-item index="/photo-recognition-members">
+          <span>手机号管理</span>
+        </el-menu-item>
+        <el-menu-item index="/skin-detection-whitelist">
+          <span>皮肤检测白名单</span>
+        </el-menu-item>
+        <el-menu-item index="/skin-detection-records">
+          <span>皮肤检测记录</span>
+        </el-menu-item>
+        <el-menu-item index="/skin-detection-item-configs">
+          <span>皮肤检测项配置</span>
+        </el-menu-item>
+        <el-menu-item index="/skin-detection-ai-prompts">
+          <span>AI提示词配置</span>
+        </el-menu-item>
       </el-menu>
     </el-aside>
     <el-container class="admin-body">

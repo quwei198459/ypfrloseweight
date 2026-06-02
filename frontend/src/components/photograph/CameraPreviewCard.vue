@@ -1,5 +1,8 @@
 <template>
-  <view class="preview-card">
+  <view
+    class="preview-card"
+    :class="{ 'preview-card--success': showSuccessOverlay }"
+  >
     <view class="preview-card__inner">
       <!-- 媒体区：图片 + 各态叠加 -->
       <view class="preview-card__media">
@@ -40,16 +43,8 @@
           <text class="failed-toast__text">识别失败，未检测到食物</text>
         </view>
 
-        <!-- 成功态：卡片 + 热量模块叠在预览上 -->
+        <!-- 成功态：只保留总热量模块叠在预览上 -->
         <view v-if="showSuccessOverlay" class="success-stack">
-          <RecognitionFoodCard
-            class="success-stack__card"
-            :food-name="foodName"
-            :gi-label="giLabel"
-            :calories="calories"
-            @edit="emit('edit-food')"
-            @delete="emit('delete-food')"
-          />
           <HeatSummaryModule
             class="success-stack__heat"
             :badge-percent-label="badgePercentLabel"
@@ -74,7 +69,6 @@
 <script setup lang="ts">
 import { computed, getCurrentInstance, nextTick, onMounted, ref, watch } from 'vue'
 import HeatSummaryModule from './HeatSummaryModule.vue'
-import RecognitionFoodCard from './RecognitionFoodCard.vue'
 
 export type PreviewCardState =
   | 'idle'
@@ -111,11 +105,6 @@ const props = withDefaults(
     stripText: '',
   },
 )
-
-const emit = defineEmits<{
-  (e: 'edit-food'): void
-  (e: 'delete-food'): void
-}>()
 
 const showEmbeddedCamera = computed(() => {
   let ok = false
@@ -270,6 +259,11 @@ defineExpose({ takeLivePhoto })
   flex-direction: column;
 }
 
+.preview-card--success .preview-card__media {
+  min-height: 0;
+  height: 100%;
+}
+
 .preview-live-camera {
   position: absolute;
   left: 0;
@@ -286,6 +280,11 @@ defineExpose({ takeLivePhoto })
   width: 100%;
   min-height: 72vh;
   display: block;
+}
+
+.preview-card--success .preview-image {
+  min-height: 0;
+  height: 100%;
 }
 
 .preview-image--layer {
@@ -376,14 +375,6 @@ defineExpose({ takeLivePhoto })
   bottom: 0;
   z-index: 6;
   pointer-events: none;
-}
-
-.success-stack__card {
-  position: absolute;
-  left: 50%;
-  top: 230rpx;
-  transform: translateX(-50%);
-  pointer-events: auto;
 }
 
 .success-stack__heat {

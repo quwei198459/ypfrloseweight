@@ -12,6 +12,10 @@ app:
   jwt:
     secret: ${APP_JWT_SECRET:change-me-to-at-least-32-bytes-secret}
     expire-seconds: 604800
+  skin-detection:
+    yimei-client-id: ${YIMEI_CLIENT_ID:change-me}
+    yimei-client-secret: ${YIMEI_CLIENT_SECRET:change-me}
+    deepseek-api-key: ${DEEPSEEK_API_KEY:change-me}
 
 logging:
   level:

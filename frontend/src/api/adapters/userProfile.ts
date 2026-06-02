@@ -15,6 +15,12 @@ export function mapAppUserDto(raw: AppUserDto): AppUserDto {
     id: num(raw.id) ?? 0,
     gender: raw.gender != null ? num(raw.gender) : null,
     age: raw.age != null ? num(raw.age) : null,
+    birthday: (() => {
+      const v = (raw as { birthday?: unknown }).birthday
+      if (v == null) return null
+      const s = String(v).trim()
+      return s === '' ? null : s
+    })(),
     heightCm: raw.heightCm != null ? num(raw.heightCm) : null,
     currentWeightKg: raw.currentWeightKg != null ? num(raw.currentWeightKg) : null,
     targetWeightKg: raw.targetWeightKg != null ? num(raw.targetWeightKg) : null,

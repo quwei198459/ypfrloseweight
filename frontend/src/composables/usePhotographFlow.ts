@@ -24,51 +24,58 @@ function isMealTypeKey(s: string): s is MealTypeKey {
   return MEAL_KEYS.includes(s as MealTypeKey)
 }
 
-function sumFoodCalories(foods: PhotographMockFood[]): number {
-  return foods.reduce((a, f) => a + (Number(f.calories) || 0), 0)
+function roundKcal(n: number): number {
+  return Math.max(0, Math.round(n))
 }
 
-/** 用户改「总热量」时按原比例分摊到各行 */
-function redistributeCalories(foods: PhotographMockFood[], newTotal: number): PhotographMockFood[] {
-  if (foods.length === 0) {
-    return [
-      {
-        lineId: '1',
-        foodName: '食物',
-        calories: Math.max(0, Math.round(newTotal)),
-        giLabel: '低 GI',
-      },
-    ]
+function roundKcalForSubmit(n: number): number {
+  return Math.round(Math.max(0, n) * 100) / 100
+}
+
+function normalizeRatioPercent(v: number): number {
+  if (!Number.isFinite(v)) return 100
+  return Math.min(100, Math.max(0, Math.round(v)))
+}
+
+function normalizeQuantity(v: number): number {
+  if (!Number.isFinite(v) || v <= 0) return 100
+  return Math.round(v * 10) / 10
+}
+
+function formatQuantityValue(v: number): string {
+  const n = normalizeQuantity(v)
+  return Number.isInteger(n) ? String(n) : String(n).replace(/\.0$/, '')
+}
+
+function getFoodActualQuantity(food: PhotographMockFood, ratioPercent: number): number {
+  const quantity = normalizeQuantity(Number(food.quantity ?? 100))
+  return Math.round(quantity * normalizeRatioPercent(ratioPercent)) / 100
+}
+
+function cleanGiLabel(v?: string | null): string {
+  return typeof v === 'string' ? v.trim() : ''
+}
+
+function initRatioPercentMap(foods: PhotographMockFood[]): Record<string, number> {
+  const map: Record<string, number> = {}
+  for (const f of foods) {
+    map[f.lineId] = 100
   }
-  if (foods.length === 1) {
-    return [{ ...foods[0], calories: Math.max(0, Math.round(newTotal)) }]
-  }
-  const oldSum = sumFoodCalories(foods)
-  if (oldSum <= 0) {
-    const per = Math.max(0, Math.round(newTotal / foods.length))
-    return foods.map((f, i) => ({
-      ...f,
-      calories: i === 0 ? Math.max(0, Math.round(newTotal - per * (foods.length - 1))) : per,
-    }))
-  }
-  const factor = newTotal / oldSum
-  const next = foods.map((f) => ({
-    ...f,
-    calories: Math.max(0, Math.round(f.calories * factor)),
-  }))
-  const drift = Math.round(newTotal) - sumFoodCalories(next)
-  if (drift !== 0 && next[0]) {
-    next[0] = { ...next[0], calories: Math.max(0, next[0].calories + drift) }
-  }
-  return next
+  return map
 }
 
 function mapApiFood(f: MealPhotoFoodItemVo, index: number): PhotographMockFood {
+  const caloriesPer100 = roundKcal(Number(f.caloriesPer100 ?? f.calories) || 0)
+  const quantity = normalizeQuantity(Number(f.quantity ?? 100))
   return {
     lineId: String(f.lineId ?? String(index + 1)),
     foodName: f.foodName || '识别食物',
-    calories: Math.max(0, Math.round(Number(f.calories) || 0)),
-    giLabel: f.giLabel || '低 GI',
+    calories: roundKcal((caloriesPer100 * quantity) / 100),
+    caloriesPer100,
+    quantity,
+    quantityUnit: f.quantityUnit || 'g/ml',
+    type: f.type,
+    giLabel: cleanGiLabel(f.giLabel),
     foodId: f.foodId,
   }
 }
@@ -90,19 +97,17 @@ function applyRecognizeSuccess(res: {
           {
             lineId: '1',
             foodName: '识别食物',
-            calories: Math.max(0, Math.round(Number(res.totalRecognizedCalories) || 0)),
-            giLabel: '低 GI',
+            calories: roundKcal(Number(res.totalRecognizedCalories) || 0),
+            caloriesPer100: roundKcal(Number(res.totalRecognizedCalories) || 0),
+            quantity: 100,
+            quantityUnit: 'g/ml',
+            type: 1,
+            giLabel: '',
           },
         ]
-  const total =
-    res.totalRecognizedCalories != null
-      ? Math.max(0, Math.round(res.totalRecognizedCalories))
-      : sumFoodCalories(foods)
-  const adjusted =
-    foods.length === 1 ? [{ ...foods[0], calories: total }] : redistributeCalories(foods, total)
 
   return {
-    foods: adjusted,
+    foods,
     recommendedEatRatio: res.recommendedEatRatio ?? 1,
     intakeCaloriesToday: res.intakeCaloriesToday ?? 0,
     dailyBudgetCalories: res.dailyBudgetCalories ?? 0,
@@ -125,10 +130,22 @@ export function usePhotographFlow() {
   /** 当前识图任务 id，确认写库必填 */
   const photoJobId = ref<number | null>(null)
   const recordDateStr = ref(formatLocalDate(new Date()))
-  /** 卡片展示总热量（与多食物分摊后一致） */
-  const displayCalories = ref(sumFoodCalories(createDefaultPhotographMock().foods))
-  const calorieDraft = ref(String(displayCalories.value))
-  const ratioPercent = ref(100)
+  const ratioPercentMap = ref<Record<string, number>>(initRatioPercentMap(createDefaultPhotographMock().foods))
+  const quantityDraft = ref('')
+  const editingFoodLineId = ref<string | null>(null)
+
+  const editingFood = computed(() => {
+    const lineId = editingFoodLineId.value
+    return lineId ? mockResult.value.foods.find((f) => f.lineId === lineId) ?? null : null
+  })
+
+  const editingFoodEstimatedCalories = computed(() => {
+    const food = editingFood.value
+    if (!food) return 0
+    const quantity = normalizeQuantity(Number(quantityDraft.value || food.quantity))
+    const per100 = Number(food.caloriesPer100 ?? food.calories) || 0
+    return roundKcal((per100 * quantity * getFoodRatioPercent(food.lineId)) / 100 / 100)
+  })
 
   const timers: ReturnType<typeof setTimeout>[] = []
 
@@ -145,6 +162,41 @@ export function usePhotographFlow() {
   }
 
   const mealLabel = computed(() => MEAL_TYPE_LABEL[selectedMealType.value])
+
+  function getFoodRatioPercent(lineId: string): number {
+    return normalizeRatioPercent(ratioPercentMap.value[lineId] ?? 100)
+  }
+
+  function getFoodDisplayedCalories(food: PhotographMockFood): number {
+    const per100 = Number(food.caloriesPer100 ?? food.calories) || 0
+    const actualQuantity = getFoodActualQuantity(food, getFoodRatioPercent(food.lineId))
+    return roundKcal((per100 * actualQuantity) / 100)
+  }
+
+  function getFoodQuantityLabel(food: PhotographMockFood): string {
+    const actualQuantity = getFoodActualQuantity(food, getFoodRatioPercent(food.lineId))
+    return `${formatQuantityValue(actualQuantity)} ${food.quantityUnit || 'g/ml'}`
+  }
+
+  function syncFoods(nextFoods: PhotographMockFood[]) {
+    mockResult.value = { ...mockResult.value, foods: nextFoods }
+    const nextRatios: Record<string, number> = {}
+    for (const f of nextFoods) {
+      nextRatios[f.lineId] = getFoodRatioPercent(f.lineId)
+    }
+    ratioPercentMap.value = nextRatios
+  }
+
+  function applyFoodsFromRecognize(next: PhotographMockResult) {
+    mockResult.value = next
+    ratioPercentMap.value = initRatioPercentMap(next.foods)
+    quantityDraft.value = ''
+    editingFoodLineId.value = null
+  }
+
+  const displayCalories = computed(() => {
+    return mockResult.value.foods.reduce((total, f) => total + getFoodDisplayedCalories(f), 0)
+  })
 
   const processingFillPercent = computed(() => {
     switch (phase.value) {
@@ -181,15 +233,8 @@ export function usePhotographFlow() {
     return `总热量 ${displayCalories.value} 千卡，推荐吃 ${recommendedPercentLabel.value}`
   })
 
-  const ratioKcalText = computed(() => {
-    const a = mockResult.value.intakeCaloriesToday
-    const b = mockResult.value.dailyBudgetCalories
-    return `${a} / ${b} 千卡`
-  })
-
-  const sheetDisplayedCalories = computed(() => {
-    const base = displayCalories.value
-    return Math.max(0, Math.round((base * ratioPercent.value) / 100))
+  const ratioSummaryText = computed(() => {
+    return `本次预计摄入 ${displayCalories.value} 千卡`
   })
 
   const isProcessing = computed(
@@ -201,13 +246,14 @@ export function usePhotographFlow() {
 
   function resetToIdle() {
     clearTimers()
+    const next = createDefaultPhotographMock()
     phase.value = 'idle'
     previewSrc.value = ''
     photoJobId.value = null
-    mockResult.value = createDefaultPhotographMock()
-    displayCalories.value = sumFoodCalories(mockResult.value.foods)
-    calorieDraft.value = String(displayCalories.value)
-    ratioPercent.value = 100
+    mockResult.value = next
+    ratioPercentMap.value = initRatioPercentMap(next.foods)
+    quantityDraft.value = ''
+    editingFoodLineId.value = null
   }
 
   function startMockSuccessPipeline(path: string) {
@@ -228,9 +274,7 @@ export function usePhotographFlow() {
         PHASE_DELAYS_MS.recognizing_type +
         PHASE_DELAYS_MS.recognizing_weight,
       () => {
-        mockResult.value = createDefaultPhotographMock()
-        displayCalories.value = sumFoodCalories(mockResult.value.foods)
-        calorieDraft.value = String(displayCalories.value)
+        applyFoodsFromRecognize(createDefaultPhotographMock())
         photoJobId.value = null
         phase.value = 'success'
       },
@@ -291,16 +335,11 @@ export function usePhotographFlow() {
             return
           }
 
-          mockResult.value = applyRecognizeSuccess(res)
-          displayCalories.value = sumFoodCalories(mockResult.value.foods)
-          calorieDraft.value = String(displayCalories.value)
+          applyFoodsFromRecognize(applyRecognizeSuccess(res))
 
           if (res.recommendedMealType && isMealTypeKey(res.recommendedMealType)) {
             selectedMealType.value = res.recommendedMealType
           }
-
-          ratioPercent.value = Math.round((mockResult.value.recommendedEatRatio ?? 1) * 100)
-          ratioPercent.value = Math.min(100, Math.max(0, ratioPercent.value))
 
           phase.value = 'success'
         } catch (e) {
@@ -344,33 +383,58 @@ export function usePhotographFlow() {
     phase.value = 'success'
   }
 
-  function openCalorieEdit() {
-    if (phase.value === 'success' || phase.value === 'mealtype_dropdown_open') {
-      calorieDraft.value = String(displayCalories.value)
-      phase.value = 'editing_calorie'
-    }
+  function openCalorieEdit(lineId: string) {
+    if (phase.value !== 'success' && phase.value !== 'mealtype_dropdown_open') return
+    const food = mockResult.value.foods.find((f) => f.lineId === lineId)
+    if (!food) return
+    editingFoodLineId.value = lineId
+    quantityDraft.value = formatQuantityValue(food.quantity)
+    phase.value = 'editing_calorie'
   }
 
   function confirmCalorieEdit() {
-    const n = Number(calorieDraft.value)
+    const n = Number(quantityDraft.value)
     if (!Number.isFinite(n) || n <= 0) {
-      uni.showToast({ title: '请输入有效热量', icon: 'none' })
+      uni.showToast({ title: '请输入有效数量', icon: 'none' })
       return
     }
-    const nextFoods = redistributeCalories(mockResult.value.foods, Math.round(n))
-    mockResult.value = { ...mockResult.value, foods: nextFoods }
-    displayCalories.value = sumFoodCalories(nextFoods)
+    const lineId = editingFoodLineId.value
+    if (!lineId) {
+      phase.value = 'success'
+      return
+    }
+    const nextFoods = mockResult.value.foods.map((f) => {
+      if (f.lineId !== lineId) return f
+      const quantity = normalizeQuantity(n)
+      return { ...f, quantity, calories: roundKcal(((Number(f.caloriesPer100 ?? f.calories) || 0) * quantity) / 100) }
+    })
+    syncFoods(nextFoods)
+    editingFoodLineId.value = null
+    quantityDraft.value = ''
     phase.value = 'success'
   }
 
   function cancelCalorieEdit() {
+    editingFoodLineId.value = null
+    quantityDraft.value = ''
     phase.value = 'success'
+  }
+
+  function deleteFood(lineId: string) {
+    const nextFoods = mockResult.value.foods.filter((f) => f.lineId !== lineId)
+    syncFoods(nextFoods)
+  }
+
+  function setFoodRatioPercent(lineId: string, percent: number) {
+    if (!mockResult.value.foods.some((f) => f.lineId === lineId)) return
+    ratioPercentMap.value = {
+      ...ratioPercentMap.value,
+      [lineId]: normalizeRatioPercent(percent),
+    }
   }
 
   function openRatioSheet() {
     if (phase.value === 'success') {
-      ratioPercent.value = Math.round((mockResult.value.recommendedEatRatio ?? 1) * 100)
-      ratioPercent.value = Math.min(100, Math.max(0, ratioPercent.value))
       phase.value = 'adjusting_ratio'
     }
   }
@@ -379,7 +443,41 @@ export function usePhotographFlow() {
     if (phase.value === 'adjusting_ratio') phase.value = 'success'
   }
 
+  function buildConfirmItems() {
+    return mockResult.value.foods
+      .map((f) => {
+        const ratioPercent = getFoodRatioPercent(f.lineId)
+        const ratioDec = ratioPercent / 100
+        const actualQuantity = getFoodActualQuantity(f, ratioPercent)
+        const per100 = Number(f.caloriesPer100 ?? f.calories) || 0
+        const kcal = roundKcalForSubmit((per100 * actualQuantity) / 100)
+        return {
+          lineId: f.lineId,
+          foodId: f.foodId,
+          confirmedFoodName: f.foodName,
+          confirmedCalories: kcal,
+          confirmedEatRatio: ratioDec,
+          confirmedQuantity: actualQuantity,
+          confirmedQuantityUnit: f.quantityUnit || 'g/ml',
+          caloriesPer100: per100,
+        }
+      })
+      .filter((it) => it.confirmedCalories > 0 && it.confirmedEatRatio > 0)
+  }
+
+  function validateConfirmItems() {
+    const items = buildConfirmItems()
+    if (items.length === 0) {
+      uni.showToast({ title: '至少保留 1 个食物', icon: 'none' })
+      return null
+    }
+    return items
+  }
+
   function goSavedThenDailyRecord() {
+    const items = validateConfirmItems()
+    if (!items) return
+
     if (USE_MOCK_PIPELINE) {
       uni.showToast({ title: 'Mock 模式未写库，仅跳转', icon: 'none', duration: 1800 })
       phase.value = 'saved'
@@ -396,22 +494,6 @@ export function usePhotographFlow() {
       uni.showToast({ title: '缺少识图任务，请重新拍照', icon: 'none' })
       return
     }
-    if (ratioPercent.value <= 0) {
-      uni.showToast({ title: '食用比例需大于 0', icon: 'none' })
-      return
-    }
-
-    const ratioDec = Math.round(ratioPercent.value) / 100
-    const items = mockResult.value.foods.map((f) => {
-      const kcal = Math.round(f.calories * ratioDec * 100) / 100
-      return {
-        lineId: f.lineId,
-        foodId: f.foodId,
-        confirmedFoodName: f.foodName,
-        confirmedCalories: Math.max(0.01, kcal),
-        confirmedEatRatio: ratioDec,
-      }
-    })
 
     void (async () => {
       uni.showLoading({ title: '写入中', mask: true })
@@ -479,16 +561,20 @@ export function usePhotographFlow() {
     photoJobId,
     recordDateStr,
     displayCalories,
-    calorieDraft,
-    ratioPercent,
+    quantityDraft,
+    editingFood,
+    editingFoodEstimatedCalories,
+    ratioPercentMap,
     mealLabel,
     processingFillPercent,
     processingLabel,
     recommendedPercentLabel,
     totalStripText,
-    ratioKcalText,
-    sheetDisplayedCalories,
+    ratioSummaryText,
     isProcessing,
+    getFoodDisplayedCalories,
+    getFoodQuantityLabel,
+    getFoodRatioPercent,
     handleImagePicked,
     openMealDropdown,
     closeMealDropdown,
@@ -496,6 +582,8 @@ export function usePhotographFlow() {
     openCalorieEdit,
     confirmCalorieEdit,
     cancelCalorieEdit,
+    deleteFood,
+    setFoodRatioPercent,
     openRatioSheet,
     closeRatioSheet,
     onConfirmMain,

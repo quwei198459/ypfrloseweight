@@ -5,11 +5,15 @@ export interface AppUserDto {
   avatarUrl: string | null
   gender: number | null
   age: number | null
+  birthday?: string | null
   heightCm: number | null
   currentWeightKg: number | null
   targetWeightKg: number | null
   initialWeightKg: number | null
   targetDate: string | null
+  residenceProvince?: string | null
+  residenceCity?: string | null
+  residenceDistrict?: string | null
   bmr: number | null
   tdee: number | null
   dailyCalorieGoal: number | null
@@ -56,6 +60,11 @@ export interface UpdateProfilePayload {
   initialWeightKg?: number
   /** yyyy-MM-dd */
   targetDate?: string
+  /** yyyy-MM-dd */
+  birthday?: string
+  residenceProvince?: string
+  residenceCity?: string
+  residenceDistrict?: string
   /** 1-5，与后端活动系数档位一致 */
   activityLevel?: number
   /** 1=使用 customBmr，0=恢复系统按资料计算 */

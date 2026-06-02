@@ -95,6 +95,13 @@ public class UserService {
     if (req.getAge() != null && req.getAge() > 0) {
       p.setAge(req.getAge());
     }
+    if (StringUtils.hasText(req.getBirthday())) {
+      try {
+        p.setBirthday(LocalDate.parse(req.getBirthday().trim()));
+      } catch (Exception e) {
+        throw new ApiException(400, "出生日期格式无效，需 yyyy-MM-dd");
+      }
+    }
     if (req.getHeightCm() != null && req.getHeightCm().doubleValue() > 0) {
       p.setHeightCm(req.getHeightCm());
     }
@@ -113,6 +120,15 @@ public class UserService {
       } catch (Exception e) {
         throw new ApiException(400, "目标日期格式无效，需 yyyy-MM-dd");
       }
+    }
+    if (StringUtils.hasText(req.getResidenceProvince())) {
+      p.setResidenceProvince(limitText(req.getResidenceProvince(), 64));
+    }
+    if (StringUtils.hasText(req.getResidenceCity())) {
+      p.setResidenceCity(limitText(req.getResidenceCity(), 64));
+    }
+    if (StringUtils.hasText(req.getResidenceDistrict())) {
+      p.setResidenceDistrict(limitText(req.getResidenceDistrict(), 64));
     }
     if (req.getActivityLevel() != null) {
       int al = req.getActivityLevel();
@@ -192,6 +208,11 @@ public class UserService {
     return loadLatestBudget(userId);
   }
 
+  private static String limitText(String value, int maxLength) {
+    String text = value == null ? "" : value.trim();
+    return text.length() > maxLength ? text.substring(0, maxLength) : text;
+  }
+
   public static boolean computeProfileComplete(LoseWeightUser u, UserProfile p) {
     if (u == null || p == null) {
       return false;
@@ -233,11 +254,15 @@ public class UserService {
       }
       d.setGender(p.getGender());
       d.setAge(p.getAge());
+      d.setBirthday(p.getBirthday());
       d.setHeightCm(p.getHeightCm());
       d.setCurrentWeightKg(p.getCurrentWeightKg());
       d.setTargetWeightKg(p.getTargetWeightKg());
       d.setInitialWeightKg(p.getInitialWeightKg());
       d.setTargetDate(p.getTargetDate());
+      d.setResidenceProvince(p.getResidenceProvince());
+      d.setResidenceCity(p.getResidenceCity());
+      d.setResidenceDistrict(p.getResidenceDistrict());
       d.setBmiInterpretation(
           bmiInterpretationService.resolveInterpretationText(
               p.getHeightCm(), p.getCurrentWeightKg()));

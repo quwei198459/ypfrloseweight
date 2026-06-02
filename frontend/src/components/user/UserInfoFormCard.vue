@@ -2,7 +2,21 @@
   <view class="info-card">
     <UserInfoRow label="性别" :value="gender" @click="$emit('gender')" />
     <view class="info-divider" />
+    <picker mode="date" :value="birthday" @change="(e) => $emit('birthday-change', e.detail.value)">
+      <UserInfoRow label="出生日期" :value="birthday || '请选择'" />
+    </picker>
+    <view class="info-divider" />
     <UserInfoRow label="年龄" :value="age" @click="$emit('age')" />
+    <view class="info-divider" />
+    <picker
+      mode="multiSelector"
+      :range="regionRange"
+      :value="regionIndex"
+      @columnchange="(e) => $emit('residence-column-change', e.detail.column, e.detail.value)"
+      @change="(e) => $emit('residence-change', e.detail.value as number[])"
+    >
+      <UserInfoRow label="居住地" :value="residence || '请选择'" />
+    </picker>
     <view class="info-divider" />
     <UserInfoRow label="身高" :value="height" @click="$emit('height')" />
     <view class="info-divider" />
@@ -19,7 +33,11 @@ import UserInfoRow from './UserInfoRow.vue'
 
 defineProps<{
   gender: string
+  birthday: string
   age: string
+  residence: string
+  regionRange: string[][]
+  regionIndex: number[]
   height: string
   currentWeight: string
   targetWeight: string
@@ -28,7 +46,10 @@ defineProps<{
 
 defineEmits<{
   (e: 'gender'): void
+  (e: 'birthday-change', value: string): void
   (e: 'age'): void
+  (e: 'residence-column-change', column: number, value: number): void
+  (e: 'residence-change', value: number[]): void
   (e: 'height'): void
   (e: 'weight'): void
   (e: 'target-weight'): void

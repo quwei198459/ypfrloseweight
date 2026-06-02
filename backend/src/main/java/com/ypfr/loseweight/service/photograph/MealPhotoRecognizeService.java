@@ -9,6 +9,7 @@ import com.ypfr.loseweight.mapper.DietRecordMapper;
 import com.ypfr.loseweight.mapper.MealPhotoRecognitionMapper;
 import com.ypfr.loseweight.mapper.MealRecordMapper;
 import com.ypfr.loseweight.service.AliyunFoodCalorieClient;
+import com.ypfr.loseweight.service.PhotoRecognitionAccessService;
 import com.ypfr.loseweight.service.DailySummaryService;
 import com.ypfr.loseweight.service.DashboardService;
 import com.ypfr.loseweight.web.dto.DashboardDto;
@@ -40,6 +41,9 @@ public class MealPhotoRecognizeService {
   private static final Set<String> MEAL_TYPES =
       Set.of("breakfast", "lunch", "dinner", "snack");
 
+  private static final Set<String> NON_FOOD_RECOGNITION_NAMES =
+      Set.of("碳水化合物", "蛋白质", "脂肪", "膳食纤维", "钠");
+
   private final MealPhotoRecognitionMapper mealPhotoRecognitionMapper;
   private final MealRecordMapper mealRecordMapper;
   private final DietRecordMapper dietRecordMapper;
@@ -47,6 +51,7 @@ public class MealPhotoRecognizeService {
   private final MealPhotoAliyunJsonParser aliyunJsonParser;
   private final DashboardService dashboardService;
   private final DailySummaryService dailySummaryService;
+  private final PhotoRecognitionAccessService photoRecognitionAccessService;
 
   public MealPhotoRecognizeService(
       MealPhotoRecognitionMapper mealPhotoRecognitionMapper,
@@ -55,7 +60,8 @@ public class MealPhotoRecognizeService {
       AliyunFoodCalorieClient aliyunFoodCalorieClient,
       MealPhotoAliyunJsonParser aliyunJsonParser,
       DashboardService dashboardService,
-      DailySummaryService dailySummaryService) {
+      DailySummaryService dailySummaryService,
+      PhotoRecognitionAccessService photoRecognitionAccessService) {
     this.mealPhotoRecognitionMapper = mealPhotoRecognitionMapper;
     this.mealRecordMapper = mealRecordMapper;
     this.dietRecordMapper = dietRecordMapper;
@@ -63,6 +69,7 @@ public class MealPhotoRecognizeService {
     this.aliyunJsonParser = aliyunJsonParser;
     this.dashboardService = dashboardService;
     this.dailySummaryService = dailySummaryService;
+    this.photoRecognitionAccessService = photoRecognitionAccessService;
   }
 
   public MealPhotoRecognizeResultVo submit(Long userId, MealPhotoSubmitRequest req) {
@@ -89,6 +96,7 @@ public class MealPhotoRecognizeService {
       row.setImageUrl(u.length() > 1024 ? u.substring(0, 1024) : u);
     }
     mealPhotoRecognitionMapper.insert(row);
+    photoRecognitionAccessService.consumeQuota(userId, row.getId());
 
     row.setRecognizeStatus("recognizing");
     mealPhotoRecognitionMapper.updateById(row);
@@ -111,7 +119,8 @@ public class MealPhotoRecognizeService {
           mealPhotoRecognitionMapper.updateById(row);
           return buildResultVo(row, List.of(), row.getErrorCode(), row.getErrorMessage());
         }
-        List<MealPhotoFoodItemVo> foods = aliyunJsonParser.parseFoods(body);
+        List<MealPhotoFoodItemVo> foods =
+            filterRecognizedFoods(aliyunJsonParser.parseFoods(body));
         row.setParsedResultJson(aliyunJsonParser.toJson(foods));
         row.setResultType("candidate_foods");
         row.setRecognizeStatus("success");
@@ -210,6 +219,12 @@ public class MealPhotoRecognizeService {
       d.setImageSnapshot(photo.getImageUrl());
       d.setGiLevelSnapshot(MealPhotoAliyunJsonParser.giSnapshotFromLabel(giLabel));
       d.setCaloriesTotal(it.getConfirmedCalories());
+      d.setAmount(it.getConfirmedQuantity() != null ? it.getConfirmedQuantity() : BigDecimal.valueOf(100));
+      d.setAmountUnit(
+          StringUtils.hasText(it.getConfirmedQuantityUnit())
+              ? it.getConfirmedQuantityUnit().trim()
+              : "g/ml");
+      d.setWeightG(d.getAmount());
       d.setSource("photo");
       d.setRecordTime(now);
       dietRecordMapper.insert(d);
@@ -287,6 +302,30 @@ public class MealPhotoRecognizeService {
       throw new ApiException(403, "无权访问该识图任务");
     }
     return row;
+  }
+
+  private static List<MealPhotoFoodItemVo> filterRecognizedFoods(List<MealPhotoFoodItemVo> foods) {
+    if (foods == null || foods.isEmpty()) {
+      return List.of();
+    }
+    List<MealPhotoFoodItemVo> filtered = new ArrayList<>();
+    int lineNo = 1;
+    for (MealPhotoFoodItemVo food : foods) {
+      if (food == null || !StringUtils.hasText(food.getFoodName())) {
+        continue;
+      }
+      if (food.getType() != null && food.getType() != 1) {
+        continue;
+      }
+      String name = food.getFoodName().trim();
+      if (food.getType() == null && NON_FOOD_RECOGNITION_NAMES.contains(name)) {
+        continue;
+      }
+      food.setFoodName(name);
+      food.setLineId(String.valueOf(lineNo++));
+      filtered.add(food);
+    }
+    return filtered;
   }
 
   private void fillRecognizedSnapshots(MealPhotoRecognition row, List<MealPhotoFoodItemVo> foods) {

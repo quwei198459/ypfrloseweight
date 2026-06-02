@@ -13,11 +13,15 @@ public class AppUserDto {
   private Boolean profileCompleted;
   private Integer gender;
   private Integer age;
+  private LocalDate birthday;
   private BigDecimal heightCm;
   private BigDecimal currentWeightKg;
   private BigDecimal targetWeightKg;
   private BigDecimal initialWeightKg;
   private LocalDate targetDate;
+  private String residenceProvince;
+  private String residenceCity;
+  private String residenceDistrict;
   private Integer bmr;
   private Integer tdee;
   private Integer dailyCalorieGoal;
@@ -95,6 +99,14 @@ public class AppUserDto {
     this.age = age;
   }
 
+  public LocalDate getBirthday() {
+    return birthday;
+  }
+
+  public void setBirthday(LocalDate birthday) {
+    this.birthday = birthday;
+  }
+
   public BigDecimal getHeightCm() {
     return heightCm;
   }
@@ -133,6 +145,30 @@ public class AppUserDto {
 
   public void setTargetDate(LocalDate targetDate) {
     this.targetDate = targetDate;
+  }
+
+  public String getResidenceProvince() {
+    return residenceProvince;
+  }
+
+  public void setResidenceProvince(String residenceProvince) {
+    this.residenceProvince = residenceProvince;
+  }
+
+  public String getResidenceCity() {
+    return residenceCity;
+  }
+
+  public void setResidenceCity(String residenceCity) {
+    this.residenceCity = residenceCity;
+  }
+
+  public String getResidenceDistrict() {
+    return residenceDistrict;
+  }
+
+  public void setResidenceDistrict(String residenceDistrict) {
+    this.residenceDistrict = residenceDistrict;
   }
 
   public Integer getBmr() {

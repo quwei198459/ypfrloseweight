@@ -36,13 +36,20 @@
 
       <UserInfoFormCard
         :gender="profileData.gender"
+        :birthday="profileData.birthday"
         :age="profileData.age"
+        :residence="residenceLabel"
+        :region-range="regionRange"
+        :region-index="regionIndex"
         :height="profileData.height"
         :current-weight="profileData.currentWeight"
         :target-weight="profileData.targetWeight"
         :target-date="profileData.targetDate"
         @gender="openGender"
+        @birthday-change="onBirthdayChange"
         @age="openAge"
+        @residence-column-change="onResidenceColumnChange"
+        @residence-change="onResidenceChange"
         @height="openHeight"
         @weight="openWeight"
         @target-weight="openTargetWeight"
@@ -120,6 +127,7 @@ import { onShow } from '@dcloudio/uni-app'
 import { storeToRefs } from 'pinia'
 import { computed, ref } from 'vue'
 import { fetchCurrentUser } from '@/api/loseweight'
+import { getRegionTree, type RegionAreaNode } from '@/api/region'
 import { useUserStore } from '@/stores/user'
 import {
   genderLabelToCode,
@@ -155,11 +163,50 @@ const {
 
 /** 微信小程序头像临时路径，保存时转 Base64 上传 */
 const pendingAvatarPath = ref('')
+const regionTree = ref<RegionAreaNode[]>([])
+const regionIndex = ref([0, 0, 0])
 
 const displayAvatarSrc = computed(() => {
   if (pendingAvatarPath.value) return pendingAvatarPath.value
   return profileData.value.avatar || ''
 })
+
+const residenceLabel = computed(() => {
+  return [
+    profileData.value.residenceProvince,
+    profileData.value.residenceCity,
+    profileData.value.residenceDistrict,
+  ].filter(Boolean).join(' ')
+})
+
+const regionValue = computed<[string, string, string]>(() => [
+  profileData.value.residenceProvince || '',
+  profileData.value.residenceCity || '',
+  profileData.value.residenceDistrict || '',
+])
+
+const regionRange = computed(() => {
+  const provinces = regionTree.value
+  const province = provinces[regionIndex.value[0]]
+  const cities = province?.children || []
+  const city = cities[regionIndex.value[1]]
+  const districts = city?.children || []
+  return [
+    provinces.map((item) => item.name),
+    cities.map((item) => item.name),
+    districts.map((item) => item.name),
+  ]
+})
+
+function syncRegionIndexFromProfile() {
+  const provinces = regionTree.value
+  const p = Math.max(0, provinces.findIndex((item) => item.name === profileData.value.residenceProvince))
+  const cities = provinces[p]?.children || []
+  const c = Math.max(0, cities.findIndex((item) => item.name === profileData.value.residenceCity))
+  const districts = cities[c]?.children || []
+  const d = Math.max(0, districts.findIndex((item) => item.name === profileData.value.residenceDistrict))
+  regionIndex.value = [p, c, d]
+}
 
 const genderOpts = [...GENDER_OPTIONS]
 
@@ -172,6 +219,9 @@ const weekIndex = ref(indexOfLabel(WEEK_OPTIONS, '8周'))
 
 onShow(async () => {
   try {
+    if (regionTree.value.length === 0) {
+      regionTree.value = await getRegionTree()
+    }
     if (userStore.token) {
       const u = await userStore.fetchUserProfile()
       if (u) store.applyFromApiUser(u)
@@ -179,6 +229,7 @@ onShow(async () => {
       const u = await fetchCurrentUser()
       store.applyFromApiUser(u)
     }
+    syncRegionIndexFromProfile()
   } catch {
     /* 未登录或网络失败时保留本地 store */
   }
@@ -241,6 +292,32 @@ async function onPhoneAuth(e: { detail?: { errMsg?: string; code?: string } }) {
 function openGender() {
   genderIndex.value = indexOfLabel(genderOpts, profileData.value.gender)
   showGenderPopup.value = true
+}
+
+function onBirthdayChange(value: string) {
+  profileData.value.birthday = value
+}
+
+function onResidenceColumnChange(column: number, value: number) {
+  const next = [...regionIndex.value]
+  next[column] = value
+  if (column === 0) {
+    next[1] = 0
+    next[2] = 0
+  } else if (column === 1) {
+    next[2] = 0
+  }
+  regionIndex.value = next
+}
+
+function onResidenceChange(value: number[]) {
+  regionIndex.value = value
+  const province = regionTree.value[value[0]]
+  const city = province?.children?.[value[1]]
+  const district = city?.children?.[value[2]]
+  profileData.value.residenceProvince = province?.name || ''
+  profileData.value.residenceCity = city?.name || ''
+  profileData.value.residenceDistrict = district?.name || ''
 }
 
 function openAge() {
@@ -356,6 +433,10 @@ async function onSave() {
       currentWeightKg,
       targetWeightKg,
       targetDate,
+      birthday: profileData.value.birthday || undefined,
+      residenceProvince: profileData.value.residenceProvince || undefined,
+      residenceCity: profileData.value.residenceCity || undefined,
+      residenceDistrict: profileData.value.residenceDistrict || undefined,
       avatarBase64,
     }
     if (activityLevel != null) {

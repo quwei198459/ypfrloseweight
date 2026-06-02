@@ -1,5 +1,9 @@
 # 含密钥/敏感信息，禁止入库
 docs/final/账号密码.md
+certs/
+.cursor/mcp.json
+.DS_Store
+**/.DS_Store
 
 # 本地整库备份（体积大，勿提交）
 loseweight_0413.sql

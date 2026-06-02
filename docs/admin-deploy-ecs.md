@@ -105,3 +105,144 @@ systemctl reload nginx
 3. 用户列表可查询
 4. 食物分类/食物/运动可增删改查
 5. `https://api.baohukeji.com/api/v1/admin/login` 返回正常 JSON
+
+## 10. 服务器命令备忘
+
+### 10.1 Nginx 与证书
+
+```bash
+vim /etc/nginx/sites-available/default
+cd /etc/nginx/ssl
+ls /etc/nginx/ssl
+chmod 600 /etc/nginx/ssl/*
+mv /etc/nginx/ssl/api.baohukeji.com.pem /etc/nginx/ssl/fullchain.pem
+mv /etc/nginx/ssl/api.baohukeji.com.key /etc/nginx/ssl/privkey.pem
+nginx -t
+systemctl restart nginx
+```
+
+证书上传示例：
+
+```bash
+scp D:\mycode\ypfrloseweight\certs\api.baohukeji.com.pem root@8.136.24.243:/etc/nginx/ssl/
+scp D:\mycode\ypfrloseweight\certs\api.baohukeji.com.key root@8.136.24.243:/etc/nginx/ssl/
+```
+
+### 10.2 前端更新
+
+```bash
+rm -rf /www/frontend-admin/*
+scp -r admin-frontend/dist/* root@8.136.24.243:/www/frontend-admin/
+```
+
+### 10.3 后端打包与上传
+
+```bash
+cd backend
+mvn clean package -DskipTests
+scp backend/target/loseweight-api-0.0.1-SNAPSHOT.jar root@8.136.24.243:/www/backend/loseweight-api.jar
+```
+
+### 10.4 后端启动与重启
+
+```bash
+cd /www/backend
+export DB_USERNAME=root
+export DB_PASSWORD='你的数据库密码'
+export APP_JWT_SECRET='请换成至少32位的随机字符串'
+export WECHAT_MINIAPP_APP_ID='wxfd93d8228139adca'
+export WECHAT_MINIAPP_APP_SECRET='请换成你自己的小程序密钥'
+export ALIYUN_FOOD_APPCODE='请换成你自己的 AppCode'
+nohup java -jar /www/backend/loseweight-api.jar --spring.profiles.active=prod > /www/backend/app.log 2>&1 &
+```
+
+查看日志：
+
+```bash
+tail -f /www/backend/app.log
+```
+
+检查端口：
+
+```bash
+ss -lntp | grep 8081
+```
+
+重启：
+
+```bash
+ps -ef | grep loseweight-api.jar | grep -v grep
+pkill -f loseweight-api.jar
+cd /www/backend
+export DB_USERNAME=root
+export DB_PASSWORD='你的数据库密码'
+export APP_JWT_SECRET='请换成至少32位的随机字符串'
+export WECHAT_MINIAPP_APP_ID='wxfd93d8228139adca'
+export WECHAT_MINIAPP_APP_SECRET='请换成你自己的小程序密钥'
+export ALIYUN_FOOD_APPCODE='请换成你自己的 AppCode'
+nohup java -jar /www/backend/loseweight-api.jar --spring.profiles.active=prod > /www/backend/app.log 2>&1 &
+```
+
+### 10.5 Nginx 参考配置
+
+```nginx
+server {
+    listen 443 ssl;
+    server_name api.baohukeji.com;
+
+    ssl_certificate /etc/nginx/ssl/fullchain.pem;
+    ssl_certificate_key /etc/nginx/ssl/privkey.pem;
+    
+    location /uploads/food-images/ {
+      alias /www/backend/uploads/food-images/;
+      access_log off;
+      expires 30d;
+    }
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:8081/api/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    location / {
+        return 404;
+    }
+}
+
+server {
+    listen 80;
+    server_name api.baohukeji.com;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name admin.baohukeji.com;
+
+    ssl_certificate /etc/nginx/ssl/fullchain.pem;
+    ssl_certificate_key /etc/nginx/ssl/privkey.pem;
+
+    root /www/frontend-admin;
+    index index.html;
+     
+    location /api/ {
+      proxy_pass http://127.0.0.1:8081/api/;
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+
+server {
+    listen 80;
+    server_name admin.baohukeji.com;
+    return 301 https://$host$request_uri;
+}
+```
+

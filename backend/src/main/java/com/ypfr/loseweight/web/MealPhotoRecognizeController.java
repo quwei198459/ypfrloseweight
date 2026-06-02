@@ -2,6 +2,7 @@ package com.ypfr.loseweight.web;
 
 import com.ypfr.loseweight.common.ApiResponse;
 import com.ypfr.loseweight.service.photograph.MealPhotoRecognizeService;
+import com.ypfr.loseweight.service.PhotoRecognitionAccessService;
 import com.ypfr.loseweight.web.dto.photograph.MealPhotoConfirmRequest;
 import com.ypfr.loseweight.web.dto.photograph.MealPhotoConfirmResponseVo;
 import com.ypfr.loseweight.web.dto.photograph.MealPhotoRecognizeResultVo;
@@ -23,11 +24,15 @@ public class MealPhotoRecognizeController {
 
   private final MealPhotoRecognizeService mealPhotoRecognizeService;
   private final AuthUserResolver authUserResolver;
+  private final PhotoRecognitionAccessService photoRecognitionAccessService;
 
   public MealPhotoRecognizeController(
-      MealPhotoRecognizeService mealPhotoRecognizeService, AuthUserResolver authUserResolver) {
+      MealPhotoRecognizeService mealPhotoRecognizeService,
+      AuthUserResolver authUserResolver,
+      PhotoRecognitionAccessService photoRecognitionAccessService) {
     this.mealPhotoRecognizeService = mealPhotoRecognizeService;
     this.authUserResolver = authUserResolver;
+    this.photoRecognitionAccessService = photoRecognitionAccessService;
   }
 
   @PostMapping("/meal-photo")
@@ -37,6 +42,7 @@ public class MealPhotoRecognizeController {
           String authorization,
       @Valid @RequestBody MealPhotoSubmitRequest request) {
     Long userId = authUserResolver.requireUserId(authorization);
+    photoRecognitionAccessService.requireAccess(userId);
     return ApiResponse.ok(mealPhotoRecognizeService.submit(userId, request));
   }
 

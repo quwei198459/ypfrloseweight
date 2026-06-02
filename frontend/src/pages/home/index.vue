@@ -107,6 +107,18 @@
         </view>
       </view>
 
+      <!-- Skin Detection Entry -->
+      <view class="skin-entry-section">
+        <view class="skin-entry-card" @click="goSkinDetection">
+          <view class="skin-entry-copy">
+            <text class="skin-entry-kicker">AI 皮肤检测</text>
+            <text class="skin-entry-title">拍照生成肤况报告</text>
+            <text class="skin-entry-desc">斑点、毛孔、肤质、痤疮、皱纹、黑头 6 项分析</text>
+          </view>
+          <view class="skin-entry-button">去检测</view>
+        </view>
+      </view>
+
       <!-- Fat Loss Plan Section -->
       <view class="fat-loss-plan-section">
         <view class="plan-banner-card">
@@ -227,6 +239,12 @@ const goHeatSearch = () => {
 const openPhotographFromSearchBar = () => {
   uni.navigateTo({
     url: '/pages/photograph/index',
+  })
+}
+
+const goSkinDetection = () => {
+  uni.navigateTo({
+    url: '/pages/skin-detection/intro',
   })
 }
 </script>
@@ -452,6 +470,66 @@ const openPhotographFromSearchBar = () => {
   font-size: 12px;
   color: #dddddd;
   font-weight: bold;
+  flex-shrink: 0;
+}
+
+// ===== Skin Detection Entry =====
+.skin-entry-section {
+  padding: 17px 16px 0;
+}
+
+.skin-entry-card {
+  min-height: 116px;
+  padding: 18px 18px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #ffffff 0%, #eef6e8 100%);
+  border: 1px solid #edf1e7;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.skin-entry-copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.skin-entry-kicker {
+  font-size: 12px;
+  color: #5fa854;
+  font-weight: 800;
+}
+
+.skin-entry-title {
+  margin-top: 6px;
+  font-size: 20px;
+  font-weight: 900;
+  color: #1f2a1f;
+}
+
+.skin-entry-desc {
+  margin-top: 7px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #7a857a;
+}
+
+.skin-entry-button {
+  margin-left: 12px;
+  width: 78px;
+  height: 36px;
+  border-radius: 18px;
+  background: #d5e7b1;
+  border: 1px solid #9ebc86;
+  color: #4b5b2d;
+  font-size: 14px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
 

@@ -47,6 +47,18 @@ app:
   upload:
     avatar-dir: ./uploads/avatars
     food-image-dir: ./uploads/food-images
+  photo-recognition:
+    service-phone: ${APP_PHOTO_RECOGNITION_SERVICE_PHONE:400-000-0000}
+    service-wechat: ${APP_PHOTO_RECOGNITION_SERVICE_WECHAT:baohu-service}
+  skin-detection:
+    yimei-base-url: ${YIMEI_API_BASE_URL:https://api.yimei.ai}
+    yimei-client-id: ${YIMEI_CLIENT_ID:change-me}
+    yimei-client-secret: ${YIMEI_CLIENT_SECRET:change-me}
+    detect-types: ${YIMEI_FACE_DETECT_TYPES:106510}
+    deepseek-base-url: ${DEEPSEEK_BASE_URL:https://api.deepseek.com}
+    deepseek-api-key: ${DEEPSEEK_API_KEY:change-me}
+    default-times: ${SKIN_DETECT_DEFAULT_TIMES:3}
+    image-dir-suffix: ${SKIN_DETECT_IMAGE_DIR_SUFFIX:skin-detection}
 
 logging:
   level:

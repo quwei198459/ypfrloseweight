@@ -4,84 +4,90 @@
       <view class="ras-handle" />
 
       <view class="ras-top">
-        <view class="ras-progress-row">
-          <view class="ras-track">
-            <view class="ras-fill" :style="{ width: budgetFillPercent + '%' }" />
-          </view>
-          <text class="ras-kcal-pair">{{ kcalPairText }}</text>
-        </view>
-        <view class="ras-mini-row">
-          <view class="ras-thumb" />
-          <view class="ras-add-btn" @click="emit('add')">
-            <text class="ras-add-text">添加到{{ mealShortLabel }}</text>
-          </view>
+        <text class="ras-summary">{{ summaryText }}</text>
+        <view class="ras-add-btn" @click="emit('add')">
+          <text class="ras-add-text">添加到{{ mealShortLabel }}</text>
         </view>
       </view>
 
-      <view class="ras-card">
-        <view class="ras-card-top">
-          <view class="ras-big-thumb" />
-          <view class="ras-card-col">
-            <view class="ras-gi">
-              <text class="ras-gi-t">{{ giLabel }}</text>
+      <scroll-view scroll-y class="ras-list">
+        <view class="ras-list__inner">
+          <view v-for="food in foods" :key="food.lineId" class="ras-card">
+            <view class="ras-card-top">
+              <view class="ras-card-col">
+                <view v-if="food.giLabel && food.giLabel.trim()" class="ras-gi">
+                  <text class="ras-gi-t">{{ food.giLabel }}</text>
+                </view>
+                <text class="ras-food-name">{{ food.foodName }}</text>
+                <text class="ras-food-kcal">{{ getDisplayedQuantityLabel(food) }} · {{ getDisplayedCalories(food.lineId) }} 千卡</text>
+              </view>
             </view>
-            <text class="ras-food-name">{{ foodName }}</text>
-            <text class="ras-food-kcal">{{ displayedCalories }} 千卡</text>
+            <view class="ras-slider-block">
+              <view class="ras-slider-head">
+                <text class="ras-slider-hint">食用比例</text>
+                <text class="ras-slider-val">{{ getRatio(food.lineId) }}%</text>
+              </view>
+              <view class="ras-slider-pad">
+                <slider
+                  class="ras-slider"
+                  :value="getRatio(food.lineId)"
+                  min="0"
+                  max="100"
+                  step="1"
+                  activeColor="#2e7d32"
+                  backgroundColor="#c8e6c9"
+                  block-size="26"
+                  block-color="#d5e7b1"
+                  @changing="onSlider(food.lineId, $event)"
+                  @change="onSlider(food.lineId, $event)"
+                />
+              </view>
+            </view>
           </view>
-          <view class="ras-check">
-            <text class="ras-check-dot">✓</text>
+
+          <view v-if="foods.length === 0" class="ras-empty">
+            <text class="ras-empty__text">暂无可调节食物</text>
           </view>
         </view>
-        <view class="ras-slider-block">
-          <text class="ras-slider-hint">食用比例</text>
-          <slider
-            class="ras-slider"
-            :value="ratioPercent"
-            min="0"
-            max="100"
-            step="1"
-            activeColor="#2e7d32"
-            backgroundColor="#c8e6c9"
-            block-size="20"
-            @changing="onSlider"
-            @change="onSlider"
-          />
-          <text class="ras-slider-val">{{ ratioPercent }}%</text>
-        </view>
-      </view>
+      </scroll-view>
     </view>
   </view>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import type { PhotographMockFood } from '@/types/photograph'
 
 const props = defineProps<{
-  foodName: string
-  giLabel: string
-  displayedCalories: number
-  kcalPairText: string
+  foods: PhotographMockFood[]
+  ratioPercentMap: Record<string, number>
+  summaryText: string
   mealShortLabel: string
-  ratioPercent: number
-  intakeToday: number
-  dailyBudget: number
+  getDisplayedCalories: (lineId: string) => number
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:ratioPercent', v: number): void
+  (e: 'update-food-ratio', lineId: string, v: number): void
   (e: 'close'): void
   (e: 'add'): void
 }>()
 
-const budgetFillPercent = computed(() => {
-  const b = props.dailyBudget
-  if (!b || b <= 0) return 0
-  const p = (props.intakeToday / b) * 100
-  return Math.min(100, Math.round(p))
-})
+function getRatio(lineId: string) {
+  const v = props.ratioPercentMap[lineId]
+  if (!Number.isFinite(v)) return 100
+  return Math.min(100, Math.max(0, Math.round(v)))
+}
 
-function onSlider(e: { detail: { value: number } }) {
-  emit('update:ratioPercent', Number(e.detail.value))
+function getDisplayedQuantityLabel(food: PhotographMockFood) {
+  const base = Number(food.quantity ?? 100)
+  const safeBase = Number.isFinite(base) && base > 0 ? base : 100
+  const actual = Math.round(safeBase * getRatio(food.lineId)) / 100
+  const rounded = Math.round(actual * 10) / 10
+  const text = Number.isInteger(rounded) ? String(rounded) : String(rounded).replace(/\.0$/, '')
+  return `${text} ${food.quantityUnit || 'g/ml'}`
+}
+
+function onSlider(lineId: string, e: { detail: { value: number } }) {
+  emit('update-food-ratio', lineId, Number(e.detail.value))
 }
 </script>
 
@@ -109,7 +115,7 @@ function onSlider(e: { detail: { value: number } }) {
   max-height: 88vh;
   display: flex;
   flex-direction: column;
-  gap: 32rpx;
+  gap: 28rpx;
 }
 
 .ras-handle {
@@ -123,58 +129,24 @@ function onSlider(e: { detail: { value: number } }) {
 
 .ras-top {
   display: flex;
-  flex-direction: column;
-  gap: 24rpx;
-}
-
-.ras-progress-row {
-  display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
   gap: 20rpx;
+  flex-shrink: 0;
 }
 
-.ras-track {
+.ras-summary {
   flex: 1;
-  height: 16rpx;
-  border-radius: 8rpx;
-  background: #e0e0e0;
-  overflow: hidden;
-}
-
-.ras-fill {
-  height: 100%;
-  border-radius: 8rpx;
-  background: #2e7d32;
-}
-
-.ras-kcal-pair {
-  font-size: 26rpx;
-  font-weight: 600;
-  color: #333333;
-  flex-shrink: 0;
-}
-
-.ras-mini-row {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8rpx 0;
-}
-
-.ras-thumb {
-  width: 96rpx;
-  height: 96rpx;
-  border-radius: 20rpx;
-  background: #d8d8d8;
-  border: 1rpx solid #cccccc;
-  flex-shrink: 0;
+  min-width: 0;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #222222;
+  line-height: 1.4;
 }
 
 .ras-add-btn {
-  padding: 20rpx 36rpx;
+  padding: 20rpx 34rpx;
   border-radius: 40rpx;
   background: #d5e7b1;
   border: 2rpx solid #9ebc86;
@@ -185,6 +157,19 @@ function onSlider(e: { detail: { value: number } }) {
   font-size: 26rpx;
   font-weight: 600;
   color: #2d3d22;
+}
+
+.ras-list {
+  flex: 1;
+  min-height: 0;
+  max-height: 64vh;
+}
+
+.ras-list__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+  padding-bottom: 8rpx;
 }
 
 .ras-card {
@@ -202,15 +187,6 @@ function onSlider(e: { detail: { value: number } }) {
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-  gap: 24rpx;
-}
-
-.ras-big-thumb {
-  width: 144rpx;
-  height: 144rpx;
-  border-radius: 24rpx;
-  background: #d8d8d8;
-  flex-shrink: 0;
 }
 
 .ras-card-col {
@@ -235,9 +211,14 @@ function onSlider(e: { detail: { value: number } }) {
 }
 
 .ras-food-name {
+  max-width: 100%;
   font-size: 28rpx;
   font-weight: 600;
   color: #222222;
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .ras-food-kcal {
@@ -246,32 +227,27 @@ function onSlider(e: { detail: { value: number } }) {
   color: #bf360c;
 }
 
-.ras-check {
-  width: 56rpx;
-  height: 56rpx;
-  border-radius: 28rpx;
-  background: #8bc34a;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.ras-check-dot {
-  font-size: 22rpx;
-  color: #ffffff;
-  font-weight: 700;
-}
-
 .ras-slider-block {
   display: flex;
   flex-direction: column;
   gap: 8rpx;
 }
 
+.ras-slider-head {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .ras-slider-hint {
   font-size: 24rpx;
   color: #666666;
+}
+
+.ras-slider-pad {
+  padding: 0 28rpx;
+  box-sizing: border-box;
 }
 
 .ras-slider {
@@ -282,5 +258,17 @@ function onSlider(e: { detail: { value: number } }) {
   font-size: 24rpx;
   color: #333333;
   text-align: right;
+}
+
+.ras-empty {
+  min-height: 160rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ras-empty__text {
+  font-size: 26rpx;
+  color: #888888;
 }
 </style>

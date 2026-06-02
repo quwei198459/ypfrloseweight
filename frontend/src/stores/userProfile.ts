@@ -11,6 +11,10 @@ export interface ProfileData {
   currentWeight: string
   targetWeight: string
   targetDate: string
+  birthday: string
+  residenceProvince: string
+  residenceCity: string
+  residenceDistrict: string
   /** 脱敏展示，未绑定为「未绑定」 */
   phoneDisplay: string
   /** 「我的」统计：餐次条数 */
@@ -34,6 +38,10 @@ export const useUserProfileStore = defineStore('userProfile', {
       currentWeight: '160斤',
       targetWeight: '154斤',
       targetDate: '2026-05-05',
+      birthday: '',
+      residenceProvince: '',
+      residenceCity: '',
+      residenceDistrict: '',
       phoneDisplay: '未绑定',
       mealRecordCount: 0,
       healthyDietDays: 0,
@@ -73,6 +81,10 @@ export const useUserProfileStore = defineStore('userProfile', {
       this.profileData.currentWeight = jin(user.currentWeightKg)
       this.profileData.targetWeight = jin(user.targetWeightKg)
       this.profileData.targetDate = user.targetDate || '--'
+      this.profileData.birthday = user.birthday || ''
+      this.profileData.residenceProvince = user.residenceProvince || ''
+      this.profileData.residenceCity = user.residenceCity || ''
+      this.profileData.residenceDistrict = user.residenceDistrict || ''
       if (user.avatarUrl && user.avatarUrl.trim()) {
         let av = user.avatarUrl.trim()
         if (!/^https?:\/\//i.test(av)) {

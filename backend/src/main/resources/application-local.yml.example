@@ -24,3 +24,11 @@ aliyun:
 app:
   jwt:
     secret: 在此填写至少32位随机字符串作为JWT密钥
+  skin-detection:
+    yimei-base-url: https://api.yimei.ai
+    yimei-client-id: 在此填写宜远应用ID
+    yimei-client-secret: 在此填写宜远应用密钥
+    detect-types: 40990
+    deepseek-base-url: https://api.deepseek.com
+    deepseek-api-key: 在此填写 DeepSeek API Key
+    default-times: 3

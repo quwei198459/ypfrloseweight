@@ -13,11 +13,30 @@ export interface RecognizeFoodPayload {
   userId?: number
 }
 
+export interface PhotoRecognitionAccessVo {
+  allowed: boolean
+  phoneBound: boolean
+  reason: 'allowed' | 'phone_required' | 'not_member' | 'quota_exhausted' | string
+  message: string
+  servicePhone?: string | null
+  serviceWechat?: string | null
+  serviceQrImageUrl?: string | null
+  serviceQrImagePath?: string | null
+  serviceQrImageName?: string | null
+  totalQuota?: number | null
+  usedCount?: number | null
+  remainingCount?: number | null
+}
+
 /** 与后端 MealPhotoFoodItemVo 对齐 */
 export interface MealPhotoFoodItemVo {
   lineId: string
   foodName: string
   calories: number
+  type?: number
+  caloriesPer100?: number
+  quantity?: number
+  quantityUnit?: string
   giLabel?: string
   foodId?: number
   weightG?: number
@@ -57,6 +76,9 @@ export interface MealPhotoConfirmItemPayload {
   confirmedFoodName?: string
   confirmedCalories: number
   confirmedEatRatio?: number
+  confirmedQuantity?: number
+  confirmedQuantityUnit?: string
+  caloriesPer100?: number
 }
 
 export interface MealPhotoConfirmPayload {
@@ -83,6 +105,14 @@ export function recognizeFood(payload: RecognizeFoodPayload): Promise<FoodRecogn
   if (payload.imageBase64) body.imageBase64 = payload.imageBase64
   if (payload.imageUrl) body.imageUrl = payload.imageUrl
   return httpPost<FoodRecognizeResponse>(apiPath('food/recognize'), body)
+}
+
+export function checkMealPhotoAccess(): Promise<PhotoRecognitionAccessVo> {
+  const token = (uni.getStorageSync(STORAGE_TOKEN) as string | undefined)?.trim()
+  if (!token) {
+    return Promise.reject(new Error('请先登录'))
+  }
+  return httpGetAuth<PhotoRecognitionAccessVo>(apiPath('recognize/meal-photo/access'), token)
 }
 
 /** 餐前拍一拍：提交识图（落库 + 调用识图服务） */
@@ -129,6 +159,9 @@ export function confirmMealPhoto(payload: MealPhotoConfirmPayload): Promise<Meal
       confirmedFoodName: it.confirmedFoodName,
       confirmedCalories: it.confirmedCalories,
       confirmedEatRatio: it.confirmedEatRatio,
+      confirmedQuantity: it.confirmedQuantity,
+      confirmedQuantityUnit: it.confirmedQuantityUnit,
+      caloriesPer100: it.caloriesPer100,
     })),
   }
   if (payload.recordDate) body.recordDate = payload.recordDate

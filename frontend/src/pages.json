@@ -33,6 +33,60 @@
 			}
 		},
 		{
+			"path": "pages/skin-detection/intro",
+			"style": {
+				"navigationBarTitleText": "AI皮肤检测",
+				"navigationBarBackgroundColor": "#F7FBF7",
+				"navigationBarTextStyle": "black",
+				"backgroundColor": "#F7FBF7"
+			}
+		},
+		{
+			"path": "pages/skin-detection/profile",
+			"style": {
+				"navigationBarTitleText": "检测资料",
+				"navigationBarBackgroundColor": "#F7FBF7",
+				"navigationBarTextStyle": "black",
+				"backgroundColor": "#F7FBF7"
+			}
+		},
+		{
+			"path": "pages/skin-detection/camera",
+			"style": {
+				"navigationBarTitleText": "拍照检测",
+				"navigationBarBackgroundColor": "#F7FBF7",
+				"navigationBarTextStyle": "black",
+				"backgroundColor": "#F7FBF7"
+			}
+		},
+		{
+			"path": "pages/skin-detection/loading",
+			"style": {
+				"navigationBarTitleText": "生成报告",
+				"navigationBarBackgroundColor": "#F7FBF7",
+				"navigationBarTextStyle": "black",
+				"backgroundColor": "#F7FBF7"
+			}
+		},
+		{
+			"path": "pages/skin-detection/report",
+			"style": {
+				"navigationBarTitleText": "皮肤报告",
+				"navigationBarBackgroundColor": "#F7FBF7",
+				"navigationBarTextStyle": "black",
+				"backgroundColor": "#F7FBF7"
+			}
+		},
+		{
+			"path": "pages/skin-detection/detail",
+			"style": {
+				"navigationBarTitleText": "单项报告",
+				"navigationBarBackgroundColor": "#F7FBF7",
+				"navigationBarTextStyle": "black",
+				"backgroundColor": "#F7FBF7"
+			}
+		},
+		{
 			"path": "pages/user/index",
 			"style": {
 				"navigationBarTitleText": "我的",
