@@ -27,6 +27,8 @@ export interface PhotographMockFood {
   /** 聚美类型：1=食物，2=营养成分 */
   type?: number
   giLabel?: string
+  /** 第三方返回的真实 GI 数值，缺省为 undefined */
+  gi?: number
   /** 后端食物库 id，确认写入时透传 */
   foodId?: number
 }
@@ -34,6 +36,8 @@ export interface PhotographMockFood {
 export interface PhotographMockResult {
   foods: PhotographMockFood[]
   recommendedEatRatio: number
+  /** DeepSeek 个性化推荐用语，可能为空 */
+  recommendText?: string | null
   intakeCaloriesToday: number
   dailyBudgetCalories: number
   badgeProgressPercent: number

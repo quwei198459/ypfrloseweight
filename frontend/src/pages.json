@@ -8,6 +8,15 @@
 			}
 		},
 		{
+			"path": "pages/agreement/index",
+			"style": {
+				"navigationBarTitleText": "用户协议",
+				"navigationBarBackgroundColor": "#F7FBF7",
+				"navigationBarTextStyle": "black",
+				"backgroundColor": "#F7FBF7"
+			}
+		},
+		{
 			"path": "pages/home/index",
 			"style": {
 				"navigationBarTitleText": "首页",
@@ -87,6 +96,69 @@
 			}
 		},
 		{
+			"path": "pages/tcm-detection/intro",
+			"style": {
+				"navigationBarTitleText": "中医体检",
+				"navigationBarBackgroundColor": "#F7FBF7",
+				"navigationBarTextStyle": "black",
+				"backgroundColor": "#F7FBF7"
+			}
+		},
+		{
+			"path": "pages/tcm-detection/profile",
+			"style": {
+				"navigationBarTitleText": "检测资料",
+				"navigationBarBackgroundColor": "#F7FBF7",
+				"navigationBarTextStyle": "black",
+				"backgroundColor": "#F7FBF7"
+			}
+		},
+		{
+			"path": "pages/tcm-detection/camera",
+			"style": {
+				"navigationBarTitleText": "拍摄舌面",
+				"navigationBarBackgroundColor": "#F7FBF7",
+				"navigationBarTextStyle": "black",
+				"backgroundColor": "#F7FBF7"
+			}
+		},
+		{
+			"path": "pages/tcm-detection/loading",
+			"style": {
+				"navigationBarTitleText": "生成报告",
+				"navigationBarBackgroundColor": "#F7FBF7",
+				"navigationBarTextStyle": "black",
+				"backgroundColor": "#F7FBF7"
+			}
+		},
+		{
+			"path": "pages/tcm-detection/inquiry",
+			"style": {
+				"navigationBarTitleText": "问诊",
+				"navigationBarBackgroundColor": "#F7FBF7",
+				"navigationBarTextStyle": "black",
+				"backgroundColor": "#F7FBF7"
+			}
+		},
+		{
+			"path": "pages/tcm-detection/report",
+			"style": {
+				"navigationBarTitleText": "体质报告",
+				"navigationBarBackgroundColor": "#F7FBF7",
+				"navigationBarTextStyle": "black",
+				"backgroundColor": "#F7FBF7"
+			}
+		},
+		{
+			"path": "pages/tcm-detection/detail",
+			"style": {
+				"navigationBarTitleText": "单项详情",
+				"navigationBarBackgroundColor": "#F7FBF7",
+				"navigationBarTextStyle": "black",
+				"backgroundColor": "#F7FBF7"
+			}
+		},
+		{
 			"path": "pages/user/index",
 			"style": {
 				"navigationBarTitleText": "我的",
@@ -153,7 +225,7 @@
 		{
 			"path": "pages/food-search/index",
 			"style": {
-				"navigationBarTitleText": "3月10日饮食",
+				"navigationBarTitleText": "今日饮食",
 				"navigationBarBackgroundColor": "#BFD9A3"
 			}
 		},

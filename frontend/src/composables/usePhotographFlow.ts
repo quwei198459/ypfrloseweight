@@ -76,6 +76,7 @@ function mapApiFood(f: MealPhotoFoodItemVo, index: number): PhotographMockFood {
     quantityUnit: f.quantityUnit || 'g/ml',
     type: f.type,
     giLabel: cleanGiLabel(f.giLabel),
+    gi: typeof f.gi === 'number' && Number.isFinite(f.gi) ? f.gi : undefined,
     foodId: f.foodId,
   }
 }
@@ -83,6 +84,7 @@ function mapApiFood(f: MealPhotoFoodItemVo, index: number): PhotographMockFood {
 function applyRecognizeSuccess(res: {
   foods?: MealPhotoFoodItemVo[] | null
   recommendedEatRatio?: number | null
+  recommendText?: string | null
   intakeCaloriesToday?: number | null
   dailyBudgetCalories?: number | null
   badgeProgressPercent?: number | null
@@ -109,6 +111,7 @@ function applyRecognizeSuccess(res: {
   return {
     foods,
     recommendedEatRatio: res.recommendedEatRatio ?? 1,
+    recommendText: res.recommendText ?? null,
     intakeCaloriesToday: res.intakeCaloriesToday ?? 0,
     dailyBudgetCalories: res.dailyBudgetCalories ?? 0,
     badgeProgressPercent: res.badgeProgressPercent ?? 0,
@@ -132,6 +135,7 @@ export function usePhotographFlow() {
   const recordDateStr = ref(formatLocalDate(new Date()))
   const ratioPercentMap = ref<Record<string, number>>(initRatioPercentMap(createDefaultPhotographMock().foods))
   const quantityDraft = ref('')
+  const foodNameDraft = ref('')
   const editingFoodLineId = ref<string | null>(null)
 
   const editingFood = computed(() => {
@@ -191,6 +195,7 @@ export function usePhotographFlow() {
     mockResult.value = next
     ratioPercentMap.value = initRatioPercentMap(next.foods)
     quantityDraft.value = ''
+    foodNameDraft.value = ''
     editingFoodLineId.value = null
   }
 
@@ -230,6 +235,10 @@ export function usePhotographFlow() {
   })
 
   const totalStripText = computed(() => {
+    const tip = mockResult.value.recommendText
+    if (tip && tip.trim()) {
+      return `总热量 ${displayCalories.value} 千卡 · ${tip.trim()}`
+    }
     return `总热量 ${displayCalories.value} 千卡，推荐吃 ${recommendedPercentLabel.value}`
   })
 
@@ -253,6 +262,7 @@ export function usePhotographFlow() {
     mockResult.value = next
     ratioPercentMap.value = initRatioPercentMap(next.foods)
     quantityDraft.value = ''
+    foodNameDraft.value = ''
     editingFoodLineId.value = null
   }
 
@@ -389,6 +399,7 @@ export function usePhotographFlow() {
     if (!food) return
     editingFoodLineId.value = lineId
     quantityDraft.value = formatQuantityValue(food.quantity)
+    foodNameDraft.value = food.foodName
     phase.value = 'editing_calorie'
   }
 
@@ -396,6 +407,11 @@ export function usePhotographFlow() {
     const n = Number(quantityDraft.value)
     if (!Number.isFinite(n) || n <= 0) {
       uni.showToast({ title: '请输入有效数量', icon: 'none' })
+      return
+    }
+    const name = foodNameDraft.value.trim()
+    if (!name) {
+      uni.showToast({ title: '请输入食物名称', icon: 'none' })
       return
     }
     const lineId = editingFoodLineId.value
@@ -406,17 +422,24 @@ export function usePhotographFlow() {
     const nextFoods = mockResult.value.foods.map((f) => {
       if (f.lineId !== lineId) return f
       const quantity = normalizeQuantity(n)
-      return { ...f, quantity, calories: roundKcal(((Number(f.caloriesPer100 ?? f.calories) || 0) * quantity) / 100) }
+      return {
+        ...f,
+        foodName: name.slice(0, 40),
+        quantity,
+        calories: roundKcal(((Number(f.caloriesPer100 ?? f.calories) || 0) * quantity) / 100),
+      }
     })
     syncFoods(nextFoods)
     editingFoodLineId.value = null
     quantityDraft.value = ''
+    foodNameDraft.value = ''
     phase.value = 'success'
   }
 
   function cancelCalorieEdit() {
     editingFoodLineId.value = null
     quantityDraft.value = ''
+    foodNameDraft.value = ''
     phase.value = 'success'
   }
 
@@ -562,6 +585,7 @@ export function usePhotographFlow() {
     recordDateStr,
     displayCalories,
     quantityDraft,
+    foodNameDraft,
     editingFood,
     editingFoodEstimatedCalories,
     ratioPercentMap,

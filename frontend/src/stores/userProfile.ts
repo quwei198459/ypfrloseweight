@@ -35,8 +35,8 @@ export const useUserProfileStore = defineStore('userProfile', {
       gender: '男',
       age: '25岁',
       height: '175cm',
-      currentWeight: '160斤',
-      targetWeight: '154斤',
+      currentWeight: '80.0公斤',
+      targetWeight: '77.0公斤',
       targetDate: '2026-05-05',
       birthday: '',
       residenceProvince: '',
@@ -56,6 +56,26 @@ export const useUserProfileStore = defineStore('userProfile', {
     showTargetDatePopup: false,
   }),
   actions: {
+    resetProfile() {
+      this.profileData.avatar = ''
+      this.profileData.nickname = ''
+      this.profileData.gender = '男'
+      this.profileData.age = '--'
+      this.profileData.height = '--'
+      this.profileData.currentWeight = '--'
+      this.profileData.targetWeight = '--'
+      this.profileData.targetDate = '--'
+      this.profileData.birthday = ''
+      this.profileData.residenceProvince = ''
+      this.profileData.residenceCity = ''
+      this.profileData.residenceDistrict = ''
+      this.profileData.phoneDisplay = '未绑定'
+      this.profileData.mealRecordCount = 0
+      this.profileData.healthyDietDays = 0
+      this.profileData.joinedDays = null
+      this.profileData.weightRecordedDaysAgo = null
+      this.closeAllPickers()
+    },
     closeAllPickers() {
       this.showGenderPopup = false
       this.showAgePopup = false
@@ -64,11 +84,11 @@ export const useUserProfileStore = defineStore('userProfile', {
       this.showTargetWeightPopup = false
       this.showTargetDatePopup = false
     },
-    /** 将后端用户资料写入展示字段（体重按「斤」展示：kg×2） */
+    /** 将后端用户资料写入展示字段（体重按「公斤」展示） */
     applyFromApiUser(user: AppUserDto) {
-      const jin = (kg: number | null | undefined) => {
+      const kgLabel = (kg: number | null | undefined) => {
         if (kg == null) return '--'
-        return `${(Number(kg) * 2).toFixed(1)}斤`
+        return `${Number(kg).toFixed(1)}公斤`
       }
       const genderLabel =
         user.gender === 1 ? '男' : user.gender === 2 ? '女' : '未知'
@@ -78,8 +98,8 @@ export const useUserProfileStore = defineStore('userProfile', {
         user.age != null && user.age > 0 ? `${user.age}岁` : '--'
       this.profileData.height =
         user.heightCm != null ? `${user.heightCm}cm` : '--'
-      this.profileData.currentWeight = jin(user.currentWeightKg)
-      this.profileData.targetWeight = jin(user.targetWeightKg)
+      this.profileData.currentWeight = kgLabel(user.currentWeightKg)
+      this.profileData.targetWeight = kgLabel(user.targetWeightKg)
       this.profileData.targetDate = user.targetDate || '--'
       this.profileData.birthday = user.birthday || ''
       this.profileData.residenceProvince = user.residenceProvince || ''

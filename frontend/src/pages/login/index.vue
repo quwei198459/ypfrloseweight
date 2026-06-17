@@ -96,11 +96,7 @@ const onAgreeChange = (e: { detail?: { value?: string[] } }) => {
 }
 
 const openDoc = (type: 'privacy' | 'terms') => {
-  docToastMessage.value = type === 'privacy' ? '《隐私协议》（静态演示）' : '《用户使用协议》（静态演示）'
-  showDocToast.value = true
-  setTimeout(() => {
-    showDocToast.value = false
-  }, 2000)
+  uni.navigateTo({ url: `/pages/agreement/index?type=${type}` })
 }
 
 const closeAgreementPopup = () => {

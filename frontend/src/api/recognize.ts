@@ -38,6 +38,8 @@ export interface MealPhotoFoodItemVo {
   quantity?: number
   quantityUnit?: string
   giLabel?: string
+  /** 第三方返回的真实 GI 数值 */
+  gi?: number
   foodId?: number
   weightG?: number
 }

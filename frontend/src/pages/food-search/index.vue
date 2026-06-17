@@ -213,6 +213,15 @@ const summaryItems = computed(() =>
 
 const showBottomBar = computed(() => selectedRows.value.length > 0 && !recordSummaryVisible.value)
 
+function foodSearchTitle(ymd: string) {
+  const parts = ymd.split('-')
+  if (parts.length !== 3) return '今日饮食'
+  const month = Number(parts[1])
+  const day = Number(parts[2])
+  if (!Number.isFinite(month) || !Number.isFinite(day)) return '今日饮食'
+  return `${month}月${day}日饮食`
+}
+
 onLoad((query) => {
   const fromMeal = String(query?.mealType || 'lunch')
   if (fromMeal === 'breakfast' || fromMeal === 'lunch' || fromMeal === 'dinner' || fromMeal === 'snack') {
@@ -222,6 +231,7 @@ onLoad((query) => {
   if (/^\d{4}-\d{2}-\d{2}$/.test(qd)) {
     recordDateYmd.value = qd
   }
+  uni.setNavigationBarTitle({ title: foodSearchTitle(recordDateYmd.value) })
   void loadCategories()
 })
 

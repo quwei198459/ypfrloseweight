@@ -55,6 +55,7 @@
               :key="food.lineId"
               :food-name="food.foodName"
               :gi-label="food.giLabel"
+              :gi="food.gi"
               :calories="getFoodDisplayedCalories(food)"
               :quantity-label="getFoodQuantityLabel(food)"
               @edit="openCalorieEdit(food.lineId)"
@@ -168,6 +169,7 @@
     <CalorieEditModal
       v-if="phase === 'editing_calorie'"
       v-model="quantityDraft"
+      v-model:food-name="foodNameDraft"
       :unit-label="editingFood?.quantityUnit || 'g/ml'"
       :estimated-calories="editingFoodEstimatedCalories"
       @confirm="confirmCalorieEdit"
@@ -239,6 +241,7 @@ const {
   selectedMealType,
   mockResult,
   quantityDraft,
+  foodNameDraft,
   editingFood,
   editingFoodEstimatedCalories,
   ratioPercentMap,

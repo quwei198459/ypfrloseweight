@@ -1,7 +1,7 @@
 <template>
   <view class="fl-item">
-    <view v-if="normalizedGiLabel" class="fl-item__gi">
-      <text class="fl-item__gi-text">{{ normalizedGiLabel }}</text>
+    <view v-if="giBadgeText" class="fl-item__gi" :class="giLevelClass">
+      <text class="fl-item__gi-text">{{ giBadgeText }}</text>
     </view>
 
     <view class="fl-item__main" @click="emit('edit')">
@@ -28,6 +28,8 @@ const props = defineProps<{
   calories: number
   quantityLabel: string
   giLabel?: string
+  /** 第三方返回的真实 GI 数值 */
+  gi?: number
 }>()
 
 const emit = defineEmits<{
@@ -35,7 +37,44 @@ const emit = defineEmits<{
   (e: 'delete'): void
 }>()
 
-const normalizedGiLabel = computed(() => props.giLabel?.trim() || '')
+const hasGiValue = computed(() => typeof props.gi === 'number' && Number.isFinite(props.gi))
+
+const giLevel = computed<'low' | 'mid' | 'high' | ''>(() => {
+  if (hasGiValue.value) {
+    const v = props.gi as number
+    if (v <= 55) return 'low'
+    if (v <= 69) return 'mid'
+    return 'high'
+  }
+  const label = props.giLabel ?? ''
+  if (label.includes('高')) return 'high'
+  if (label.includes('中')) return 'mid'
+  if (label.includes('低')) return 'low'
+  return ''
+})
+
+const giLevelWord = computed(() => {
+  switch (giLevel.value) {
+    case 'low':
+      return '低'
+    case 'mid':
+      return '中'
+    case 'high':
+      return '高'
+    default:
+      return ''
+  }
+})
+
+/** 优先展示第三方真实 GI 数值，缺失时回退到分级文案 */
+const giBadgeText = computed(() => {
+  if (hasGiValue.value) {
+    return giLevelWord.value ? `GI ${props.gi} · ${giLevelWord.value}` : `GI ${props.gi}`
+  }
+  return props.giLabel?.trim() || ''
+})
+
+const giLevelClass = computed(() => (giLevel.value ? `fl-item__gi--${giLevel.value}` : ''))
 </script>
 
 <style lang="scss" scoped>
@@ -65,6 +104,30 @@ const normalizedGiLabel = computed(() => props.giLabel?.trim() || '')
   font-weight: 600;
   color: #2d5a27;
   line-height: 1.2;
+}
+
+/* 低 GI：绿色 */
+.fl-item__gi--low {
+  background: #dceedd;
+}
+.fl-item__gi--low .fl-item__gi-text {
+  color: #2d5a27;
+}
+
+/* 中 GI：琥珀色 */
+.fl-item__gi--mid {
+  background: #fdecc8;
+}
+.fl-item__gi--mid .fl-item__gi-text {
+  color: #8a5a00;
+}
+
+/* 高 GI：红色 */
+.fl-item__gi--high {
+  background: #fbdcd6;
+}
+.fl-item__gi--high .fl-item__gi-text {
+  color: #a3271a;
 }
 
 .fl-item__main {

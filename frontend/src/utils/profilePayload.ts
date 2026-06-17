@@ -16,9 +16,9 @@ export function parseHeightCm(s: string): number | undefined {
   return m ? parseFloat(m[1]) : undefined
 }
 
-export function parseWeightKgFromJinLabel(s: string): number | undefined {
-  const m = /^(\d+(?:\.\d+)?)斤$/.exec((s || '').trim())
-  return m ? parseFloat(m[1]) / 2 : undefined
+export function parseWeightKgFromKgLabel(s: string): number | undefined {
+  const m = /^(\d+(?:\.\d+)?)公斤$/.exec((s || '').trim())
+  return m ? parseFloat(m[1]) : undefined
 }
 
 /** 支持 yyyy-MM-dd 或「N周」估算日期 */

@@ -14,47 +14,52 @@
       <text class="wx-nick-hint">修改以下信息会更新每日热量预算</text>
       <!-- #endif -->
 
-      <view class="phone-card">
-        <view class="phone-card__row">
-          <text class="phone-card__label">手机号</text>
-          <text class="phone-card__val" :class="{ 'phone-card__val--muted': profileData.phoneDisplay === '未绑定' }">
-            {{ profileData.phoneDisplay }}
-          </text>
+      <view class="info-card-group">
+        <view class="phone-card">
+          <view class="phone-card__row">
+            <text class="phone-card__label">手机号</text>
+            <view class="phone-card__right">
+              <text class="phone-card__val" :class="{ 'phone-card__val--muted': profileData.phoneDisplay === '未绑定' }">
+                {{ profileData.phoneDisplay }}
+              </text>
+              <!-- #ifdef MP-WEIXIN -->
+              <button
+                class="phone-bind-btn"
+                :class="{ 'phone-bind-btn--emphasis': profileData.phoneDisplay === '未绑定' }"
+                open-type="getPhoneNumber"
+                hover-class="none"
+                @getphonenumber="onPhoneAuth"
+              >
+                <text class="phone-bind-btn__txt">{{ profileData.phoneDisplay === '未绑定' ? '微信授权手机号' : '更换手机号' }}</text>
+              </button>
+              <!-- #endif -->
+            </view>
+          </view>
         </view>
-        <!-- #ifdef MP-WEIXIN -->
-        <button
-          v-if="profileData.phoneDisplay === '未绑定'"
-          class="phone-bind-btn phone-bind-btn--emphasis"
-          open-type="getPhoneNumber"
-          hover-class="none"
-          @getphonenumber="onPhoneAuth"
-        >
-          <text class="phone-bind-btn__txt">微信授权手机号</text>
-        </button>
-        <!-- #endif -->
-      </view>
 
-      <UserInfoFormCard
-        :gender="profileData.gender"
-        :birthday="profileData.birthday"
-        :age="profileData.age"
-        :residence="residenceLabel"
-        :region-range="regionRange"
-        :region-index="regionIndex"
-        :height="profileData.height"
-        :current-weight="profileData.currentWeight"
-        :target-weight="profileData.targetWeight"
-        :target-date="profileData.targetDate"
-        @gender="openGender"
-        @birthday-change="onBirthdayChange"
-        @age="openAge"
-        @residence-column-change="onResidenceColumnChange"
-        @residence-change="onResidenceChange"
-        @height="openHeight"
-        @weight="openWeight"
-        @target-weight="openTargetWeight"
-        @target-date="openTargetDate"
-      />
+        <UserInfoFormCard
+          class="info-form-card--joined"
+          :gender="profileData.gender"
+          :birthday="profileData.birthday"
+          :age="profileData.age"
+          :residence="residenceLabel"
+          :region-range="regionRange"
+          :region-index="regionIndex"
+          :height="profileData.height"
+          :current-weight="profileData.currentWeight"
+          :target-weight="profileData.targetWeight"
+          :target-date="profileData.targetDate"
+          @gender="openGender"
+          @birthday-change="onBirthdayChange"
+          @age="openAge"
+          @residence-column-change="onResidenceColumnChange"
+          @residence-change="onResidenceChange"
+          @height="openHeight"
+          @weight="openWeight"
+          @target-weight="openTargetWeight"
+          @target-date="openTargetDate"
+        />
+      </view>
 
       <view class="profile-page__scroll-gap" />
     </scroll-view>
@@ -95,7 +100,7 @@
     <UserPickerPopup
       v-model="showWeightPopup"
       title="选择体重"
-      :options="WEIGHT_JIN_OPTIONS"
+      :options="WEIGHT_KG_OPTIONS"
       :index="weightIndex"
       @update:index="(i) => (weightIndex = i)"
       @confirm-wheel="onConfirmWeight"
@@ -104,7 +109,7 @@
     <UserPickerPopup
       v-model="showTargetWeightPopup"
       title="选择目标体重"
-      :options="WEIGHT_JIN_OPTIONS"
+      :options="WEIGHT_KG_OPTIONS"
       :index="targetWeightIndex"
       @update:index="(i) => (targetWeightIndex = i)"
       @confirm-wheel="onConfirmTargetWeight"
@@ -126,7 +131,6 @@
 import { onShow } from '@dcloudio/uni-app'
 import { storeToRefs } from 'pinia'
 import { computed, ref } from 'vue'
-import { fetchCurrentUser } from '@/api/loseweight'
 import { getRegionTree, type RegionAreaNode } from '@/api/region'
 import { useUserStore } from '@/stores/user'
 import {
@@ -134,7 +138,7 @@ import {
   parseAgeLabel,
   parseHeightCm,
   parseTargetDateIso,
-  parseWeightKgFromJinLabel,
+  parseWeightKgFromKgLabel,
 } from '@/utils/profilePayload'
 import { useUserProfileStore } from '../../stores/userProfile'
 import UserProfileCard from '../../components/user/UserProfileCard.vue'
@@ -146,7 +150,7 @@ import {
   HEIGHT_OPTIONS,
   indexOfLabel,
   WEEK_OPTIONS,
-  WEIGHT_JIN_OPTIONS,
+  WEIGHT_KG_OPTIONS,
 } from '../../constants/userProfilePickers'
 
 const store = useUserProfileStore()
@@ -213,9 +217,30 @@ const genderOpts = [...GENDER_OPTIONS]
 const genderIndex = ref(indexOfLabel(genderOpts, profileData.value.gender))
 const ageIndex = ref(indexOfLabel(AGE_OPTIONS, profileData.value.age))
 const heightIndex = ref(indexOfLabel(HEIGHT_OPTIONS, profileData.value.height))
-const weightIndex = ref(indexOfLabel(WEIGHT_JIN_OPTIONS, profileData.value.currentWeight))
-const targetWeightIndex = ref(indexOfLabel(WEIGHT_JIN_OPTIONS, profileData.value.targetWeight))
+const weightIndex = ref(indexOfLabel(WEIGHT_KG_OPTIONS, profileData.value.currentWeight))
+const targetWeightIndex = ref(indexOfLabel(WEIGHT_KG_OPTIONS, profileData.value.targetWeight))
 const weekIndex = ref(indexOfLabel(WEEK_OPTIONS, '8周'))
+
+function calculateAgeFromBirthday(birthday: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(birthday)) return undefined
+  const [year, month, day] = birthday.split('-').map(Number)
+  const today = new Date()
+  let age = today.getFullYear() - year
+  const currentMonth = today.getMonth() + 1
+  const currentDay = today.getDate()
+  if (currentMonth < month || (currentMonth === month && currentDay < day)) {
+    age -= 1
+  }
+  return Number.isFinite(age) && age > 0 ? age : undefined
+}
+
+function syncAgeFromBirthday() {
+  const age = calculateAgeFromBirthday(profileData.value.birthday)
+  if (age != null) {
+    profileData.value.age = `${age}岁`
+    ageIndex.value = indexOfLabel(AGE_OPTIONS, profileData.value.age)
+  }
+}
 
 onShow(async () => {
   try {
@@ -226,9 +251,9 @@ onShow(async () => {
       const u = await userStore.fetchUserProfile()
       if (u) store.applyFromApiUser(u)
     } else {
-      const u = await fetchCurrentUser()
-      store.applyFromApiUser(u)
+      store.resetProfile()
     }
+    syncAgeFromBirthday()
     syncRegionIndexFromProfile()
   } catch {
     /* 未登录或网络失败时保留本地 store */
@@ -296,6 +321,7 @@ function openGender() {
 
 function onBirthdayChange(value: string) {
   profileData.value.birthday = value
+  syncAgeFromBirthday()
 }
 
 function onResidenceColumnChange(column: number, value: number) {
@@ -331,12 +357,12 @@ function openHeight() {
 }
 
 function openWeight() {
-  weightIndex.value = indexOfLabel(WEIGHT_JIN_OPTIONS, profileData.value.currentWeight)
+  weightIndex.value = indexOfLabel(WEIGHT_KG_OPTIONS, profileData.value.currentWeight)
   showWeightPopup.value = true
 }
 
 function openTargetWeight() {
-  targetWeightIndex.value = indexOfLabel(WEIGHT_JIN_OPTIONS, profileData.value.targetWeight)
+  targetWeightIndex.value = indexOfLabel(WEIGHT_KG_OPTIONS, profileData.value.targetWeight)
   showTargetWeightPopup.value = true
 }
 
@@ -382,7 +408,11 @@ async function onSave() {
     uni.showToast({ title: '请选择性别', icon: 'none' })
     return
   }
-  const age = parseAgeLabel(profileData.value.age)
+  const birthdayAge = calculateAgeFromBirthday(profileData.value.birthday)
+  if (birthdayAge != null) {
+    profileData.value.age = `${birthdayAge}岁`
+  }
+  const age = birthdayAge ?? parseAgeLabel(profileData.value.age)
   if (age == null || age < 1) {
     uni.showToast({ title: '请选择年龄', icon: 'none' })
     return
@@ -392,12 +422,12 @@ async function onSave() {
     uni.showToast({ title: '请选择身高', icon: 'none' })
     return
   }
-  const currentWeightKg = parseWeightKgFromJinLabel(profileData.value.currentWeight)
+  const currentWeightKg = parseWeightKgFromKgLabel(profileData.value.currentWeight)
   if (currentWeightKg == null || currentWeightKg <= 0) {
     uni.showToast({ title: '请选择最新体重', icon: 'none' })
     return
   }
-  const targetWeightKg = parseWeightKgFromJinLabel(profileData.value.targetWeight)
+  const targetWeightKg = parseWeightKgFromKgLabel(profileData.value.targetWeight)
   if (targetWeightKg == null || targetWeightKg <= 0) {
     uni.showToast({ title: '请选择目标体重', icon: 'none' })
     return
@@ -534,12 +564,17 @@ async function onSave() {
   color: $user-save-text;
 }
 
-.phone-card {
+.info-card-group {
   margin-top: 24rpx;
   background: $user-card-bg;
   border-radius: $user-card-radius;
   box-shadow: $user-card-shadow;
-  padding: 24rpx 32rpx 28rpx;
+  overflow: hidden;
+}
+
+.phone-card {
+  background: $user-card-bg;
+  padding: 24rpx 32rpx 0;
   box-sizing: border-box;
 }
 
@@ -549,6 +584,10 @@ async function onSave() {
   align-items: center;
   justify-content: space-between;
   gap: 16rpx;
+  min-height: 96rpx;
+  padding-bottom: 24rpx;
+  border-bottom: 2rpx solid $user-row-divider;
+  box-sizing: border-box;
 }
 
 .phone-card__label {
@@ -557,12 +596,21 @@ async function onSave() {
   flex-shrink: 0;
 }
 
+.phone-card__right {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16rpx;
+  flex: 1;
+  min-width: 0;
+}
+
 .phone-card__val {
   font-size: 30rpx;
   font-weight: 600;
   color: $user-text-primary;
   text-align: right;
-  flex: 1;
   min-width: 0;
 }
 
@@ -572,17 +620,18 @@ async function onSave() {
 }
 
 .phone-bind-btn {
-  width: 100%;
-  margin-top: 24rpx;
-  height: 96rpx;
-  border-radius: 48rpx;
-  background: $user-save-bg;
+  margin: 0;
+  min-width: 180rpx;
+  height: 64rpx;
+  border-radius: 32rpx;
+  background: #eef7df;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
+  padding: 0 22rpx;
   border: none;
   box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .phone-bind-btn--emphasis {
@@ -590,12 +639,18 @@ async function onSave() {
 }
 
 .phone-bind-btn__txt {
-  font-size: 32rpx;
+  font-size: 26rpx;
   font-weight: 600;
   color: $user-save-text;
 }
 
 .phone-bind-btn::after {
   border: none;
+}
+
+:deep(.info-form-card--joined) {
+  border-radius: 0;
+  box-shadow: none;
+  padding-top: 0;
 }
 </style>

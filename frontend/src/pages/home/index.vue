@@ -29,6 +29,48 @@
           />
         </view>
 
+        <view v-if="!userStore.isLogin" class="home-login-card" @click="goLogin">
+          <view class="home-login-copy">
+            <text class="home-login-title">登录后开始记录热量</text>
+            <text class="home-login-desc">同步饮食、运动和体重数据，生成您的减脂计划</text>
+          </view>
+          <view class="home-login-btn">
+            <text class="home-login-btn__text">去登录</text>
+          </view>
+        </view>
+
+        <view v-if="showProfileQuickCard" class="profile-quick-card">
+          <view class="profile-quick-copy" @click="goAccountEdit">
+            <text class="profile-quick-title">完善微信资料</text>
+            <text class="profile-quick-desc">绑定手机号、同步头像，方便使用识别与报告服务</text>
+          </view>
+          <view class="profile-quick-actions">
+            <!-- #ifdef MP-WEIXIN -->
+            <button
+              v-if="needBindPhone"
+              class="profile-quick-btn profile-quick-btn--primary"
+              open-type="getPhoneNumber"
+              hover-class="none"
+              @getphonenumber="onHomePhoneAuth"
+            >
+              绑定手机号
+            </button>
+            <button
+              v-if="needSyncAvatar"
+              class="profile-quick-btn"
+              open-type="chooseAvatar"
+              hover-class="none"
+              @chooseavatar="onHomeChooseAvatar"
+            >
+              同步头像
+            </button>
+            <!-- #endif -->
+            <!-- #ifndef MP-WEIXIN -->
+            <view class="profile-quick-btn profile-quick-btn--primary" @click="goAccountEdit">去完善</view>
+            <!-- #endif -->
+          </view>
+        </view>
+
         <!-- Summary Card -->
         <view class="summary-card">
           <view class="summary-top-row">
@@ -119,6 +161,18 @@
         </view>
       </view>
 
+      <!-- TCM Detection Entry -->
+      <view class="tcm-entry-section">
+        <view class="tcm-entry-card" @click="goTcmDetection">
+          <view class="tcm-entry-copy">
+            <text class="tcm-entry-kicker">中医 AI 体检</text>
+            <text class="tcm-entry-title">AI 舌诊 · 面诊 · 体质辨识</text>
+            <text class="tcm-entry-desc">拍舌象面象，生成中医体质与健康调理报告</text>
+          </view>
+          <view class="tcm-entry-button">去检测</view>
+        </view>
+      </view>
+
       <!-- Fat Loss Plan Section -->
       <view class="fat-loss-plan-section">
         <view class="plan-banner-card">
@@ -144,19 +198,87 @@
 
 <script setup lang="ts">
 import { onShow } from '@dcloudio/uni-app'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { fetchDashboard } from '@/api/loseweight'
 import logoContrast from '@/static/logo/logo-c-contrast.png'
 import HomeCalorieGauge from '@/components/home/HomeCalorieGauge.vue'
 import { formatLocalDate } from '@/utils/date'
+import { useUserStore } from '@/stores/user'
+import { useUserProfileStore } from '@/stores/userProfile'
 
 const MEAL_ICON_STORAGE = 'ypfw_meal_icon_active'
+
+const userStore = useUserStore()
+const profileStore = useUserProfileStore()
 
 const intakeCalories = ref(0)
 const remainingCalories = ref(0)
 const sportCalories = ref(0)
 const dailyBudget = ref(0)
 const mealIconActiveKey = ref<string | null>(null)
+
+const needBindPhone = computed(() => !userStore.userInfo?.phone)
+const needSyncAvatar = computed(() => !userStore.userInfo?.avatarUrl)
+const showProfileQuickCard = computed(() => userStore.isLogin && (needBindPhone.value || needSyncAvatar.value))
+
+function syncProfile() {
+  if (!userStore.token) return
+  userStore.fetchUserProfile()
+    .then((u) => {
+      if (u) profileStore.applyFromApiUser(u)
+    })
+    .catch(() => {})
+}
+
+function readFileAsBase64(filePath: string): Promise<string | undefined> {
+  return new Promise((resolve) => {
+    uni.getFileSystemManager().readFile({
+      filePath,
+      encoding: 'base64',
+      success: (r) => {
+        const d = r.data
+        resolve(typeof d === 'string' ? d : undefined)
+      },
+      fail: () => resolve(undefined),
+    })
+  })
+}
+
+async function onHomePhoneAuth(e: { detail?: { errMsg?: string; code?: string } }) {
+  const d = e.detail
+  if (!d?.errMsg || !d.errMsg.includes('getPhoneNumber:ok')) {
+    uni.showToast({ title: '未授权手机号', icon: 'none' })
+    return
+  }
+  if (!d.code) {
+    uni.showToast({ title: '请升级微信或基础库以支持手机号', icon: 'none' })
+    return
+  }
+  try {
+    await userStore.bindPhone(d.code)
+    if (userStore.userInfo) profileStore.applyFromApiUser(userStore.userInfo)
+    uni.showToast({ title: '手机号已绑定', icon: 'success' })
+  } catch (err: unknown) {
+    uni.showToast({ title: err instanceof Error ? err.message : '绑定失败', icon: 'none' })
+  }
+}
+
+async function onHomeChooseAvatar(e: { detail?: { avatarUrl?: string } }) {
+  const avatarUrl = e.detail?.avatarUrl
+  if (!avatarUrl) return
+  try {
+    uni.showLoading({ title: '同步中', mask: true })
+    const b64 = await readFileAsBase64(avatarUrl)
+    if (!b64) throw new Error('头像读取失败')
+    const u = await userStore.updateUserProfile({ avatarBase64: `data:image/jpeg;base64,${b64}` })
+    profileStore.applyFromApiUser(u)
+    uni.hideLoading()
+    uni.showToast({ title: '头像已同步', icon: 'success' })
+  } catch (err: unknown) {
+    uni.hideLoading()
+    uni.showToast({ title: err instanceof Error ? err.message : '同步失败', icon: 'none' })
+  }
+}
 
 function syncMealIconHighlight() {
   const v = uni.getStorageSync(MEAL_ICON_STORAGE)
@@ -171,6 +293,13 @@ function categoryIconSrc(mealKey: string): string {
 }
 
 function syncDashboard() {
+  if (!userStore.isLogin) {
+    intakeCalories.value = 0
+    sportCalories.value = 0
+    dailyBudget.value = 0
+    remainingCalories.value = 0
+    return
+  }
   const date = formatLocalDate(new Date())
   fetchDashboard(date)
     .then((data) => {
@@ -185,6 +314,7 @@ function syncDashboard() {
 }
 
 onShow(() => {
+  syncProfile()
   syncDashboard()
   syncMealIconHighlight()
 })
@@ -224,6 +354,18 @@ const goCustomBmrHelp = () => {
   })
 }
 
+const goAccountEdit = () => {
+  uni.navigateTo({
+    url: '/pages/user/account-edit',
+  })
+}
+
+const goLogin = () => {
+  uni.navigateTo({
+    url: '/pages/login/index',
+  })
+}
+
 const goToPlanResult = () => {
   uni.navigateTo({
     url: '/pages/plan-result/index',
@@ -245,6 +387,12 @@ const openPhotographFromSearchBar = () => {
 const goSkinDetection = () => {
   uni.navigateTo({
     url: '/pages/skin-detection/intro',
+  })
+}
+
+const goTcmDetection = () => {
+  uni.navigateTo({
+    url: '/pages/tcm-detection/intro',
   })
 }
 </script>
@@ -349,6 +497,95 @@ const goSkinDetection = () => {
   margin-left: 10px;
   font-size: 14px;
   color: #b3b3b3;
+}
+
+.profile-quick-card,
+.home-login-card {
+  position: relative;
+  z-index: 1;
+  margin: 12px 16px 0;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 8px 20px rgba(68, 104, 61, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.home-login-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f2f9e9 100%);
+  border: 1px solid rgba(91, 168, 109, 0.16);
+}
+
+.profile-quick-copy,
+.home-login-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-quick-title,
+.home-login-title {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  color: #243323;
+  line-height: 1.3;
+}
+
+.profile-quick-desc,
+.home-login-desc {
+  display: block;
+  margin-top: 3px;
+  font-size: 11px;
+  color: #72806e;
+  line-height: 1.35;
+}
+
+.profile-quick-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.profile-quick-btn,
+.home-login-btn {
+  margin: 0;
+  padding: 0 12px;
+  height: 30px;
+  line-height: 30px;
+  border-radius: 15px;
+  border: none;
+  background: #eef7df;
+  color: #5d7f3f;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.home-login-btn {
+  flex-shrink: 0;
+  background: #bfd98e;
+  color: #23351d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.home-login-btn__text {
+  font-size: 12px;
+  font-weight: 700;
+  color: #23351d;
+}
+
+.profile-quick-btn--primary {
+  background: #bfd98e;
+  color: #23351d;
+}
+
+.profile-quick-btn::after {
+  border: none;
 }
 
 // ===== Summary Card（三列 flex + 独立半圆组件）=====
@@ -525,6 +762,66 @@ const goSkinDetection = () => {
   background: #d5e7b1;
   border: 1px solid #9ebc86;
   color: #4b5b2d;
+  font-size: 14px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+// ===== TCM Detection Entry =====
+.tcm-entry-section {
+  padding: 17px 16px 0;
+}
+
+.tcm-entry-card {
+  min-height: 116px;
+  padding: 18px 18px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #fffdf6 0%, #f4ecda 100%);
+  border: 1px solid #efe6d2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.tcm-entry-copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.tcm-entry-kicker {
+  font-size: 12px;
+  color: #b5894e;
+  font-weight: 800;
+}
+
+.tcm-entry-title {
+  margin-top: 6px;
+  font-size: 20px;
+  font-weight: 900;
+  color: #2a2419;
+}
+
+.tcm-entry-desc {
+  margin-top: 7px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #897e6a;
+}
+
+.tcm-entry-button {
+  margin-left: 12px;
+  width: 78px;
+  height: 36px;
+  border-radius: 18px;
+  background: #ead9b0;
+  border: 1px solid #cdb074;
+  color: #6b5320;
   font-size: 14px;
   font-weight: 800;
   display: flex;

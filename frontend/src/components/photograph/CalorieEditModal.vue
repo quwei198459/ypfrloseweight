@@ -1,18 +1,34 @@
 <template>
   <view class="cem-root" @click="emit('cancel')">
     <view class="cem-panel" @click.stop>
-      <text class="cem-title">修改数量</text>
-      <view class="cem-row">
-        <view class="cem-input-wrap">
+      <text class="cem-title">修改食物信息</text>
+      <view class="cem-field">
+        <text class="cem-label">食物名称</text>
+        <view class="cem-name-wrap">
           <input
-            class="cem-input"
-            type="digit"
-            :value="modelValue"
-            placeholder="100"
-            @input="onInput"
+            class="cem-name-input"
+            type="text"
+            :value="foodName"
+            maxlength="40"
+            placeholder="请输入食物名称"
+            @input="onNameInput"
           />
         </view>
-        <text class="cem-unit">{{ unitLabel }}</text>
+      </view>
+      <view class="cem-field">
+        <text class="cem-label">数量</text>
+        <view class="cem-row">
+          <view class="cem-input-wrap">
+            <input
+              class="cem-input"
+              type="digit"
+              :value="modelValue"
+              placeholder="100"
+              @input="onInput"
+            />
+          </view>
+          <text class="cem-unit">{{ unitLabel }}</text>
+        </view>
       </view>
       <text class="cem-estimate">预计摄入 {{ estimatedCalories }} 千卡</text>
       <view class="cem-actions">
@@ -30,18 +46,24 @@
 <script setup lang="ts">
 const props = defineProps<{
   modelValue: string
+  foodName: string
   unitLabel: string
   estimatedCalories: number
 }>()
 
 const emit = defineEmits<{
   (e: 'update:modelValue', v: string): void
+  (e: 'update:foodName', v: string): void
   (e: 'confirm'): void
   (e: 'cancel'): void
 }>()
 
 function onInput(e: { detail: { value: string } }) {
   emit('update:modelValue', e.detail.value)
+}
+
+function onNameInput(e: { detail: { value: string } }) {
+  emit('update:foodName', e.detail.value)
 }
 </script>
 
@@ -79,6 +101,38 @@ function onInput(e: { detail: { value: string } }) {
   font-weight: 700;
   color: #222222;
   line-height: 1.3;
+}
+
+.cem-field {
+  display: flex;
+  flex-direction: column;
+  gap: 14rpx;
+}
+
+.cem-label {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #333333;
+  line-height: 1.3;
+}
+
+.cem-name-wrap {
+  width: 100%;
+  height: 76rpx;
+  border-radius: 18rpx;
+  background: #f8fbf2;
+  border: 2rpx solid #c8d9b8;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  padding: 0 22rpx;
+}
+
+.cem-name-input {
+  width: 100%;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #222222;
 }
 
 .cem-row {
