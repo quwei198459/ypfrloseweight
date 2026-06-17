@@ -38,6 +38,7 @@ public class PhotoRecognitionAccessService {
   private final PhotoRecognitionProperties properties;
   private final AvatarStorageService avatarStorageService;
   private final PhotoRecognitionQuotaService quotaService;
+  private final SystemConfigService systemConfigService;
 
   public PhotoRecognitionAccessService(
       LoseWeightUserMapper loseWeightUserMapper,
@@ -45,19 +46,25 @@ public class PhotoRecognitionAccessService {
       PhotoRecognitionServiceConfigMapper serviceConfigMapper,
       PhotoRecognitionProperties properties,
       AvatarStorageService avatarStorageService,
-      PhotoRecognitionQuotaService quotaService) {
+      PhotoRecognitionQuotaService quotaService,
+      SystemConfigService systemConfigService) {
     this.loseWeightUserMapper = loseWeightUserMapper;
     this.memberPhoneMapper = memberPhoneMapper;
     this.serviceConfigMapper = serviceConfigMapper;
     this.properties = properties;
     this.avatarStorageService = avatarStorageService;
     this.quotaService = quotaService;
+    this.systemConfigService = systemConfigService;
   }
 
   public PhotoRecognitionAccessVo checkAccess(Long userId) {
     LoseWeightUser user = loseWeightUserMapper.selectById(userId);
     if (user == null) {
       throw new ApiException(404, "用户不存在");
+    }
+    // 白名单限制关闭时：所有用户放行，不校验手机号/次数
+    if (!systemConfigService.isPhotoRecognitionWhitelistEnabled()) {
+      return buildVo(true, true, REASON_ALLOWED, "ok", loadServiceConfig(), null);
     }
     String phone = normalizePhone(user.getPhone());
     if (!StringUtils.hasText(phone)) {
@@ -90,6 +97,10 @@ public class PhotoRecognitionAccessService {
   }
 
   public void consumeQuota(Long userId, Long photoJobId) {
+    // 白名单限制关闭时不计次
+    if (!systemConfigService.isPhotoRecognitionWhitelistEnabled()) {
+      return;
+    }
     quotaService.consumeQuota(userId, photoJobId);
   }
 

@@ -33,6 +33,24 @@ public class PublicAvatarController {
     return readFile(p);
   }
 
+  @GetMapping("/api/v1/public/avatars/skin-detection/{fileName:.+}")
+  public ResponseEntity<byte[]> skinDetectionImage(@PathVariable String fileName) {
+    if (!fileName.matches("^[A-Za-z0-9._-]+\\.(jpg|jpeg|png)$")) {
+      return ResponseEntity.badRequest().build();
+    }
+    Path p = Paths.get(uploadProperties.getAvatarDir()).resolve("skin-detection").resolve(fileName);
+    return readFile(p);
+  }
+
+  @GetMapping("/api/v1/public/avatars/tcm-detection/{fileName:.+}")
+  public ResponseEntity<byte[]> tcmDetectionImage(@PathVariable String fileName) {
+    if (!fileName.matches("^[A-Za-z0-9._-]+\\.(jpg|jpeg|png)$")) {
+      return ResponseEntity.badRequest().build();
+    }
+    Path p = Paths.get(uploadProperties.getAvatarDir()).resolve("tcm-detection").resolve(fileName);
+    return readFile(p);
+  }
+
   private ResponseEntity<byte[]> readFile(Path p) {
     try {
       if (!Files.exists(p) || !Files.isRegularFile(p)) {

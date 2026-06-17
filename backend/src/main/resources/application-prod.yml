@@ -16,6 +16,14 @@ app:
     yimei-client-id: ${YIMEI_CLIENT_ID:change-me}
     yimei-client-secret: ${YIMEI_CLIENT_SECRET:change-me}
     deepseek-api-key: ${DEEPSEEK_API_KEY:change-me}
+  tcm-detection:
+    appcode: ${ALIYUN_TCM_APPCODE:change-me}
+    host: ${ALIYUN_TCM_HOST:https://ali-market-tongue-detect-v2.macrocura.com}
+    create-path: ${ALIYUN_TCM_CREATE_PATH:/diagnose/face-tongue/result/}
+    report-path: ${ALIYUN_TCM_REPORT_PATH:/diagnose/face-tongue/report/}
+    public-base-url: ${APP_PUBLIC_BASE_URL:https://api.baohukeji.com}
+    mock: ${TCM_DETECT_MOCK:false}
+    deepseek-api-key: ${DEEPSEEK_API_KEY:change-me}
 
 logging:
   level:

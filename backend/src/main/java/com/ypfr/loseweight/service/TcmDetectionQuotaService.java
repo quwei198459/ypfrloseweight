@@ -3,19 +3,19 @@ package com.ypfr.loseweight.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ypfr.loseweight.common.ApiException;
 import com.ypfr.loseweight.domain.LoseWeightUser;
-import com.ypfr.loseweight.domain.SkinDetectionQuotaLog;
-import com.ypfr.loseweight.domain.SkinDetectionWhitelist;
+import com.ypfr.loseweight.domain.TcmDetectionQuotaLog;
+import com.ypfr.loseweight.domain.TcmDetectionWhitelist;
 import com.ypfr.loseweight.mapper.LoseWeightUserMapper;
-import com.ypfr.loseweight.mapper.SkinDetectionQuotaLogMapper;
-import com.ypfr.loseweight.mapper.SkinDetectionWhitelistMapper;
-import com.ypfr.loseweight.web.dto.skin.SkinDetectionQuotaVo;
+import com.ypfr.loseweight.mapper.TcmDetectionQuotaLogMapper;
+import com.ypfr.loseweight.mapper.TcmDetectionWhitelistMapper;
+import com.ypfr.loseweight.web.dto.tcm.TcmDetectionQuotaVo;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 @Service
-public class SkinDetectionQuotaService {
+public class TcmDetectionQuotaService {
 
   private static final String REASON_ALLOWED = "allowed";
   private static final String REASON_PHONE_REQUIRED = "phone_required";
@@ -23,14 +23,14 @@ public class SkinDetectionQuotaService {
   private static final String REASON_QUOTA_EXHAUSTED = "quota_exhausted";
 
   private final LoseWeightUserMapper userMapper;
-  private final SkinDetectionWhitelistMapper whitelistMapper;
-  private final SkinDetectionQuotaLogMapper quotaLogMapper;
+  private final TcmDetectionWhitelistMapper whitelistMapper;
+  private final TcmDetectionQuotaLogMapper quotaLogMapper;
   private final SystemConfigService systemConfigService;
 
-  public SkinDetectionQuotaService(
+  public TcmDetectionQuotaService(
       LoseWeightUserMapper userMapper,
-      SkinDetectionWhitelistMapper whitelistMapper,
-      SkinDetectionQuotaLogMapper quotaLogMapper,
+      TcmDetectionWhitelistMapper whitelistMapper,
+      TcmDetectionQuotaLogMapper quotaLogMapper,
       SystemConfigService systemConfigService) {
     this.userMapper = userMapper;
     this.whitelistMapper = whitelistMapper;
@@ -38,66 +38,66 @@ public class SkinDetectionQuotaService {
     this.systemConfigService = systemConfigService;
   }
 
-  public SkinDetectionQuotaVo getQuota(Long userId) {
+  public TcmDetectionQuotaVo getQuota(Long userId) {
     LoseWeightUser user = requireUser(userId);
     // 白名单限制关闭时：所有用户放行
-    if (!systemConfigService.isSkinDetectionWhitelistEnabled()) {
+    if (!systemConfigService.isTcmDetectionWhitelistEnabled()) {
       return buildVo(true, true, REASON_ALLOWED, "ok", null);
     }
     String phone = normalizePhone(user.getPhone());
     if (!StringUtils.hasText(phone)) {
-      return buildVo(false, false, REASON_PHONE_REQUIRED, "使用皮肤检测前，请先绑定手机号", null);
+      return buildVo(false, false, REASON_PHONE_REQUIRED, "使用中医体检前，请先绑定手机号", null);
     }
-    SkinDetectionWhitelist member = findEnabledByPhone(phone);
+    TcmDetectionWhitelist member = findEnabledByPhone(phone);
     if (member == null) {
-      return buildVo(false, true, REASON_NOT_MEMBER, "当前手机号暂未开通皮肤检测，请联系客服开通", null);
+      return buildVo(false, true, REASON_NOT_MEMBER, "当前手机号暂未开通中医体检，请联系客服开通", null);
     }
     if (remainingTimes(member) <= 0) {
-      return buildVo(false, true, REASON_QUOTA_EXHAUSTED, "皮肤检测次数已用完，请联系客服增加次数", member);
+      return buildVo(false, true, REASON_QUOTA_EXHAUSTED, "中医体检次数已用完，请联系客服增加次数", member);
     }
     return buildVo(true, true, REASON_ALLOWED, "ok", member);
   }
 
   /** 返回可用白名单记录；白名单限制关闭时返回 null（放行、不计次）。 */
-  public SkinDetectionWhitelist requireAvailableQuota(Long userId) {
+  public TcmDetectionWhitelist requireAvailableQuota(Long userId) {
     LoseWeightUser user = requireUser(userId);
-    if (!systemConfigService.isSkinDetectionWhitelistEnabled()) {
+    if (!systemConfigService.isTcmDetectionWhitelistEnabled()) {
       return null;
     }
     String phone = normalizePhone(user.getPhone());
     if (!StringUtils.hasText(phone)) {
-      throw new ApiException(4601, "使用皮肤检测前，请先绑定手机号");
+      throw new ApiException(4601, "使用中医体检前，请先绑定手机号");
     }
-    SkinDetectionWhitelist member = findEnabledByPhone(phone);
+    TcmDetectionWhitelist member = findEnabledByPhone(phone);
     if (member == null) {
-      throw new ApiException(4602, "当前手机号暂未开通皮肤检测，请联系客服开通");
+      throw new ApiException(4602, "当前手机号暂未开通中医体检，请联系客服开通");
     }
     if (remainingTimes(member) <= 0) {
-      throw new ApiException(4602, "皮肤检测次数已用完，请联系客服增加次数");
+      throw new ApiException(4602, "中医体检次数已用完，请联系客服增加次数");
     }
     return member;
   }
 
   @Transactional
-  public void consumeQuota(SkinDetectionWhitelist member, Long userId, Long recordId) {
+  public void consumeQuota(TcmDetectionWhitelist member, Long userId, Long recordId) {
     // 白名单限制关闭时无对应白名单记录，跳过计次
     if (member == null) {
       return;
     }
-    SkinDetectionWhitelist current = whitelistMapper.selectById(member.getId());
+    TcmDetectionWhitelist current = whitelistMapper.selectById(member.getId());
     if (current == null || safeInt(current.getStatus()) != 1) {
-      throw new ApiException(4602, "当前手机号暂未开通皮肤检测，请联系客服开通");
+      throw new ApiException(4602, "当前手机号暂未开通中医体检，请联系客服开通");
     }
     int beforeTotal = safeInt(current.getTotalTimes());
     int beforeUsed = safeInt(current.getUsedTimes());
     if (beforeTotal - beforeUsed <= 0) {
-      throw new ApiException(4602, "皮肤检测次数已用完，请联系客服增加次数");
+      throw new ApiException(4602, "中医体检次数已用完，请联系客服增加次数");
     }
     current.setUsedTimes(beforeUsed + 1);
     current.setQuotaUpdatedAt(LocalDateTime.now());
     whitelistMapper.updateById(current);
 
-    SkinDetectionQuotaLog log = new SkinDetectionQuotaLog();
+    TcmDetectionQuotaLog log = new TcmDetectionQuotaLog();
     log.setWhitelistId(current.getId());
     log.setPhone(current.getPhone());
     log.setUserId(userId);
@@ -110,22 +110,22 @@ public class SkinDetectionQuotaService {
     log.setAfterUsedTimes(beforeUsed + 1);
     log.setOperatorType("user");
     log.setOperatorName(String.valueOf(userId));
-    log.setRemark("皮肤检测成功扣减");
+    log.setRemark("中医体检成功扣减");
     quotaLogMapper.insert(log);
   }
 
-  public SkinDetectionWhitelist findEnabledByPhone(String phone) {
+  public TcmDetectionWhitelist findEnabledByPhone(String phone) {
     if (!StringUtils.hasText(phone)) {
       return null;
     }
     return whitelistMapper.selectOne(
-        new LambdaQueryWrapper<SkinDetectionWhitelist>()
-            .eq(SkinDetectionWhitelist::getPhone, normalizePhone(phone))
-            .eq(SkinDetectionWhitelist::getStatus, 1)
+        new LambdaQueryWrapper<TcmDetectionWhitelist>()
+            .eq(TcmDetectionWhitelist::getPhone, normalizePhone(phone))
+            .eq(TcmDetectionWhitelist::getStatus, 1)
             .last("LIMIT 1"));
   }
 
-  public int remainingTimes(SkinDetectionWhitelist member) {
+  public int remainingTimes(TcmDetectionWhitelist member) {
     return safeInt(member.getTotalTimes()) - safeInt(member.getUsedTimes());
   }
 
@@ -137,13 +137,13 @@ public class SkinDetectionQuotaService {
     return user;
   }
 
-  private SkinDetectionQuotaVo buildVo(
+  private TcmDetectionQuotaVo buildVo(
       boolean allowed,
       boolean phoneBound,
       String reason,
       String message,
-      SkinDetectionWhitelist member) {
-    SkinDetectionQuotaVo vo = new SkinDetectionQuotaVo();
+      TcmDetectionWhitelist member) {
+    TcmDetectionQuotaVo vo = new TcmDetectionQuotaVo();
     vo.setAllowed(allowed);
     vo.setPhoneBound(phoneBound);
     vo.setReason(reason);

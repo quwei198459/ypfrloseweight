@@ -187,22 +187,120 @@ public class MealPhotoAliyunJsonParser {
     if (!StringUtils.hasText(name)) {
       name = "识别食物";
     }
+    // 预估重量：第三方返回如 "300g"，缺省按 100 计
+    ParsedWeight weight = parseWeight(n);
     MealPhotoFoodItemVo vo = new MealPhotoFoodItemVo();
     vo.setLineId(String.valueOf(index + 1));
     vo.setFoodName(name.length() > 128 ? name.substring(0, 128) : name);
     vo.setType(type);
     vo.setCaloriesPer100(caloriesPer100.setScale(2, RoundingMode.HALF_UP));
-    vo.setQuantity(DEFAULT_QUANTITY);
-    vo.setQuantityUnit(DEFAULT_QUANTITY_UNIT);
+    vo.setQuantity(weight.grams);
+    vo.setQuantityUnit(weight.unit);
+    vo.setWeightG(weight.grams.doubleValue());
+    // 实际热量 = 标准热量(每100g/ml) × 实际重量 ÷ 100
     vo.setCalories(
         caloriesPer100
-            .multiply(DEFAULT_QUANTITY)
+            .multiply(weight.grams)
             .divide(BigDecimal.valueOf(100), 0, RoundingMode.HALF_UP)
             .max(BigDecimal.ZERO)
             .setScale(0, RoundingMode.HALF_UP)
             .intValue());
-    vo.setGiLabel("低 GI");
+    Integer gi = firstInteger(n, "GI", "gi", "giValue", "gi_value");
+    vo.setGi(gi);
+    vo.setGiLabel(giLabelFromValue(gi));
     return vo;
+  }
+
+  /** 预估重量解析结果：统一换算到数值 + 展示单位（g/ml）。 */
+  private static final class ParsedWeight {
+    final BigDecimal grams;
+    final String unit;
+
+    ParsedWeight(BigDecimal grams, String unit) {
+      this.grams = grams;
+      this.unit = unit;
+    }
+  }
+
+  private static final Pattern WEIGHT_PATTERN =
+      Pattern.compile("([\\d]+(?:\\.\\d+)?)\\s*(kg|千克|公斤|g|克|ml|毫升|l|升)?", Pattern.CASE_INSENSITIVE);
+
+  /**
+   * 解析第三方预估重量字符串（如 {@code "300g"}、{@code "1.5kg"}、{@code "250ml"}）。
+   * 单位归一：kg/千克/公斤→g(×1000)，l/升→ml(×1000)；无单位或无法解析时按 100 g/ml 兜底。
+   */
+  private ParsedWeight parseWeight(JsonNode n) {
+    String raw = null;
+    for (String k : new String[] {"weight", "amount", "estimateWeight", "weight_g", "weightG"}) {
+      if (n == null || !n.has(k)) {
+        continue;
+      }
+      JsonNode v = n.get(k);
+      if (v.isTextual() && StringUtils.hasText(v.asText())) {
+        raw = v.asText().trim();
+        break;
+      }
+      if (v.isNumber()) {
+        // 纯数字按克/毫升处理（无单位）
+        raw = v.asText();
+        break;
+      }
+    }
+    if (StringUtils.hasText(raw)) {
+      Matcher m = WEIGHT_PATTERN.matcher(raw.trim());
+      if (m.find()) {
+        try {
+          BigDecimal value = new BigDecimal(m.group(1));
+          String unitRaw = m.group(2) == null ? "" : m.group(2).toLowerCase(Locale.ROOT);
+          BigDecimal grams = value;
+          String unit;
+          switch (unitRaw) {
+            case "kg":
+            case "千克":
+            case "公斤":
+              grams = value.multiply(BigDecimal.valueOf(1000));
+              unit = "g";
+              break;
+            case "g":
+            case "克":
+              unit = "g";
+              break;
+            case "l":
+            case "升":
+              grams = value.multiply(BigDecimal.valueOf(1000));
+              unit = "ml";
+              break;
+            case "ml":
+            case "毫升":
+              unit = "ml";
+              break;
+            default:
+              unit = DEFAULT_QUANTITY_UNIT;
+          }
+          if (grams.compareTo(BigDecimal.ZERO) > 0) {
+            return new ParsedWeight(grams.setScale(1, RoundingMode.HALF_UP), unit);
+          }
+        } catch (NumberFormatException ignored) {
+        }
+      }
+    }
+    return new ParsedWeight(DEFAULT_QUANTITY, DEFAULT_QUANTITY_UNIT);
+  }
+
+  /**
+   * 按通用 GI 分级阈值给出展示文案：≤55 低 GI，56-69 中 GI，≥70 高 GI；无真值时返回空串（不再伪造）。
+   */
+  private static String giLabelFromValue(Integer gi) {
+    if (gi == null) {
+      return "";
+    }
+    if (gi <= 55) {
+      return "低 GI";
+    }
+    if (gi <= 69) {
+      return "中 GI";
+    }
+    return "高 GI";
   }
 
   private static String firstText(JsonNode n, String... keys) {
@@ -267,8 +365,9 @@ public class MealPhotoAliyunJsonParser {
     vo.setCaloriesPer100(caloriesPer100.setScale(2, RoundingMode.HALF_UP));
     vo.setQuantity(DEFAULT_QUANTITY);
     vo.setQuantityUnit(DEFAULT_QUANTITY_UNIT);
+    vo.setWeightG(DEFAULT_QUANTITY.doubleValue());
     vo.setCalories(caloriesPer100.intValue());
-    vo.setGiLabel("低 GI");
+    vo.setGiLabel("");
     return List.of(vo);
   }
 

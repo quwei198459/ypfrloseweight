@@ -20,6 +20,8 @@ public class MealPhotoRecognizeResultVo {
   private String imageUrl;
   private String previewUrl;
   private String recommendedMealType;
+  /** DeepSeek 个性化推荐用语（替代固定"推荐吃 X%"）；可能为 null */
+  private String recommendText;
   private List<MealPhotoFoodItemVo> foods;
   /** 0~1，与前端 recommendedEatRatio 一致 */
   private Double recommendedEatRatio;
@@ -79,6 +81,14 @@ public class MealPhotoRecognizeResultVo {
 
   public void setRecommendedMealType(String recommendedMealType) {
     this.recommendedMealType = recommendedMealType;
+  }
+
+  public String getRecommendText() {
+    return recommendText;
+  }
+
+  public void setRecommendText(String recommendText) {
+    this.recommendText = recommendText;
   }
 
   public List<MealPhotoFoodItemVo> getFoods() {

@@ -19,8 +19,10 @@ public class MealPhotoFoodItemVo {
   private BigDecimal quantity;
   /** 默认识别单位，当前统一为 g/ml */
   private String quantityUnit;
-  /** 如「低 GI」 */
+  /** 如「中 GI」，由真实 GI 值分级得到 */
   private String giLabel;
+  /** 第三方返回的真实血糖生成指数（GI）数值，无则为 null */
+  private Integer gi;
   private Long foodId;
   private Double weightG;
 
@@ -86,6 +88,14 @@ public class MealPhotoFoodItemVo {
 
   public void setGiLabel(String giLabel) {
     this.giLabel = giLabel;
+  }
+
+  public Integer getGi() {
+    return gi;
+  }
+
+  public void setGi(Integer gi) {
+    this.gi = gi;
   }
 
   public Long getFoodId() {

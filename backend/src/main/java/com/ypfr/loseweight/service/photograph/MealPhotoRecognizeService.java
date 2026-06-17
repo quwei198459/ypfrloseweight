@@ -52,6 +52,7 @@ public class MealPhotoRecognizeService {
   private final DashboardService dashboardService;
   private final DailySummaryService dailySummaryService;
   private final PhotoRecognitionAccessService photoRecognitionAccessService;
+  private final MealPhotoRecommendService recommendService;
 
   public MealPhotoRecognizeService(
       MealPhotoRecognitionMapper mealPhotoRecognitionMapper,
@@ -61,7 +62,8 @@ public class MealPhotoRecognizeService {
       MealPhotoAliyunJsonParser aliyunJsonParser,
       DashboardService dashboardService,
       DailySummaryService dailySummaryService,
-      PhotoRecognitionAccessService photoRecognitionAccessService) {
+      PhotoRecognitionAccessService photoRecognitionAccessService,
+      MealPhotoRecommendService recommendService) {
     this.mealPhotoRecognitionMapper = mealPhotoRecognitionMapper;
     this.mealRecordMapper = mealRecordMapper;
     this.dietRecordMapper = dietRecordMapper;
@@ -70,6 +72,7 @@ public class MealPhotoRecognizeService {
     this.dashboardService = dashboardService;
     this.dailySummaryService = dailySummaryService;
     this.photoRecognitionAccessService = photoRecognitionAccessService;
+    this.recommendService = recommendService;
   }
 
   public MealPhotoRecognizeResultVo submit(Long userId, MealPhotoSubmitRequest req) {
@@ -126,8 +129,17 @@ public class MealPhotoRecognizeService {
         row.setRecognizeStatus("success");
         row.setConfirmStatus("pending_confirm");
         fillRecognizedSnapshots(row, foods);
+        // DeepSeek 个性化推荐（比例 + 用语）；失败/未配置则保持默认 100%
+        MealPhotoRecommendService.Result rec = recommendService.recommend(foods, chosenMeal);
+        if (rec != null) {
+          row.setRecommendedEatRatio(BigDecimal.valueOf(rec.ratio()));
+        }
         mealPhotoRecognitionMapper.updateById(row);
-        return buildResultVo(row, foods, null, null);
+        MealPhotoRecognizeResultVo vo = buildResultVo(row, foods, null, null);
+        if (rec != null) {
+          vo.setRecommendText(rec.text());
+        }
+        return vo;
       }
       row.setRecognizeStatus("fail");
       row.setErrorCode("VENDOR_HTTP_" + resp.getStatusCode().value());

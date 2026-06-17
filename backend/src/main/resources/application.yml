@@ -59,6 +59,18 @@ app:
     deepseek-api-key: ${DEEPSEEK_API_KEY:change-me}
     default-times: ${SKIN_DETECT_DEFAULT_TIMES:3}
     image-dir-suffix: ${SKIN_DETECT_IMAGE_DIR_SUFFIX:skin-detection}
+  tcm-detection:
+    appcode: ${ALIYUN_TCM_APPCODE:change-me}
+    host: ${ALIYUN_TCM_HOST:https://ali-market-tongue-detect-v2.macrocura.com}
+    create-path: ${ALIYUN_TCM_CREATE_PATH:/diagnose/face-tongue/result/}
+    report-path: ${ALIYUN_TCM_REPORT_PATH:/diagnose/face-tongue/report/}
+    default-scene: ${ALIYUN_TCM_SCENE:2}
+    mock: ${TCM_DETECT_MOCK:false}
+    public-base-url: ${APP_PUBLIC_BASE_URL:https://api.baohukeji.com}
+    deepseek-base-url: ${DEEPSEEK_BASE_URL:https://api.deepseek.com}
+    deepseek-api-key: ${DEEPSEEK_API_KEY:change-me}
+    default-times: ${TCM_DETECT_DEFAULT_TIMES:3}
+    image-dir-suffix: ${TCM_DETECT_IMAGE_DIR_SUFFIX:tcm-detection}
 
 logging:
   level:
