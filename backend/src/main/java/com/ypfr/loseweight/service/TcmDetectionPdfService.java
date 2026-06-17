@@ -36,12 +36,16 @@ public class TcmDetectionPdfService {
 
   private final PhotoRecognitionAccessService photoRecognitionAccessService;
   private final UploadProperties uploadProperties;
+  private final String publicBaseUrl;
 
   public TcmDetectionPdfService(
       PhotoRecognitionAccessService photoRecognitionAccessService,
-      UploadProperties uploadProperties) {
+      UploadProperties uploadProperties,
+      @org.springframework.beans.factory.annotation.Value("${APP_PUBLIC_BASE_URL:https://api.baohukeji.com}")
+          String publicBaseUrl) {
     this.photoRecognitionAccessService = photoRecognitionAccessService;
     this.uploadProperties = uploadProperties;
+    this.publicBaseUrl = publicBaseUrl;
   }
 
   public byte[] generate(AdminTcmDetectionRecordDetailVo detail) {
@@ -182,12 +186,12 @@ public class TcmDetectionPdfService {
     table.setWidths(new float[] {1f, 1f});
     table.setSpacingBefore(8);
     table.setSpacingAfter(12);
-    table.addCell(imageCell("舌象", tongue, fonts));
-    table.addCell(imageCell("面象", face, fonts));
+    table.addCell(imageCell("舌象（点击查看原图）", tongue, detail.getTongueImageUrl(), fonts));
+    table.addCell(imageCell("面象（点击查看原图）", face, detail.getFaceImageUrl(), fonts));
     document.add(table);
   }
 
-  private PdfPCell imageCell(String caption, Image image, Fonts fonts) {
+  private PdfPCell imageCell(String caption, Image image, String relativeUrl, Fonts fonts) {
     PdfPCell cell = new PdfPCell();
     cell.setPadding(8);
     cell.setBorderColor(new Color(225, 232, 225));
@@ -197,15 +201,40 @@ public class TcmDetectionPdfService {
     cap.setSpacingAfter(6);
     cell.addElement(cap);
     if (image != null) {
-      image.scaleToFit(220, 220);
-      image.setAlignment(Element.ALIGN_CENTER);
-      cell.addElement(image);
+      cell.addElement(clickableImage(image, relativeUrl, 220, 220));
     } else {
       Paragraph none = new Paragraph("暂无图片", fonts.muted);
       none.setAlignment(Element.ALIGN_CENTER);
       cell.addElement(none);
     }
     return cell;
+  }
+
+  /** 把图片缩放后包成可点击 Chunk（锚点为公网原图地址），点击在浏览器打开原图。 */
+  private Paragraph clickableImage(Image image, String relativeUrl, float maxW, float maxH) {
+    image.scaleToFit(maxW, maxH);
+    com.lowagie.text.Chunk chunk = new com.lowagie.text.Chunk(image, 0, 0, true);
+    String abs = absoluteUrl(relativeUrl);
+    if (hasText(abs)) {
+      chunk.setAnchor(abs);
+    }
+    Paragraph p = new Paragraph(chunk);
+    p.setAlignment(Element.ALIGN_CENTER);
+    return p;
+  }
+
+  private String absoluteUrl(String rawPath) {
+    if (!hasText(rawPath)) {
+      return null;
+    }
+    String p = rawPath.trim();
+    if (p.startsWith("http://") || p.startsWith("https://")) {
+      return p;
+    }
+    if (!p.startsWith("/")) {
+      p = "/" + p;
+    }
+    return publicBaseUrl.replaceAll("/$", "") + p;
   }
 
   private void addFocusItems(Document document, AdminTcmDetectionRecordDetailVo detail, Fonts fonts)

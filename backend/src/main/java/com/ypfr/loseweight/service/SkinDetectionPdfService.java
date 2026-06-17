@@ -36,12 +36,16 @@ public class SkinDetectionPdfService {
 
   private final PhotoRecognitionAccessService photoRecognitionAccessService;
   private final UploadProperties uploadProperties;
+  private final String publicBaseUrl;
 
   public SkinDetectionPdfService(
       PhotoRecognitionAccessService photoRecognitionAccessService,
-      UploadProperties uploadProperties) {
+      UploadProperties uploadProperties,
+      @org.springframework.beans.factory.annotation.Value("${APP_PUBLIC_BASE_URL:https://api.baohukeji.com}")
+          String publicBaseUrl) {
     this.photoRecognitionAccessService = photoRecognitionAccessService;
     this.uploadProperties = uploadProperties;
+    this.publicBaseUrl = publicBaseUrl;
   }
 
   public byte[] generate(AdminSkinDetectionRecordDetailVo detail) {
@@ -166,11 +170,60 @@ public class SkinDetectionPdfService {
       p.setSpacingAfter(8);
       document.add(p);
     }
-    if (hasText(detail.getImageUrl())) {
-      Paragraph p = new Paragraph("检测图片链接：" + detail.getImageUrl(), fonts.muted);
+    addDetectImage(document, detail.getImageUrl(), fonts);
+  }
+
+  /** 嵌入检测原图并设为可点击（锚点为公网原图地址）；读不到本地文件时退化为可点击链接。 */
+  private void addDetectImage(Document document, String imageUrl, Fonts fonts) throws DocumentException {
+    if (!hasText(imageUrl)) {
+      return;
+    }
+    Image img = loadImageFromUploadPath(imageUrl);
+    if (img != null) {
+      Paragraph cap = new Paragraph("检测图片（点击查看原图）", fonts.label);
+      cap.setSpacingBefore(6);
+      cap.setSpacingAfter(6);
+      document.add(cap);
+      Paragraph p = clickableImage(img, imageUrl, 260, 260);
       p.setSpacingAfter(12);
       document.add(p);
+    } else {
+      String abs = absoluteUrl(imageUrl);
+      if (hasText(abs)) {
+        com.lowagie.text.Chunk c = new com.lowagie.text.Chunk("检测图片：点击查看原图", fonts.muted);
+        c.setAnchor(abs);
+        Paragraph p = new Paragraph(c);
+        p.setSpacingAfter(12);
+        document.add(p);
+      }
     }
+  }
+
+  /** 把图片缩放后包成可点击 Chunk（锚点为公网原图地址），点击在浏览器打开原图。 */
+  private Paragraph clickableImage(Image image, String relativeUrl, float maxW, float maxH) {
+    image.scaleToFit(maxW, maxH);
+    com.lowagie.text.Chunk chunk = new com.lowagie.text.Chunk(image, 0, 0, true);
+    String abs = absoluteUrl(relativeUrl);
+    if (hasText(abs)) {
+      chunk.setAnchor(abs);
+    }
+    Paragraph p = new Paragraph(chunk);
+    p.setAlignment(Element.ALIGN_CENTER);
+    return p;
+  }
+
+  private String absoluteUrl(String rawPath) {
+    if (!hasText(rawPath)) {
+      return null;
+    }
+    String p = rawPath.trim();
+    if (p.startsWith("http://") || p.startsWith("https://")) {
+      return p;
+    }
+    if (!p.startsWith("/")) {
+      p = "/" + p;
+    }
+    return publicBaseUrl.replaceAll("/$", "") + p;
   }
 
   private void addFocusItems(Document document, AdminSkinDetectionRecordDetailVo detail, Fonts fonts)
