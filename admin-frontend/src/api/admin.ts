@@ -19,6 +19,14 @@ import type {
   SkinDetectionRecordDetail,
   SkinDetectionWhitelist,
   SportItem,
+  SystemConfig,
+  TcmDetectionQuotaLogItem,
+  TcmDetectionQuotaSummary,
+  TcmDetectionAiPromptTemplate,
+  TcmDetectionItemConfig,
+  TcmDetectionRecord,
+  TcmDetectionRecordDetail,
+  TcmDetectionWhitelist,
 } from '../types/admin'
 import { http } from './http'
 
@@ -243,5 +251,102 @@ export function fetchSkinDetectionRecordDetail(id: number) {
 export async function downloadSkinDetectionRecordPdf(id: number) {
   const resp = await http.get(`/admin/skin-detection-records/${id}/pdf`, { responseType: 'blob' })
   return resp.data as Blob
+}
+
+export function fetchTcmDetectionWhitelist(params: { keyword?: string; status?: number }) {
+  return unwrap<TcmDetectionWhitelist[]>(http.get('/admin/tcm-detection-whitelist', { params }))
+}
+
+export function createTcmDetectionWhitelist(payload: {
+  phone: string
+  remark?: string | null
+  status: number
+  totalTimes?: number
+}) {
+  return unwrap<TcmDetectionWhitelist>(http.post('/admin/tcm-detection-whitelist', payload))
+}
+
+export function updateTcmDetectionWhitelist(
+  id: number,
+  payload: { phone: string; remark?: string | null; status: number; totalTimes?: number },
+) {
+  return unwrap<TcmDetectionWhitelist>(http.put(`/admin/tcm-detection-whitelist/${id}`, payload))
+}
+
+export function adjustTcmDetectionQuota(id: number, payload: { delta: number; remark?: string }) {
+  return unwrap<TcmDetectionWhitelist>(http.post(`/admin/tcm-detection-whitelist/${id}/quota-adjustments`, payload))
+}
+
+export function fetchTcmDetectionQuotaSummary(id: number) {
+  return unwrap<TcmDetectionQuotaSummary>(http.get(`/admin/tcm-detection-whitelist/${id}/quota-summary`))
+}
+
+export function fetchTcmDetectionManualLogs(id: number) {
+  return unwrap<TcmDetectionQuotaLogItem[]>(http.get(`/admin/tcm-detection-whitelist/${id}/quota-logs/manual`))
+}
+
+export function fetchTcmDetectionConsumeLogs(id: number) {
+  return unwrap<TcmDetectionQuotaLogItem[]>(http.get(`/admin/tcm-detection-whitelist/${id}/quota-logs/consume`))
+}
+
+export function fetchTcmDetectionItemConfigs() {
+  return unwrap<TcmDetectionItemConfig[]>(http.get('/admin/tcm-detection-config/items'))
+}
+
+export function updateTcmDetectionItemConfig(id: number, payload: {
+  itemName: string
+  displayName: string
+  sortOrder: number
+  enabled: number
+  scaleType: string
+  scoreDirection: string
+  promptKey: string
+  remark?: string | null
+}) {
+  return unwrap<TcmDetectionItemConfig>(http.put(`/admin/tcm-detection-config/items/${id}`, payload))
+}
+
+export function fetchTcmDetectionAiPrompts() {
+  return unwrap<TcmDetectionAiPromptTemplate[]>(http.get('/admin/tcm-detection-config/ai-prompts'))
+}
+
+export function updateTcmDetectionAiPrompt(id: number, payload: {
+  promptName: string
+  templateContent: string
+  outputSchema?: string | null
+  model: string
+  temperature: number
+  status: number
+  remark?: string | null
+}) {
+  return unwrap<TcmDetectionAiPromptTemplate>(http.put(`/admin/tcm-detection-config/ai-prompts/${id}`, payload))
+}
+
+export function fetchTcmDetectionRecords(params: {
+  phone?: string
+  status?: string
+  startDate?: string
+  endDate?: string
+  minScore?: number
+  maxScore?: number
+}) {
+  return unwrap<TcmDetectionRecord[]>(http.get('/admin/tcm-detection-records', { params }))
+}
+
+export function fetchTcmDetectionRecordDetail(id: number) {
+  return unwrap<TcmDetectionRecordDetail>(http.get(`/admin/tcm-detection-records/${id}`))
+}
+
+export async function downloadTcmDetectionRecordPdf(id: number) {
+  const resp = await http.get(`/admin/tcm-detection-records/${id}/pdf`, { responseType: 'blob' })
+  return resp.data as Blob
+}
+
+export function fetchSystemConfig() {
+  return unwrap<SystemConfig>(http.get('/admin/system-config'))
+}
+
+export function updateSystemConfig(payload: Partial<SystemConfig>) {
+  return unwrap<SystemConfig>(http.put('/admin/system-config', payload))
 }
 

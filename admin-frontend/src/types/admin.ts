@@ -253,3 +253,174 @@ export interface SkinDetectionRecordDetail {
   items: SkinDetectionRecordItem[]
 }
 
+export interface TcmDetectionWhitelist {
+  id?: number
+  phone: string
+  remark?: string | null
+  status: number
+  totalTimes?: number
+  usedTimes?: number
+  quotaUpdatedAt?: string
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface TcmDetectionQuotaLogItem {
+  id: number
+  changeType: 'grant' | 'reduce' | 'consume' | string
+  changeCount: number
+  beforeTotalTimes: number
+  beforeUsedTimes: number
+  afterTotalTimes: number
+  afterUsedTimes: number
+  userId?: number | null
+  recordId?: number | null
+  remark?: string | null
+  operatorType?: string | null
+  operatorName?: string | null
+  createdAt: string
+}
+
+export interface TcmDetectionQuotaSummary {
+  grantCount: number
+  reduceCount: number
+  usedCount: number
+  currentBalance: number
+}
+
+export interface TcmDetectionItemConfig {
+  id: number
+  itemCode: string
+  vendorField: string
+  itemName: string
+  displayName: string
+  sortOrder: number
+  enabled: number
+  scaleType: string
+  scoreDirection: string
+  promptKey: string
+  remark?: string | null
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface TcmDetectionAiPromptTemplate {
+  id: number
+  promptKey: string
+  promptType: string
+  itemCode?: string | null
+  promptName: string
+  templateContent: string
+  outputSchema?: string | null
+  model: string
+  temperature: number
+  status: number
+  version: number
+  remark?: string | null
+  createdAt?: string
+  updatedAt?: string
+}
+
+/** 望诊特征项（来自脉景 API）。metricsJson 为 JSON 字符串，解析后即 TcmInspectionMetrics */
+export interface TcmDetectionRecordItem {
+  itemCode: string
+  itemName: string
+  level: string | null
+  resultText: string | null
+  scaleType: string | null
+  metricsJson: string | null
+  sortOrder: number | null
+}
+
+/** TcmDetectionRecordItem.metricsJson 解析后的结构 */
+export interface TcmInspectionMetrics {
+  group?: string
+  featureName?: string
+  situation?: string
+  category?: string
+}
+
+/** reportJson 内 advices.food 的单项 */
+export interface TcmReportFoodAdvice {
+  title?: string
+  advice?: string
+}
+
+/** reportJson 内 goods 推荐商品的单项 */
+export interface TcmReportGoods {
+  name?: string
+  img1?: string
+}
+
+/** TcmDetectionRecordDetail.reportJson 解析后的结构 */
+export interface TcmDetectionReport {
+  physiqueName?: string
+  physiqueAnalysis?: string
+  typicalSymptom?: string
+  riskWarning?: string
+  syndromeName?: string
+  syndromeIntroduction?: string
+  advices?: {
+    food?: TcmReportFoodAdvice[]
+    music?: TcmReportFoodAdvice[]
+    sleep?: TcmReportFoodAdvice[]
+    sport?: TcmReportFoodAdvice[]
+    treatment?: TcmReportFoodAdvice[]
+  }
+  goods?: TcmReportGoods[]
+  annotatedTongueUrl?: string
+}
+
+export interface TcmDetectionRecord {
+  id: number
+  userId: number
+  phone: string | null
+  userName: string | null
+  gender: number | null
+  birthday: string | null
+  age: number | null
+  residence: string | null
+  tongueImageUrl: string | null
+  faceImageUrl: string | null
+  constitutionPrimary: string | null
+  overallScore: number | null
+  aiSummary?: string | null
+  status: string
+  failReason: string | null
+  deepseekStatus: string | null
+  deepseekError?: string | null
+  createdAt: string
+  updatedAt?: string
+}
+
+export interface TcmDetectionRecordDetail {
+  recordId: number
+  userId: number
+  phone: string | null
+  userName: string | null
+  gender: number | null
+  birthday: string | null
+  age: number | null
+  residence: string | null
+  tongueImageUrl: string | null
+  faceImageUrl: string | null
+  constitutionPrimary: string | null
+  overallScore: number | null
+  /** ★ JSON 字符串，需 JSON.parse 为 TcmDetectionReport */
+  reportJson: string | null
+  aiSummary: string | null
+  status: string
+  failReason: string | null
+  deepseekStatus: string | null
+  deepseekError: string | null
+  createdAt: string
+  items: TcmDetectionRecordItem[]
+}
+
+export interface SystemConfig {
+  /** true=白名单限制开启（需在白名单内才可用）；false=关闭限制（所有用户可用） */
+  photoRecognitionWhitelistEnabled: boolean
+  skinDetectionWhitelistEnabled: boolean
+  tcmDetectionWhitelistEnabled?: boolean
+}
+

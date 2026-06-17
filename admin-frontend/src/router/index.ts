@@ -12,6 +12,11 @@ import SkinDetectionWhitelistView from '../views/SkinDetectionWhitelistView.vue'
 import SkinDetectionRecordView from '../views/SkinDetectionRecordView.vue'
 import SkinDetectionItemConfigView from '../views/SkinDetectionItemConfigView.vue'
 import SkinDetectionAiPromptView from '../views/SkinDetectionAiPromptView.vue'
+import TcmDetectionWhitelistView from '../views/TcmDetectionWhitelistView.vue'
+import TcmDetectionRecordView from '../views/TcmDetectionRecordView.vue'
+import TcmDetectionItemConfigView from '../views/TcmDetectionItemConfigView.vue'
+import TcmDetectionAiPromptView from '../views/TcmDetectionAiPromptView.vue'
+import SystemConfigView from '../views/SystemConfigView.vue'
 import UserListView from '../views/UserListView.vue'
 
 const router = createRouter({
@@ -43,7 +48,7 @@ const router = createRouter({
           path: '/photo-recognition-members',
           name: 'photo-recognition-members',
           component: PhotoRecognitionMemberView,
-          meta: { title: '手机号管理' },
+          meta: { title: '食物识别白名单' },
         },
         {
           path: '/skin-detection-whitelist',
@@ -68,6 +73,36 @@ const router = createRouter({
           name: 'skin-detection-ai-prompts',
           component: SkinDetectionAiPromptView,
           meta: { title: 'AI提示词配置' },
+        },
+        {
+          path: '/tcm-detection-whitelist',
+          name: 'tcm-detection-whitelist',
+          component: TcmDetectionWhitelistView,
+          meta: { title: '中医体检白名单' },
+        },
+        {
+          path: '/tcm-detection-records',
+          name: 'tcm-detection-records',
+          component: TcmDetectionRecordView,
+          meta: { title: '中医体检记录' },
+        },
+        {
+          path: '/tcm-detection-item-configs',
+          name: 'tcm-detection-item-configs',
+          component: TcmDetectionItemConfigView,
+          meta: { title: '中医体检项配置' },
+        },
+        {
+          path: '/tcm-detection-ai-prompts',
+          name: 'tcm-detection-ai-prompts',
+          component: TcmDetectionAiPromptView,
+          meta: { title: '中医AI提示词' },
+        },
+        {
+          path: '/system-config',
+          name: 'system-config',
+          component: SystemConfigView,
+          meta: { title: '系统配置' },
         },
       ],
     },

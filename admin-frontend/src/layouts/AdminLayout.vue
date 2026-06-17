@@ -113,7 +113,7 @@ function handleLogout() {
           <span>识图客服配置</span>
         </el-menu-item>
         <el-menu-item index="/photo-recognition-members">
-          <span>手机号管理</span>
+          <span>食物识别白名单</span>
         </el-menu-item>
         <el-menu-item index="/skin-detection-whitelist">
           <span>皮肤检测白名单</span>
@@ -126,6 +126,21 @@ function handleLogout() {
         </el-menu-item>
         <el-menu-item index="/skin-detection-ai-prompts">
           <span>AI提示词配置</span>
+        </el-menu-item>
+        <el-menu-item index="/tcm-detection-whitelist">
+          <span>中医体检白名单</span>
+        </el-menu-item>
+        <el-menu-item index="/tcm-detection-records">
+          <span>中医体检记录</span>
+        </el-menu-item>
+        <el-menu-item index="/tcm-detection-item-configs">
+          <span>中医体检项配置</span>
+        </el-menu-item>
+        <el-menu-item index="/tcm-detection-ai-prompts">
+          <span>中医AI提示词</span>
+        </el-menu-item>
+        <el-menu-item index="/system-config">
+          <span>系统配置</span>
         </el-menu-item>
       </el-menu>
     </el-aside>

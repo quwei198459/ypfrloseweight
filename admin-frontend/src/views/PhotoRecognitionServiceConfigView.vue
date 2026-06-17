@@ -108,7 +108,7 @@ onMounted(loadConfig)
       </template>
       <div class="page-intro">
         <div class="page-intro__title">客服配置</div>
-        <div class="page-intro__desc">维护小程序拍照识别拦截弹窗展示的客服电话、微信号和二维码。手机号权限和次数请在“手机号管理”页面维护。</div>
+        <div class="page-intro__desc">维护小程序拍照识别拦截弹窗展示的客服电话、微信号和二维码。手机号权限和次数请在“食物识别白名单”页面维护。</div>
       </div>
       <div class="config-layout">
         <div class="config-form-wrap">

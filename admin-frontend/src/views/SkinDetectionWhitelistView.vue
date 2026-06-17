@@ -195,7 +195,7 @@ onMounted(loadRows)
   <div class="skin-whitelist-page">
     <el-card class="page-intro" shadow="never">
       <div class="page-intro__title">皮肤检测白名单/次数管理</div>
-      <div class="page-intro__desc">独立管理可使用皮肤检测的手机号、启停状态、总次数和使用明细；不与拍照识别手机号管理混用。</div>
+      <div class="page-intro__desc">独立管理可使用皮肤检测的手机号、启停状态、总次数和使用明细；不与食物识别白名单混用。</div>
     </el-card>
 
     <el-card>
