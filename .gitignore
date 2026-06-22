@@ -8,6 +8,9 @@ certs/
 # 本地整库备份（体积大，勿提交）
 loseweight_0413.sql
 
+# 小程序产品采集中间产物（截图体积大，WIP，勿提交）
+product/
+
 # Python
 __pycache__/
 *.py[cod]

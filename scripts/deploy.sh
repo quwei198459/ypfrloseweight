@@ -63,9 +63,11 @@ deploy_backend() {
   info "重启 systemd 服务：$SERVICE"
   remote "systemctl restart $SERVICE && sleep 2 && systemctl --no-pager status $SERVICE | head -n 12" \
     || die "重启失败，请查看：./scripts/deploy.sh logs"
-  ok "后端部署完成"
-  info "健康检查：curl http://127.0.0.1:$HEALTH_PORT/api/v1/health（远端）"
-  remote "curl -s -o /dev/null -w 'health HTTP %{http_code}\n' http://127.0.0.1:$HEALTH_PORT/api/v1/health || true"
+  ok "后端上传+重启完成"
+  info "健康检查（等待 Spring Boot 启动，最多 ~40s）"
+  remote "for i in \$(seq 1 20); do c=\$(curl -s -o /dev/null -w '%{http_code}' --max-time 4 http://127.0.0.1:$HEALTH_PORT/api/v1/health); if [ \"\$c\" = 200 ]; then echo \"health HTTP 200（第 \$i 次）\"; exit 0; fi; sleep 2; done; echo \"health 未就绪，请查看 ./scripts/deploy.sh logs\"; exit 1" \
+    && ok "后端部署完成（健康检查通过）" \
+    || echo "⚠️ 健康检查未通过，请运行 ./scripts/deploy.sh logs 排查"
 }
 
 deploy_admin() {
