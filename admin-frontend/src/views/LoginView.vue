@@ -33,11 +33,8 @@ async function onSubmit() {
     <div class="login-bg" aria-hidden="true" />
     <div class="login-card-wrap">
       <div class="login-brand">
-        <img class="login-brand__logo" src="/logo-baohu.png" alt="宝护健康" />
-        <div class="login-brand__text">
-          <div class="login-brand__title">宝护健康瘦</div>
-          <div class="login-brand__sub">管理后台</div>
-        </div>
+        <img class="login-brand__logo" src="/logo-lockup-vertical-white.png" alt="宝护 baohu" />
+        <div class="login-brand__sub">管理后台</div>
       </div>
       <el-card class="login-card" shadow="never">
         <template #header>
@@ -89,19 +86,17 @@ async function onSubmit() {
 
 .login-brand {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
   margin-bottom: 28px;
   padding: 0 4px;
 }
 
 .login-brand__logo {
-  width: 64px;
-  height: 64px;
+  width: 132px;
+  height: auto;
   object-fit: contain;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.12);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 
 .login-brand__title {

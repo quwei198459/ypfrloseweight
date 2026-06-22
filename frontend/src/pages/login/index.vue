@@ -2,9 +2,8 @@
   <!-- login_01：默认；login_02：isLogging；login_03：showAgreementPopup -->
   <view class="page">
     <view class="brand">
-      <!-- Logo 以 import 绑定源文件，换图请只改 frontend/src/static/logo/logo-c-dark.png 后重新编译 -->
-      <image class="app-icon" :src="logoDark" mode="aspectFit" />
-      <text class="title">宝护健康瘦</text>
+      <!-- 品牌竖版锁版（图标+宝护+baohu），源文件 frontend/src/static/logo/logo-lockup-vertical.png -->
+      <image class="app-lockup" :src="logoLockup" mode="widthFix" />
       <text class="subtitle">拍一拍，热量知多少</text>
       <text class="login-lite-hint">使用微信账号快速登录</text>
     </view>
@@ -81,7 +80,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useUserStore } from '@/stores/user'
-import logoDark from '@/static/logo/logo-c-dark.png'
+import logoLockup from '@/static/logo/logo-lockup-vertical.png'
 
 const userStore = useUserStore()
 const agreed = ref(false)
@@ -175,18 +174,15 @@ const confirmAgreementAndLogin = () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 200rpx;
+  margin-top: 150rpx;
 }
 
-/* C 方案 logo：紧凑画板、去留白后 96rpx 展示，品牌区居中 */
-.app-icon {
-  width: 200rpx;
-  height: 200rpx;
-  border-radius: 12rpx;
+/* 品牌竖版锁版：图标+宝护+baohu，居中等宽自适应高度 */
+.app-lockup {
+  width: 268rpx;
   display: block;
   flex-shrink: 0;
   margin: 0 auto;
-  image-rendering: -webkit-optimize-contrast;
 }
 
 .title {
@@ -198,7 +194,7 @@ const confirmAgreementAndLogin = () => {
 }
 
 .subtitle {
-  margin-top: 16rpx;
+  margin-top: 32rpx;
   font-size: 26rpx;
   font-weight: 500;
   color: #666666;
