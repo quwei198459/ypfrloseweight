@@ -27,18 +27,21 @@ public class DeepSeekSkinAnalysisClient {
   private final ObjectMapper objectMapper;
   private final SkinDetectionAiPromptTemplateService promptTemplateService;
   private final SkinDetectionAiFactBuilder factBuilder;
+  private final DeepSeekUsageLogger usageLogger;
 
   public DeepSeekSkinAnalysisClient(
       RestTemplate restTemplate,
       SkinDetectionProperties properties,
       ObjectMapper objectMapper,
       SkinDetectionAiPromptTemplateService promptTemplateService,
-      SkinDetectionAiFactBuilder factBuilder) {
+      SkinDetectionAiFactBuilder factBuilder,
+      DeepSeekUsageLogger usageLogger) {
     this.restTemplate = restTemplate;
     this.properties = properties;
     this.objectMapper = objectMapper;
     this.promptTemplateService = promptTemplateService;
     this.factBuilder = factBuilder;
+    this.usageLogger = usageLogger;
   }
 
   public DeepSeekSkinAnalysisResult analyze(ParsedSkinDetectionResult result) {
@@ -118,11 +121,12 @@ public class DeepSeekSkinAnalysisClient {
 
   private ChatCallResult callDeepSeek(SkinDetectionAiPromptTemplate template, String prompt) {
     String url = properties.getDeepseekBaseUrl().replaceAll("/$", "") + "/chat/completions";
+    String model = firstNonBlank(template.getModel(), "deepseek-chat");
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(new MediaType("application", "json", StandardCharsets.UTF_8));
     headers.setBearerAuth(properties.getDeepseekApiKey().trim());
     Map<String, Object> payload = new LinkedHashMap<>();
-    payload.put("model", firstNonBlank(template.getModel(), "deepseek-chat"));
+    payload.put("model", model);
     payload.put("messages", List.of(
         Map.of("role", "system", "content", "你是一名皮肤检测报告分析助手，请严格按用户要求返回合法 JSON。"),
         Map.of("role", "user", "content", prompt)));
@@ -133,6 +137,7 @@ public class DeepSeekSkinAnalysisClient {
       if (!response.getStatusCode().is2xxSuccessful() || !StringUtils.hasText(body)) {
         return ChatCallResult.failed("DeepSeek 返回异常");
       }
+      usageLogger.record("skin", template.getPromptKey(), model, body);
       String content = extractContent(body);
       if (!StringUtils.hasText(content)) {
         return ChatCallResult.failed("DeepSeek 内容为空");

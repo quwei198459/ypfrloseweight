@@ -1,5 +1,7 @@
 import type {
   AdminDashboardStats,
+  DeepSeekUsageLog,
+  DeepSeekUsageSummary,
   AdminLoginPayload,
   AdminLoginResult,
   AdminPagedResult,
@@ -27,6 +29,9 @@ import type {
   TcmDetectionRecord,
   TcmDetectionRecordDetail,
   TcmDetectionWhitelist,
+  AiCostSummary,
+  ApiPriceConfig,
+  ApiUsageLog,
 } from '../types/admin'
 import { http } from './http'
 
@@ -350,3 +355,49 @@ export function updateSystemConfig(payload: Partial<SystemConfig>) {
   return unwrap<SystemConfig>(http.put('/admin/system-config', payload))
 }
 
+export function fetchDeepSeekUsageSummary(params: { from?: string; to?: string }) {
+  return unwrap<DeepSeekUsageSummary>(http.get('/admin/deepseek-usage/summary', { params }))
+}
+
+export function fetchDeepSeekUsageLogs(params: {
+  from?: string
+  to?: string
+  feature?: string
+  limit?: number
+}) {
+  return unwrap<DeepSeekUsageLog[]>(http.get('/admin/deepseek-usage/logs', { params }))
+}
+
+
+// ===== AI 与第三方接口费用 =====
+export function fetchAiCostSummary(params: { from?: string; to?: string }) {
+  return unwrap<AiCostSummary>(http.get('/admin/api-cost/summary', { params }))
+}
+
+export function fetchApiPrices() {
+  return unwrap<ApiPriceConfig[]>(http.get('/admin/api-cost/prices'))
+}
+
+export function updateApiPrice(
+  id: number,
+  payload: Partial<{
+    unitPriceCny: number
+    unitsPerCall: number
+    freeQuota: number
+    freeUntil: string | null
+    enabled: number
+    remark: string
+  }>,
+) {
+  return unwrap<ApiPriceConfig>(http.put(`/admin/api-cost/prices/${id}`, payload))
+}
+
+export function fetchApiUsageLogs(params: {
+  from?: string
+  to?: string
+  feature?: string
+  provider?: string
+  limit?: number
+}) {
+  return unwrap<ApiUsageLog[]>(http.get('/admin/api-cost/logs', { params }))
+}

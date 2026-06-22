@@ -40,6 +40,7 @@ public class SkinDetectionService {
   private final SkinDetectionResultParser resultParser;
   private final DeepSeekSkinAnalysisClient deepSeekClient;
   private final SkinDetectionItemConfigService itemConfigService;
+  private final ApiUsageLogger apiUsageLogger;
 
   public SkinDetectionService(
       SkinDetectionQuotaService quotaService,
@@ -50,7 +51,8 @@ public class SkinDetectionService {
       YimeiSkinDetectionClient yimeiClient,
       SkinDetectionResultParser resultParser,
       DeepSeekSkinAnalysisClient deepSeekClient,
-      SkinDetectionItemConfigService itemConfigService) {
+      SkinDetectionItemConfigService itemConfigService,
+      ApiUsageLogger apiUsageLogger) {
     this.quotaService = quotaService;
     this.recordMapper = recordMapper;
     this.itemMapper = itemMapper;
@@ -60,6 +62,7 @@ public class SkinDetectionService {
     this.resultParser = resultParser;
     this.deepSeekClient = deepSeekClient;
     this.itemConfigService = itemConfigService;
+    this.apiUsageLogger = apiUsageLogger;
   }
 
   @Transactional
@@ -72,8 +75,17 @@ public class SkinDetectionService {
     record.setDetectTypes(detectTypes);
     recordMapper.insert(record);
 
+    DeepSeekUsageContext.set(userId, record.getId());
     try {
-      String raw = yimeiClient.analyze(request.getImageBase64(), detectTypes);
+      String raw;
+      try {
+        raw = yimeiClient.analyze(request.getImageBase64(), detectTypes);
+        apiUsageLogger.record(ApiUsageLogger.PROVIDER_SKIN, "skin", userId, record.getId(), true, null);
+      } catch (Exception ye) {
+        apiUsageLogger.record(
+            ApiUsageLogger.PROVIDER_SKIN, "skin", userId, record.getId(), false, ye.getMessage());
+        throw ye;
+      }
       ParsedSkinDetectionResult parsed = resultParser.parse(raw);
       saveItems(record.getId(), parsed);
       DeepSeekSkinAnalysisResult ai = deepSeekClient.analyze(parsed);
@@ -101,6 +113,8 @@ public class SkinDetectionService {
       markFailed(record, reason);
       log.error("Skin detection failed. recordId={}, userId={}", record.getId(), userId, e);
       throw new ApiException(4701, reason);
+    } finally {
+      DeepSeekUsageContext.clear();
     }
   }
 

@@ -9,6 +9,8 @@ import com.ypfr.loseweight.mapper.DietRecordMapper;
 import com.ypfr.loseweight.mapper.MealPhotoRecognitionMapper;
 import com.ypfr.loseweight.mapper.MealRecordMapper;
 import com.ypfr.loseweight.service.AliyunFoodCalorieClient;
+import com.ypfr.loseweight.service.ApiUsageLogger;
+import com.ypfr.loseweight.service.DeepSeekUsageContext;
 import com.ypfr.loseweight.service.PhotoRecognitionAccessService;
 import com.ypfr.loseweight.service.DailySummaryService;
 import com.ypfr.loseweight.service.DashboardService;
@@ -53,6 +55,7 @@ public class MealPhotoRecognizeService {
   private final DailySummaryService dailySummaryService;
   private final PhotoRecognitionAccessService photoRecognitionAccessService;
   private final MealPhotoRecommendService recommendService;
+  private final ApiUsageLogger apiUsageLogger;
 
   public MealPhotoRecognizeService(
       MealPhotoRecognitionMapper mealPhotoRecognitionMapper,
@@ -63,7 +66,8 @@ public class MealPhotoRecognizeService {
       DashboardService dashboardService,
       DailySummaryService dailySummaryService,
       PhotoRecognitionAccessService photoRecognitionAccessService,
-      MealPhotoRecommendService recommendService) {
+      MealPhotoRecommendService recommendService,
+      ApiUsageLogger apiUsageLogger) {
     this.mealPhotoRecognitionMapper = mealPhotoRecognitionMapper;
     this.mealRecordMapper = mealRecordMapper;
     this.dietRecordMapper = dietRecordMapper;
@@ -73,6 +77,7 @@ public class MealPhotoRecognizeService {
     this.dailySummaryService = dailySummaryService;
     this.photoRecognitionAccessService = photoRecognitionAccessService;
     this.recommendService = recommendService;
+    this.apiUsageLogger = apiUsageLogger;
   }
 
   public MealPhotoRecognizeResultVo submit(Long userId, MealPhotoSubmitRequest req) {
@@ -120,6 +125,8 @@ public class MealPhotoRecognizeService {
           row.setConfirmStatus("none");
           row.setParsedResultJson("[]");
           mealPhotoRecognitionMapper.updateById(row);
+          apiUsageLogger.record(
+              ApiUsageLogger.PROVIDER_FOOD, "food", userId, row.getId(), false, vendorFail.get());
           return buildResultVo(row, List.of(), row.getErrorCode(), row.getErrorMessage());
         }
         List<MealPhotoFoodItemVo> foods =
@@ -129,8 +136,15 @@ public class MealPhotoRecognizeService {
         row.setRecognizeStatus("success");
         row.setConfirmStatus("pending_confirm");
         fillRecognizedSnapshots(row, foods);
+        apiUsageLogger.record(ApiUsageLogger.PROVIDER_FOOD, "food", userId, row.getId(), true, null);
         // DeepSeek 个性化推荐（比例 + 用语）；失败/未配置则保持默认 100%
-        MealPhotoRecommendService.Result rec = recommendService.recommend(foods, chosenMeal);
+        DeepSeekUsageContext.set(userId, row.getId());
+        MealPhotoRecommendService.Result rec;
+        try {
+          rec = recommendService.recommend(foods, chosenMeal);
+        } finally {
+          DeepSeekUsageContext.clear();
+        }
         if (rec != null) {
           row.setRecommendedEatRatio(BigDecimal.valueOf(rec.ratio()));
         }
@@ -146,6 +160,8 @@ public class MealPhotoRecognizeService {
       row.setErrorMessage(truncate("识图服务返回非成功状态", 512));
       row.setConfirmStatus("none");
       mealPhotoRecognitionMapper.updateById(row);
+      apiUsageLogger.record(
+          ApiUsageLogger.PROVIDER_FOOD, "food", userId, row.getId(), false, row.getErrorCode());
       return buildResultVo(row, List.of(), row.getErrorCode(), row.getErrorMessage());
     } catch (Exception e) {
       row.setRecognizeStatus("fail");
@@ -154,6 +170,7 @@ public class MealPhotoRecognizeService {
       row.setErrorCode("RECOGNIZE_EXCEPTION");
       row.setConfirmStatus("none");
       mealPhotoRecognitionMapper.updateById(row);
+      apiUsageLogger.record(ApiUsageLogger.PROVIDER_FOOD, "food", userId, row.getId(), false, msg);
       return buildResultVo(row, List.of(), row.getErrorCode(), row.getErrorMessage());
     }
   }

@@ -27,18 +27,21 @@ public class DeepSeekTcmAnalysisClient {
   private final ObjectMapper objectMapper;
   private final TcmDetectionAiPromptTemplateService promptTemplateService;
   private final TcmDetectionAiFactBuilder factBuilder;
+  private final DeepSeekUsageLogger usageLogger;
 
   public DeepSeekTcmAnalysisClient(
       RestTemplate restTemplate,
       TcmDetectionProperties properties,
       ObjectMapper objectMapper,
       TcmDetectionAiPromptTemplateService promptTemplateService,
-      TcmDetectionAiFactBuilder factBuilder) {
+      TcmDetectionAiFactBuilder factBuilder,
+      DeepSeekUsageLogger usageLogger) {
     this.restTemplate = restTemplate;
     this.properties = properties;
     this.objectMapper = objectMapper;
     this.promptTemplateService = promptTemplateService;
     this.factBuilder = factBuilder;
+    this.usageLogger = usageLogger;
   }
 
   public DeepSeekTcmAnalysisResult analyze(ParsedTcmDetectionResult result) {
@@ -123,11 +126,12 @@ public class DeepSeekTcmAnalysisClient {
 
   private ChatCallResult callDeepSeek(TcmDetectionAiPromptTemplate template, String prompt) {
     String url = properties.getDeepseekBaseUrl().replaceAll("/$", "") + "/chat/completions";
+    String model = firstNonBlank(template.getModel(), "deepseek-chat");
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(new MediaType("application", "json", StandardCharsets.UTF_8));
     headers.setBearerAuth(properties.getDeepseekApiKey().trim());
     Map<String, Object> payload = new LinkedHashMap<>();
-    payload.put("model", firstNonBlank(template.getModel(), "deepseek-chat"));
+    payload.put("model", model);
     payload.put("messages", List.of(
         Map.of("role", "system", "content", "你是一名中医体质健康报告分析助手，请严格按用户要求返回合法 JSON。"),
         Map.of("role", "user", "content", prompt)));
@@ -138,6 +142,7 @@ public class DeepSeekTcmAnalysisClient {
       if (!response.getStatusCode().is2xxSuccessful() || !StringUtils.hasText(body)) {
         return ChatCallResult.failed("DeepSeek 返回异常");
       }
+      usageLogger.record("tcm", template.getPromptKey(), model, body);
       String content = extractContent(body);
       if (!StringUtils.hasText(content)) {
         return ChatCallResult.failed("DeepSeek 内容为空");

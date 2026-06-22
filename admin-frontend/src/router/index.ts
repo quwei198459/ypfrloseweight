@@ -18,6 +18,7 @@ import TcmDetectionItemConfigView from '../views/TcmDetectionItemConfigView.vue'
 import TcmDetectionAiPromptView from '../views/TcmDetectionAiPromptView.vue'
 import SystemConfigView from '../views/SystemConfigView.vue'
 import UserListView from '../views/UserListView.vue'
+import DeepSeekUsageView from '../views/DeepSeekUsageView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -97,6 +98,12 @@ const router = createRouter({
           name: 'tcm-detection-ai-prompts',
           component: TcmDetectionAiPromptView,
           meta: { title: '中医AI提示词' },
+        },
+        {
+          path: '/deepseek-usage',
+          name: 'deepseek-usage',
+          component: DeepSeekUsageView,
+          meta: { title: 'AI与接口费用' },
         },
         {
           path: '/system-config',

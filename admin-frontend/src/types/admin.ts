@@ -424,3 +424,127 @@ export interface SystemConfig {
   tcmDetectionWhitelistEnabled?: boolean
 }
 
+export interface DeepSeekFeatureStat {
+  feature: string
+  calls: number
+  tokens: number
+  costCny: number
+}
+
+export interface DeepSeekModelStat {
+  billedModel: string
+  calls: number
+  tokens: number
+  costCny: number
+}
+
+export interface DeepSeekDailyStat {
+  date: string
+  calls: number
+  costCny: number
+}
+
+export interface DeepSeekUserStat {
+  userId: number
+  nickname: string | null
+  phone: string | null
+  calls: number
+  costCny: number
+}
+
+export interface DeepSeekUsageSummary {
+  from: string
+  to: string
+  totalCalls: number
+  totalTokens: number
+  totalCostCny: number
+  byFeature: DeepSeekFeatureStat[]
+  byBilledModel: DeepSeekModelStat[]
+  daily: DeepSeekDailyStat[]
+  topUsers: DeepSeekUserStat[]
+}
+
+export interface DeepSeekUsageLog {
+  id: number
+  feature: string
+  scene: string | null
+  model: string
+  billedModel: string
+  userId: number | null
+  recordId: number | null
+  promptTokens: number
+  cacheHitTokens: number
+  cacheMissTokens: number
+  completionTokens: number
+  totalTokens: number
+  costCny: number
+  createdAt: string
+}
+
+
+export interface AiCostFeature {
+  feature: string
+  displayName: string
+  vendorCalls: number
+  vendorSuccessCalls: number
+  vendorCostCny: number
+  deepseekCalls: number
+  deepseekCostCny: number
+  totalCostCny: number
+}
+
+export interface AiCostProvider {
+  provider: string
+  displayName: string
+  calls: number
+  successCalls: number
+  freeCalls: number
+  costCny: number
+}
+
+export interface AiCostDaily {
+  date: string
+  vendorCostCny: number
+  deepseekCostCny: number
+  totalCostCny: number
+}
+
+export interface AiCostSummary {
+  from: string
+  to: string
+  totalCostCny: number
+  vendorCostCny: number
+  deepseekCostCny: number
+  byFeature: AiCostFeature[]
+  byProvider: AiCostProvider[]
+  daily: AiCostDaily[]
+}
+
+export interface ApiPriceConfig {
+  id: number
+  provider: string
+  feature: string
+  displayName: string
+  unitPriceCny: number
+  unitsPerCall: number
+  freeQuota: number
+  freeUntil: string | null
+  enabled: number
+  remark: string | null
+}
+
+export interface ApiUsageLog {
+  id: number
+  provider: string
+  feature: string
+  userId: number | null
+  recordId: number | null
+  success: number
+  billable: number
+  free: number
+  units: number
+  unitPriceCny: number
+  costCny: number
+  error: string | null
+  createdAt: string
+}

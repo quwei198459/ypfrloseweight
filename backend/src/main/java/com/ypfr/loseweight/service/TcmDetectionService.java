@@ -44,6 +44,7 @@ public class TcmDetectionService {
   private final MaijingTcmClient maijingClient;
   private final TcmDetectionResultParser resultParser;
   private final DeepSeekTcmAnalysisClient deepSeekClient;
+  private final ApiUsageLogger apiUsageLogger;
 
   public TcmDetectionService(
       TcmDetectionQuotaService quotaService,
@@ -53,7 +54,8 @@ public class TcmDetectionService {
       TcmDetectionProperties properties,
       MaijingTcmClient maijingClient,
       TcmDetectionResultParser resultParser,
-      DeepSeekTcmAnalysisClient deepSeekClient) {
+      DeepSeekTcmAnalysisClient deepSeekClient,
+      ApiUsageLogger apiUsageLogger) {
     this.quotaService = quotaService;
     this.recordMapper = recordMapper;
     this.itemMapper = itemMapper;
@@ -62,6 +64,7 @@ public class TcmDetectionService {
     this.maijingClient = maijingClient;
     this.resultParser = resultParser;
     this.deepSeekClient = deepSeekClient;
+    this.apiUsageLogger = apiUsageLogger;
   }
 
   @Transactional
@@ -78,12 +81,19 @@ public class TcmDetectionService {
     recordMapper.insert(record);
 
     try {
-      String createRaw =
-          maijingClient.createDiagnosis(
-              scene,
-              properties.toPublicImageUrl(tongueRel),
-              properties.toPublicImageUrl(faceRel),
-              properties.toPublicImageUrl(tongueBottomRel));
+      String createRaw;
+      try {
+        createRaw =
+            maijingClient.createDiagnosis(
+                scene,
+                properties.toPublicImageUrl(tongueRel),
+                properties.toPublicImageUrl(faceRel),
+                properties.toPublicImageUrl(tongueBottomRel));
+      } catch (Exception me) {
+        apiUsageLogger.record(
+            ApiUsageLogger.PROVIDER_TCM, "tcm", userId, record.getId(), false, me.getMessage());
+        throw me;
+      }
 
       if (scene == 1) {
         // scene=1：create 返回 session_id + 问诊问题，待用户作答后再调 report 出报告
@@ -102,7 +112,8 @@ public class TcmDetectionService {
         vo.setInquiryQuestions(toQuestionVos(questions));
         return vo;
       }
-      // scene=2：create 一步直接返回完整报告（无 session_id）
+      // scene=2：create 一步直接返回完整报告（无 session_id），计一次成功调用
+      apiUsageLogger.record(ApiUsageLogger.PROVIDER_TCM, "tcm", userId, record.getId(), true, null);
       return finishReportFromRaw(record, member, userId, createRaw);
     } catch (ApiException e) {
       markFailed(record, e.getMessage());
@@ -133,7 +144,15 @@ public class TcmDetectionService {
     }
     TcmDetectionWhitelist member = quotaService.requireAvailableQuota(userId);
     try {
-      String reportRaw = maijingClient.fetchReport(record.getThirdPartyId(), toAnswerMaps(request));
+      String reportRaw;
+      try {
+        reportRaw = maijingClient.fetchReport(record.getThirdPartyId(), toAnswerMaps(request));
+      } catch (Exception me) {
+        apiUsageLogger.record(
+            ApiUsageLogger.PROVIDER_TCM, "tcm", userId, record.getId(), false, me.getMessage());
+        throw me;
+      }
+      apiUsageLogger.record(ApiUsageLogger.PROVIDER_TCM, "tcm", userId, record.getId(), true, null);
       return finishReportFromRaw(record, member, userId, reportRaw);
     } catch (ApiException e) {
       markFailed(record, e.getMessage());
@@ -171,7 +190,13 @@ public class TcmDetectionService {
     ParsedTcmDetectionResult parsed = resultParser.parseReport(reportRaw, record.getGender());
     replaceItems(record.getId(), parsed);
 
-    DeepSeekAnalysisResult overall = deepSeekClient.summarize(parsed);
+    DeepSeekUsageContext.set(userId, record.getId());
+    DeepSeekAnalysisResult overall;
+    try {
+      overall = deepSeekClient.summarize(parsed);
+    } finally {
+      DeepSeekUsageContext.clear();
+    }
     record.setConstitutionPrimary(parsed.getConstitutionPrimary());
     record.setConstitutionJson(parsed.getConstitutionJson());
     record.setOverallScore(parsed.getOverallScore());

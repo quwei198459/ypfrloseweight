@@ -80,11 +80,7 @@ function handleLogout() {
   <el-container class="admin-shell">
     <el-aside width="232px" class="admin-side">
       <div class="admin-side__brand">
-        <img class="admin-side__logo" src="/logo-baohu.png" alt="宝护健康" />
-        <div class="admin-side__titles">
-          <div class="admin-side__name">宝护健康瘦</div>
-          <div class="admin-side__hint">管理后台</div>
-        </div>
+        <img class="admin-side__logo" src="/logo-lockup-line-white.png" alt="宝护 baohu" />
       </div>
       <el-menu
         :default-active="$route.path"
@@ -138,6 +134,9 @@ function handleLogout() {
         </el-menu-item>
         <el-menu-item index="/tcm-detection-ai-prompts">
           <span>中医AI提示词</span>
+        </el-menu-item>
+        <el-menu-item index="/deepseek-usage">
+          <span>AI与接口费用</span>
         </el-menu-item>
         <el-menu-item index="/system-config">
           <span>系统配置</span>
@@ -211,11 +210,10 @@ function handleLogout() {
 }
 
 .admin-side__logo {
-  width: 40px;
-  height: 40px;
+  height: 30px;
+  width: auto;
+  max-width: 196px;
   object-fit: contain;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.1);
 }
 
 .admin-side__name {

@@ -2,6 +2,7 @@ package com.ypfr.loseweight.service.photograph;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ypfr.loseweight.service.DeepSeekUsageLogger;
 import com.ypfr.loseweight.web.dto.photograph.MealPhotoFoodItemVo;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
@@ -29,16 +30,19 @@ public class MealPhotoRecommendService {
 
   private final RestTemplate restTemplate;
   private final ObjectMapper objectMapper;
+  private final DeepSeekUsageLogger usageLogger;
   private final String apiKey;
   private final String baseUrl;
 
   public MealPhotoRecommendService(
       RestTemplate restTemplate,
       ObjectMapper objectMapper,
+      DeepSeekUsageLogger usageLogger,
       @Value("${DEEPSEEK_API_KEY:change-me}") String apiKey,
       @Value("${DEEPSEEK_BASE_URL:https://api.deepseek.com}") String baseUrl) {
     this.restTemplate = restTemplate;
     this.objectMapper = objectMapper;
+    this.usageLogger = usageLogger;
     this.apiKey = apiKey;
     this.baseUrl = baseUrl;
   }
@@ -70,6 +74,7 @@ public class MealPhotoRecommendService {
       if (!resp.getStatusCode().is2xxSuccessful() || !StringUtils.hasText(resp.getBody())) {
         return null;
       }
+      usageLogger.record("food", mealType == null ? "meal" : mealType, "deepseek-chat", resp.getBody());
       String json = extractJson(extractContent(resp.getBody()));
       if (!StringUtils.hasText(json)) {
         return null;
