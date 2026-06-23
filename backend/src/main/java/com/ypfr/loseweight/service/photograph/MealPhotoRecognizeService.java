@@ -379,7 +379,8 @@ public class MealPhotoRecognizeService {
     vo.setRecognizePhase(null);
     vo.setImageUrl(row.getImageUrl());
     vo.setPreviewUrl(row.getImageUrl());
-    vo.setRecommendedMealType(row.getRecommendedMealType());
+    // 返回「实际记录的餐次」（chosenMeal），与推荐语所用餐次一致，避免顶部餐次与推荐语不符
+    vo.setRecommendedMealType(row.getMealType());
     vo.setConfirmStatus(row.getConfirmStatus());
     vo.setErrorCode(errorCode);
     vo.setErrorMessage(errorMessage);

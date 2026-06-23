@@ -24,6 +24,16 @@ function isMealTypeKey(s: string): s is MealTypeKey {
   return MEAL_KEYS.includes(s as MealTypeKey)
 }
 
+/** 按当前时间推算默认餐次（与后端 MealRecommendedMealTypeUtil 口径一致），避免硬编码导致餐次与推荐语不符 */
+function defaultMealByTime(): MealTypeKey {
+  const h = new Date().getHours()
+  if (h >= 5 && h < 10) return 'breakfast'
+  if (h >= 10 && h < 14) return 'lunch'
+  if (h >= 14 && h < 17) return 'snack'
+  if (h >= 17 && h < 21) return 'dinner'
+  return 'snack'
+}
+
 function roundKcal(n: number): number {
   return Math.max(0, Math.round(n))
 }
@@ -128,7 +138,9 @@ export type PhotographPickImageOptions = {
 export function usePhotographFlow() {
   const phase = ref<PhotographPhase>('idle')
   const previewSrc = ref('')
-  const selectedMealType = ref<MealTypeKey>('dinner')
+  const selectedMealType = ref<MealTypeKey>(defaultMealByTime())
+  /** 用户是否手动选过餐次：选过则不再被后端推荐餐次覆盖 */
+  const mealTypeTouched = ref(false)
   const mockResult = ref<PhotographMockResult>(createDefaultPhotographMock())
   /** 当前识图任务 id，确认写库必填 */
   const photoJobId = ref<number | null>(null)
@@ -264,6 +276,8 @@ export function usePhotographFlow() {
     quantityDraft.value = ''
     foodNameDraft.value = ''
     editingFoodLineId.value = null
+    selectedMealType.value = defaultMealByTime()
+    mealTypeTouched.value = false
   }
 
   function startMockSuccessPipeline(path: string) {
@@ -347,7 +361,8 @@ export function usePhotographFlow() {
 
           applyFoodsFromRecognize(applyRecognizeSuccess(res))
 
-          if (res.recommendedMealType && isMealTypeKey(res.recommendedMealType)) {
+          // 仅当用户未手动选餐次时，用后端按拍照时间推算的餐次纠正显示；用户已选则尊重其选择
+          if (!mealTypeTouched.value && res.recommendedMealType && isMealTypeKey(res.recommendedMealType)) {
             selectedMealType.value = res.recommendedMealType
           }
 
@@ -390,6 +405,7 @@ export function usePhotographFlow() {
 
   function selectMealType(key: MealTypeKey) {
     selectedMealType.value = key
+    mealTypeTouched.value = true
     phase.value = 'success'
   }
 
