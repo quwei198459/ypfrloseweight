@@ -422,6 +422,9 @@ export interface SystemConfig {
   photoRecognitionWhitelistEnabled: boolean
   skinDetectionWhitelistEnabled: boolean
   tcmDetectionWhitelistEnabled?: boolean
+  /** true=首页入口显示；false=隐藏 */
+  skinDetectionEntryVisible?: boolean
+  tcmDetectionEntryVisible?: boolean
 }
 
 export interface DeepSeekFeatureStat {

@@ -150,7 +150,7 @@
       </view>
 
       <!-- Skin Detection Entry -->
-      <view class="skin-entry-section">
+      <view v-if="showSkinEntry" class="skin-entry-section">
         <view class="skin-entry-card" @click="goSkinDetection">
           <view class="skin-entry-copy">
             <text class="skin-entry-kicker">AI 皮肤检测</text>
@@ -162,7 +162,7 @@
       </view>
 
       <!-- TCM Detection Entry -->
-      <view class="tcm-entry-section">
+      <view v-if="showTcmEntry" class="tcm-entry-section">
         <view class="tcm-entry-card" @click="goTcmDetection">
           <view class="tcm-entry-copy">
             <text class="tcm-entry-kicker">中医 AI 体检</text>
@@ -200,6 +200,7 @@
 import { onShow } from '@dcloudio/uni-app'
 import { computed, ref } from 'vue'
 import { fetchDashboard } from '@/api/loseweight'
+import { fetchHomeEntryConfig } from '@/api/appConfig'
 import logoContrast from '@/static/logo/logo-c-contrast.png'
 import HomeCalorieGauge from '@/components/home/HomeCalorieGauge.vue'
 import { formatLocalDate } from '@/utils/date'
@@ -216,6 +217,9 @@ const remainingCalories = ref(0)
 const sportCalories = ref(0)
 const dailyBudget = ref(0)
 const mealIconActiveKey = ref<string | null>(null)
+/** 首页入口可见性（后台可控）；默认显示，接口失败也保持显示，避免误隐藏 */
+const showSkinEntry = ref(true)
+const showTcmEntry = ref(true)
 
 const needBindPhone = computed(() => !userStore.userInfo?.phone)
 const needSyncAvatar = computed(() => !userStore.userInfo?.avatarUrl)
@@ -313,10 +317,22 @@ function syncDashboard() {
     })
 }
 
+function syncHomeEntryConfig() {
+  fetchHomeEntryConfig()
+    .then((cfg) => {
+      showSkinEntry.value = cfg.skinDetectionEntryVisible !== false
+      showTcmEntry.value = cfg.tcmDetectionEntryVisible !== false
+    })
+    .catch(() => {
+      // 接口异常时保持默认显示，避免误隐藏入口
+    })
+}
+
 onShow(() => {
   syncProfile()
   syncDashboard()
   syncMealIconHighlight()
+  syncHomeEntryConfig()
 })
 
 const handleMealEntry = (mealType: string) => {

@@ -11,6 +11,10 @@ const tcmDetectionWhitelistEnabled = ref(true)
 const savingPhoto = ref(false)
 const savingSkin = ref(false)
 const savingTcm = ref(false)
+const skinDetectionEntryVisible = ref(true)
+const tcmDetectionEntryVisible = ref(true)
+const savingSkinEntry = ref(false)
+const savingTcmEntry = ref(false)
 
 async function loadConfig() {
   loading.value = true
@@ -19,6 +23,8 @@ async function loadConfig() {
     photoRecognitionWhitelistEnabled.value = cfg.photoRecognitionWhitelistEnabled !== false
     skinDetectionWhitelistEnabled.value = cfg.skinDetectionWhitelistEnabled !== false
     tcmDetectionWhitelistEnabled.value = cfg.tcmDetectionWhitelistEnabled !== false
+    skinDetectionEntryVisible.value = cfg.skinDetectionEntryVisible !== false
+    tcmDetectionEntryVisible.value = cfg.tcmDetectionEntryVisible !== false
   } catch (e) {
     ElMessage.error(e instanceof Error ? e.message : '加载系统配置失败')
   } finally {
@@ -70,6 +76,35 @@ function onSkinChange(val: boolean) {
 
 function onTcmChange(val: boolean) {
   void toggle('tcmDetectionWhitelistEnabled', val, tcmDetectionWhitelistEnabled, savingTcm, '中医体检')
+}
+
+/** 首页入口显示/隐藏开关（无需二次确认，直接保存） */
+async function toggleEntry(
+  key: keyof SystemConfig,
+  nextValue: boolean,
+  model: typeof skinDetectionEntryVisible,
+  saving: typeof savingSkinEntry,
+) {
+  saving.value = true
+  try {
+    const cfg = await updateSystemConfig({ [key]: nextValue } as Partial<SystemConfig>)
+    skinDetectionEntryVisible.value = cfg.skinDetectionEntryVisible !== false
+    tcmDetectionEntryVisible.value = cfg.tcmDetectionEntryVisible !== false
+    ElMessage.success(nextValue ? '入口已显示' : '入口已隐藏')
+  } catch (e) {
+    model.value = !nextValue // 回滚
+    ElMessage.error(e instanceof Error ? e.message : '保存失败')
+  } finally {
+    saving.value = false
+  }
+}
+
+function onSkinEntryChange(val: boolean) {
+  void toggleEntry('skinDetectionEntryVisible', val, skinDetectionEntryVisible, savingSkinEntry)
+}
+
+function onTcmEntryChange(val: boolean) {
+  void toggleEntry('tcmDetectionEntryVisible', val, tcmDetectionEntryVisible, savingTcmEntry)
 }
 
 onMounted(loadConfig)
@@ -153,6 +188,59 @@ onMounted(loadConfig)
           />
           <el-tag :type="tcmDetectionWhitelistEnabled ? 'success' : 'info'" effect="plain" size="small">
             {{ tcmDetectionWhitelistEnabled ? '白名单限制生效中' : '已关闭限制' }}
+          </el-tag>
+        </div>
+      </div>
+    </el-card>
+
+    <el-card shadow="never" class="system-config__card">
+      <template #header>
+        <div class="system-config__header">
+          <span class="system-config__title">首页入口显示</span>
+          <span class="system-config__desc">
+            控制小程序首页对应功能入口的显示与隐藏。隐藏后用户在首页看不到该入口（已有功能与数据不受影响）。
+          </span>
+        </div>
+      </template>
+
+      <div class="system-config__row">
+        <div class="system-config__info">
+          <div class="system-config__name">皮肤检测入口</div>
+          <div class="system-config__hint">首页「AI 皮肤检测」卡片的显示开关。</div>
+        </div>
+        <div class="system-config__control">
+          <el-switch
+            v-model="skinDetectionEntryVisible"
+            :loading="savingSkinEntry"
+            inline-prompt
+            active-text="显示"
+            inactive-text="隐藏"
+            @change="onSkinEntryChange"
+          />
+          <el-tag :type="skinDetectionEntryVisible ? 'success' : 'info'" effect="plain" size="small">
+            {{ skinDetectionEntryVisible ? '首页显示中' : '已隐藏' }}
+          </el-tag>
+        </div>
+      </div>
+
+      <el-divider class="system-config__divider" />
+
+      <div class="system-config__row">
+        <div class="system-config__info">
+          <div class="system-config__name">舌诊（中医体检）入口</div>
+          <div class="system-config__hint">首页「中医 AI 体检」卡片的显示开关。</div>
+        </div>
+        <div class="system-config__control">
+          <el-switch
+            v-model="tcmDetectionEntryVisible"
+            :loading="savingTcmEntry"
+            inline-prompt
+            active-text="显示"
+            inactive-text="隐藏"
+            @change="onTcmEntryChange"
+          />
+          <el-tag :type="tcmDetectionEntryVisible ? 'success' : 'info'" effect="plain" size="small">
+            {{ tcmDetectionEntryVisible ? '首页显示中' : '已隐藏' }}
           </el-tag>
         </div>
       </div>

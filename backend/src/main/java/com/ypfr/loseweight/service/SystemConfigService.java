@@ -19,6 +19,8 @@ public class SystemConfigService {
   public static final String KEY_PHOTO_RECOGNITION_WHITELIST = "photo_recognition_whitelist_enabled";
   public static final String KEY_SKIN_DETECTION_WHITELIST = "skin_detection_whitelist_enabled";
   public static final String KEY_TCM_DETECTION_WHITELIST = "tcm_detection_whitelist_enabled";
+  public static final String KEY_SKIN_DETECTION_ENTRY_VISIBLE = "skin_detection_entry_visible";
+  public static final String KEY_TCM_DETECTION_ENTRY_VISIBLE = "tcm_detection_entry_visible";
 
   private final SystemConfigMapper systemConfigMapper;
 
@@ -41,11 +43,23 @@ public class SystemConfigService {
     return getBool(KEY_TCM_DETECTION_WHITELIST, true);
   }
 
+  /** 首页皮肤检测入口是否显示（默认显示）。 */
+  public boolean isSkinDetectionEntryVisible() {
+    return getBool(KEY_SKIN_DETECTION_ENTRY_VISIBLE, true);
+  }
+
+  /** 首页舌诊(中医体检)入口是否显示（默认显示）。 */
+  public boolean isTcmDetectionEntryVisible() {
+    return getBool(KEY_TCM_DETECTION_ENTRY_VISIBLE, true);
+  }
+
   public SystemConfigVo getConfig() {
     SystemConfigVo vo = new SystemConfigVo();
     vo.setPhotoRecognitionWhitelistEnabled(isPhotoRecognitionWhitelistEnabled());
     vo.setSkinDetectionWhitelistEnabled(isSkinDetectionWhitelistEnabled());
     vo.setTcmDetectionWhitelistEnabled(isTcmDetectionWhitelistEnabled());
+    vo.setSkinDetectionEntryVisible(isSkinDetectionEntryVisible());
+    vo.setTcmDetectionEntryVisible(isTcmDetectionEntryVisible());
     return vo;
   }
 
@@ -68,8 +82,28 @@ public class SystemConfigService {
           req.getTcmDetectionWhitelistEnabled(),
           "中医体检白名单限制开关：1=开启限制 0=关闭限制");
     }
+    if (req.getSkinDetectionEntryVisible() != null) {
+      setBool(
+          KEY_SKIN_DETECTION_ENTRY_VISIBLE,
+          req.getSkinDetectionEntryVisible(),
+          "首页皮肤检测入口显示开关：1=显示 0=隐藏");
+    }
+    if (req.getTcmDetectionEntryVisible() != null) {
+      setBool(
+          KEY_TCM_DETECTION_ENTRY_VISIBLE,
+          req.getTcmDetectionEntryVisible(),
+          "首页舌诊(中医体检)入口显示开关：1=显示 0=隐藏");
+    }
     return getConfig();
   }
+
+  /** 小程序首页入口可见性（仅返回展示开关，不含白名单内部配置）。 */
+  public HomeEntryConfig getHomeEntryConfig() {
+    return new HomeEntryConfig(isSkinDetectionEntryVisible(), isTcmDetectionEntryVisible());
+  }
+
+  /** 首页入口可见性视图。 */
+  public record HomeEntryConfig(boolean skinDetectionEntryVisible, boolean tcmDetectionEntryVisible) {}
 
   private boolean getBool(String key, boolean defaultValue) {
     SystemConfig config = findByKey(key);

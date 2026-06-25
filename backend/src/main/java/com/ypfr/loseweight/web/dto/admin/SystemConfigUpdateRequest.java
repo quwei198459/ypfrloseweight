@@ -6,6 +6,24 @@ public class SystemConfigUpdateRequest {
   private Boolean photoRecognitionWhitelistEnabled;
   private Boolean skinDetectionWhitelistEnabled;
   private Boolean tcmDetectionWhitelistEnabled;
+  private Boolean skinDetectionEntryVisible;
+  private Boolean tcmDetectionEntryVisible;
+
+  public Boolean getSkinDetectionEntryVisible() {
+    return skinDetectionEntryVisible;
+  }
+
+  public void setSkinDetectionEntryVisible(Boolean skinDetectionEntryVisible) {
+    this.skinDetectionEntryVisible = skinDetectionEntryVisible;
+  }
+
+  public Boolean getTcmDetectionEntryVisible() {
+    return tcmDetectionEntryVisible;
+  }
+
+  public void setTcmDetectionEntryVisible(Boolean tcmDetectionEntryVisible) {
+    this.tcmDetectionEntryVisible = tcmDetectionEntryVisible;
+  }
 
   public Boolean getPhotoRecognitionWhitelistEnabled() {
     return photoRecognitionWhitelistEnabled;
