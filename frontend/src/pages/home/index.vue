@@ -329,10 +329,13 @@ function syncHomeEntryConfig() {
 }
 
 onShow(() => {
-  syncProfile()
-  syncDashboard()
   syncMealIconHighlight()
   syncHomeEntryConfig()
+  // 静默确保会话（仅 openid，无需任何授权），再加载个人数据；未登录也能浏览首页
+  userStore.ensureSession().then(() => {
+    syncProfile()
+    syncDashboard()
+  })
 })
 
 const handleMealEntry = (mealType: string) => {

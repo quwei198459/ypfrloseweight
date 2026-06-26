@@ -1,6 +1,13 @@
 {
 	"pages": [
 		{
+			"path": "pages/home/index",
+			"style": {
+				"navigationBarTitleText": "首页",
+				"navigationStyle": "custom"
+			}
+		},
+		{
 			"path": "pages/login/index",
 			"style": {
 				"navigationBarTitleText": "登录",
@@ -14,13 +21,6 @@
 				"navigationBarBackgroundColor": "#F7FBF7",
 				"navigationBarTextStyle": "black",
 				"backgroundColor": "#F7FBF7"
-			}
-		},
-		{
-			"path": "pages/home/index",
-			"style": {
-				"navigationBarTitleText": "首页",
-				"navigationStyle": "custom"
 			}
 		},
 		{

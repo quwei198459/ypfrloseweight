@@ -23,6 +23,9 @@ function readNum(key: string): number {
   return Number.isFinite(n) ? n : 0
 }
 
+/** 静默登录去重：并发调用共用同一 Promise，登录中不重复发起 */
+let silentSessionPromise: Promise<void> | null = null
+
 export const useUserStore = defineStore('user', {
   state: () => ({
     token: readStr(STORAGE_TOKEN),
@@ -54,6 +57,38 @@ export const useUserStore = defineStore('user', {
     async loginByWxCode(code: string) {
       const data = await wxLoginByCode(code)
       this.applyLoginPayload(data)
+    },
+
+    /**
+     * 静默建立会话：仅用 wx.login 的 code 换取 openid 级登录态（不索取手机号/头像/昵称授权）。
+     * 用于 App 启动 / 首页加载，让用户无需任何授权即可浏览体验；失败时静默忽略，不阻断浏览。
+     */
+    ensureSession(): Promise<void> {
+      if (this.token && this.userId > 0) return Promise.resolve()
+      if (silentSessionPromise) return silentSessionPromise
+      silentSessionPromise = new Promise<void>((resolve) => {
+        // #ifdef MP-WEIXIN
+        uni.login({
+          provider: 'weixin',
+          success: (res) => {
+            if (!res.code) {
+              resolve()
+              return
+            }
+            this.loginByWxCode(res.code)
+              .then(() => resolve())
+              .catch(() => resolve())
+          },
+          fail: () => resolve(),
+        })
+        // #endif
+        // #ifndef MP-WEIXIN
+        resolve()
+        // #endif
+      }).finally(() => {
+        silentSessionPromise = null
+      })
+      return silentSessionPromise
     },
 
     patchFromUserDto(u: AppUserDto) {

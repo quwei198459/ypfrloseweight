@@ -11,11 +11,18 @@
 import { onLaunch, onShow, onHide } from "@dcloudio/uni-app";
 import PageTopHeader from "@/components/PageTopHeader.vue";
 import { API_BASE_URL } from "@/config/api";
+import { useUserStore } from "@/stores/user";
 
 onLaunch(() => {
   console.log("App Launch");
   // 真机调试时请在 vConsole 核对：若不是电脑局域网 IP，说明未用到最新编译产物或未打开 dist/dev/mp-weixin
   console.log("[loseweight] API_BASE_URL =", API_BASE_URL);
+  // 静默登录（仅 openid，不索取任何授权），让用户无需登录即可进入首页浏览体验
+  try {
+    useUserStore().ensureSession();
+  } catch (e) {
+    console.warn("[loseweight] ensureSession on launch failed", e);
+  }
 });
 
 onShow(() => {
